@@ -22,7 +22,6 @@ from model.run import load_processed_data, run_model
 from model.snapshot import save_snapshot, _sanitize_for_json
 
 DATA_DIR = ROOT / "data" / "processed"
-FRONTEND_DATA_DIR = ROOT / "frontend" / "public" / "data"
 
 
 def build_polls_snapshot() -> dict[str, Any]:
@@ -146,12 +145,6 @@ def main() -> None:
     polls_path = DATA_DIR / "polls_snapshot.json"
     save_json(polls_data, polls_path)
     print(f"Polls snapshot written to {polls_path}")
-
-    FRONTEND_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    for src in [model_path, polls_path]:
-        dest = FRONTEND_DATA_DIR / src.name
-        dest.write_bytes(src.read_bytes())
-        print(f"Copied {src.name} → {dest}")
 
 
 if __name__ == "__main__":
