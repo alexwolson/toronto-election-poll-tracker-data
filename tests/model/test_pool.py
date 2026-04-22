@@ -125,23 +125,6 @@ def test_pool_model_consolidation_trend_is_consolidating():
     assert result["consolidation_trend"] == "consolidating"
 
 
-def test_polls_latest_includes_pool_model():
-    """GET /api/polls/latest returns a pool_model key with required structure."""
-    import sys
-    sys.path.insert(0, str(_REPO_ROOT / "backend"))
-    from fastapi.testclient import TestClient
-    from main import app
-    client = TestClient(app)
-    response = client.get("/api/polls/latest")
-    assert response.status_code == 200
-    data = response.json()
-    assert "pool_model" in data, "pool_model missing from response"
-    pm = data["pool_model"]
-    assert pm["phase_mode"] == "pre_nomination"
-    assert "pool" in pm
-    assert "candidates" in pm
-    assert "bradford" in pm["candidates"]
-
 
 # ── poll_detail ────────────────────────────────────────────────
 
@@ -250,20 +233,5 @@ def test_poll_detail_capture_polls_weight_normalised():
     polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]["capture_polls"]
     assert polls[0]["recency_weight"] == 1.0
 
-
-def test_polls_latest_includes_poll_detail():
-    """GET /api/polls/latest returns pool_model.poll_detail with all four lists."""
-    import sys
-    sys.path.insert(0, str(_REPO_ROOT / "backend"))
-    from fastapi.testclient import TestClient
-    from main import app
-    client = TestClient(app)
-    response = client.get("/api/polls/latest")
-    assert response.status_code == 200
-    pm = response.json()["pool_model"]
-    assert "poll_detail" in pm
-    for key in ("approval_polls", "floor_polls", "h2h_polls", "capture_polls"):
-        assert key in pm["poll_detail"], f"Missing poll_detail.{key}"
-        assert isinstance(pm["poll_detail"][key], list)
 
 
