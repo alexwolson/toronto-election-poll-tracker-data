@@ -1,0 +1,17 @@
+poll_id,firm,date_conducted,date_published,sample_size,methodology,field_tested,bailao,bradford,chow,furey,ford,mendicino,tory,other,notes
+liaison-2026-04-13,Liaison Strategies,2026-04-13,2026-04-13,1000,IVR,"bradford,chow,furey",,0.35,0.46,0.11,,,,,
+liaison-2026-03-08,Liaison Strategies,2026-03-08,2026-03-08,1000,IVR,"bradford,chow,furey,ford,other",,0.26,0.44,0.08,0.16,,,0.06,
+pallas-2026-03-08,Pallas Data,2026-03-08,2026-03-08,735,IVR,"bradford,chow,ford,other",,0.26,0.44,,0.21,,,0.08,
+mainstreet-2026-02-22,Mainstreet Research,2026-02-22,2026-02-22,802,IVR,"bradford,chow,furey,tory",,0.17,0.43,0.06,,,0.34,,
+liaison-2026-02-02,Liaison Strategies,2026-02-02,2026-02-02,1000,IVR,"bradford,chow,furey,tory,other",,0.18,0.40,0.05,,,0.33,0.04,
+liaison-2025-12-21,Liaison Strategies,2025-12-21,2025-12-21,1000,IVR,"bradford,chow,furey,tory,other",,0.16,0.39,0.06,,,0.35,0.04,
+liaison-2025-10-23,Liaison Strategies,2025-10-23,2025-10-23,1000,IVR,"bradford,chow,furey,tory,other",,0.12,0.42,0.07,,,0.36,0.03,
+canadapulse-2025-10-06,Canada Pulse Insights,2025-10-06,2025-10-06,406,IVR,"bradford,chow,furey,tory,other",,0.08,0.29,0.02,,,0.24,0.33,CityNews
+forum-2025-09-04,Forum Research,2025-09-04,2025-09-04,1000,IVR,"bailao,bradford,chow,tory,other",0.08,0.18,0.36,,,,,0.13,multi-candidate field
+forum-2025-09-04-chow-v-bradford,Forum Research,2025-09-04,2025-09-04,1000,IVR,"bradford,chow",,0.42,0.40,,,,,,head-to-head chow v bradford
+forum-2025-09-04-chow-v-tory,Forum Research,2025-09-04,2025-09-04,1000,IVR,"chow,tory",,,0.37,,,,0.48,,head-to-head chow v tory
+ipsos-2025-08-29,Ipsos,2025-08-29,2025-08-29,1001,online,"chow,tory,other",,,0.33,,,,0.25,0.31,
+liaison-2025-07-06,Liaison Strategies,2025-07-06,2025-07-06,1000,IVR,"bailao,bradford,chow,furey,mendicino,tory",0.07,0.08,0.39,0.06,,0.03,0.35,,
+pallas-2025-06-07,Pallas Data,2025-06-07,2025-06-07,611,IVR,"bradford,chow,mendicino,tory,other",,0.14,0.37,,,,0.24,0.15,
+pallas-2026-03-08-chow-v-bradford,Pallas Data,2026-03-08,2026-03-08,735,IVR,"bradford,chow",,0.38,0.47,,,,,,head-to-head chow v bradford
+abacus-2026-01-27,Abacus Data,2026-01-27,2026-01-27,1001,IVR,"bradford,chow",,0.38,0.39,,,,,,head-to-head chow v bradford
