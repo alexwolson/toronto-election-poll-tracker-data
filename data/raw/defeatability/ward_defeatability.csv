@@ -2,7 +2,7 @@ ward,councillor_name,election_year,is_byelection_incumbent,is_running,vote_share
 1,Vincent Crisanti,2022,false,true,0.4107,0.0963,58,New Voter Margin: +2531,2026-03-10
 2,Stephen Holyday,2022,false,true,0.7228,0.2074,14,New Voter Margin: -8628,2026-03-10
 3,Amber Morley,2022,false,true,0.4644,0.1486,50,New Voter Margin: +7048,2026-03-10
-4,Gord Perks,2022,false,true,0.3548,0.1330,54,New Voter Margin: +2653,2026-03-10
+4,Gord Perks,2022,false,false,0.3548,0.1330,54,Perks not seeking re-election; Ward is Open,2026-04-30
 5,Frances Nunziata,2022,false,true,0.4761,0.1310,53,New Voter Margin: +5709,2026-03-10
 6,James Pasternak,2022,false,true,0.7353,0.1784,22,New Voter Margin: -1660,2026-03-10
 7,Anthony Perruzza,2022,false,true,0.6130,0.1316,38,New Voter Margin: +1086,2026-03-10
