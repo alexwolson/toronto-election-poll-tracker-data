@@ -28,7 +28,10 @@ OUTPUT_DIR = Path("data/raw/candidates")
 
 def _parse_date(date_str: str) -> str:
     """Convert '01-May-2026' to '2026-05-01'."""
-    return datetime.strptime(date_str, "%d-%b-%Y").strftime("%Y-%m-%d")
+    try:
+        return datetime.strptime(date_str, "%d-%b-%Y").strftime("%Y-%m-%d")
+    except (ValueError, TypeError) as exc:
+        raise ValueError(f"Unparseable dateNomination: {date_str!r}") from exc
 
 
 def _parse_mayor_response(data: dict) -> list[dict]:

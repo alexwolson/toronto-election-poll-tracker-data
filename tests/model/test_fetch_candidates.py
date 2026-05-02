@@ -105,6 +105,11 @@ def test_parse_date_other_month(fc):
     assert fc._parse_date("15-Oct-2026") == "2026-10-15"
 
 
+def test_parse_date_raises_on_bad_input(fc):
+    with pytest.raises(ValueError, match="Unparseable"):
+        fc._parse_date("not-a-date")
+
+
 def test_parse_mayor_response_returns_correct_fields(fc):
     records = fc._parse_mayor_response(MOCK_MAYOR_RESPONSE)
     assert len(records) == 2
