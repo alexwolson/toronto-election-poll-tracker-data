@@ -4,18 +4,21 @@ from __future__ import annotations
 
 import importlib.util
 import pathlib
-import sys
 
 import pytest
 
 _REPO_ROOT = pathlib.Path(__file__).parent.parent.parent
 
 
+@pytest.fixture(scope="module")
+def fc():
+    return _load_module()
+
+
 def _load_module():
-    spec = importlib.util.spec_from_file_location(
-        "scripts.fetch_candidates",
-        str(_REPO_ROOT / "scripts" / "fetch_candidates.py"),
-    )
+    path = _REPO_ROOT / "scripts" / "fetch_candidates.py"
+    spec = importlib.util.spec_from_file_location("scripts.fetch_candidates", str(path))
+    assert spec is not None, f"Could not load fetch_candidates.py — expected at {path}"
     module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
     spec.loader.exec_module(module)  # type: ignore[union-attr]
     return module
@@ -94,18 +97,15 @@ MOCK_COUNCILLOR_RESPONSE = {
 }
 
 
-def test_parse_date_standard():
-    fc = _load_module()
+def test_parse_date_standard(fc):
     assert fc._parse_date("01-May-2026") == "2026-05-01"
 
 
-def test_parse_date_other_month():
-    fc = _load_module()
+def test_parse_date_other_month(fc):
     assert fc._parse_date("15-Oct-2026") == "2026-10-15"
 
 
-def test_parse_mayor_response_returns_correct_fields():
-    fc = _load_module()
+def test_parse_mayor_response_returns_correct_fields(fc):
     records = fc._parse_mayor_response(MOCK_MAYOR_RESPONSE)
     assert len(records) == 2
     assert records[0] == {
@@ -116,16 +116,14 @@ def test_parse_mayor_response_returns_correct_fields():
     }
 
 
-def test_parse_mayor_response_all_candidates():
-    fc = _load_module()
+def test_parse_mayor_response_all_candidates(fc):
     records = fc._parse_mayor_response(MOCK_MAYOR_RESPONSE)
     last_names = [r["last_name"] for r in records]
     assert "Bradford" in last_names
     assert "Sanders" in last_names
 
 
-def test_parse_councillor_response_includes_ward():
-    fc = _load_module()
+def test_parse_councillor_response_includes_ward(fc):
     records = fc._parse_councillor_response(MOCK_COUNCILLOR_RESPONSE)
     assert len(records) == 2
     assert records[0] == {
@@ -137,8 +135,7 @@ def test_parse_councillor_response_includes_ward():
     }
 
 
-def test_parse_councillor_response_ward_is_int():
-    fc = _load_module()
+def test_parse_councillor_response_ward_is_int(fc):
     records = fc._parse_councillor_response(MOCK_COUNCILLOR_RESPONSE)
     for r in records:
         assert isinstance(r["ward"], int)
