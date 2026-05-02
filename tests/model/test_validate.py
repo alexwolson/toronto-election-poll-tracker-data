@@ -116,3 +116,21 @@ def test_validate_registered_councillors_rejects_bad_date():
     df = pd.DataFrame([_base_councillor_row(date_nomination="bad")])
     with pytest.raises(ValidationError, match="date_nomination"):
         validate_registered_councillors(df)
+
+
+def test_validate_registered_mayors_rejects_null_name():
+    df = pd.DataFrame([_base_mayor_row(first_name=None)])
+    with pytest.raises(ValidationError, match="first_name"):
+        validate_registered_mayors(df)
+
+
+def test_validate_registered_councillors_rejects_null_name():
+    df = pd.DataFrame([_base_councillor_row(last_name=None)])
+    with pytest.raises(ValidationError, match="last_name"):
+        validate_registered_councillors(df)
+
+
+def test_validate_registered_councillors_rejects_empty_status():
+    df = pd.DataFrame([_base_councillor_row(status="")])
+    with pytest.raises(ValidationError, match="Missing status"):
+        validate_registered_councillors(df)
