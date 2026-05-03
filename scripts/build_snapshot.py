@@ -55,7 +55,15 @@ def build_polls_snapshot() -> dict[str, Any]:
     )
     from model.run import DEFAULT_SCENARIO, SCENARIOS
     from model.pool import compute_pool_model
-    from model.candidates import CANDIDATE_STATUS, DECLINED_CANDIDATE_IDS
+    from model.candidates import build_candidate_status, DECLINED_CANDIDATE_IDS
+
+    mayor_reg_path = DATA_DIR / "mayor_registered.csv"
+    mayor_records = (
+        pd.read_csv(mayor_reg_path).to_dict(orient="records")
+        if mayor_reg_path.exists()
+        else []
+    )
+    candidate_status = build_candidate_status(mayor_records)
 
     def normalize_candidate(value: str) -> str:
         return str(value).strip().lower()
@@ -98,9 +106,9 @@ def build_polls_snapshot() -> dict[str, Any]:
             point[candidate] = round(float(row[candidate]), 4) if candidate in row and pd.notna(row[candidate]) else 0.0
         trend.append(point)
 
-    def candidate_ranges(df: pd.DataFrame) -> dict:
+    def candidate_ranges(df: pd.DataFrame, status_dict: dict) -> dict:
         out: dict = {"declared": {}, "potential": {}, "declined": {}}
-        for status, candidates in CANDIDATE_STATUS.items():
+        for status, candidates in status_dict.items():
             for candidate in candidates:
                 cid = candidate["id"]
                 if cid not in df.columns:
@@ -144,8 +152,8 @@ def build_polls_snapshot() -> dict[str, Any]:
         "trend": trend,
         "total_polls_available": int(len(polls_df)),
         "excluded_declined_polls": int(polls_df["_contains_declined"].sum()),
-        "candidate_status": CANDIDATE_STATUS,
-        "candidate_ranges": candidate_ranges(polls_df),
+        "candidate_status": candidate_status,
+        "candidate_ranges": candidate_ranges(polls_df, candidate_status),
         "poll_history": history,
         "chow_pressure": None,
         "registered_candidates": registered,
