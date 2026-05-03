@@ -24,6 +24,28 @@ from model.snapshot import save_snapshot, _sanitize_for_json
 DATA_DIR = ROOT / "data" / "processed"
 
 
+def build_registered_candidates_snapshot() -> dict:
+    """Load processed registered candidates and return snapshot dict."""
+    mayors_path = DATA_DIR / "mayor_registered.csv"
+    councillors_path = DATA_DIR / "councillor_registered.csv"
+
+    mayors: list[dict] = []
+    if mayors_path.exists():
+        df = pd.read_csv(mayors_path)
+        mayors = df.to_dict(orient="records")
+
+    councillors: dict[str, list] = {}
+    if councillors_path.exists():
+        df = pd.read_csv(councillors_path)
+        df["ward"] = df["ward"].astype(int)
+        for ward_num, group in df.groupby("ward"):
+            councillors[str(ward_num)] = (
+                group.drop(columns=["ward"]).to_dict(orient="records")
+            )
+
+    return {"mayors": mayors, "councillors": councillors}
+
+
 def build_polls_snapshot() -> dict[str, Any]:
     from model.aggregator import (
         aggregate_polls,
@@ -128,28 +150,6 @@ def build_polls_snapshot() -> dict[str, Any]:
         "chow_pressure": None,
         "registered_candidates": registered,
     }
-
-
-def build_registered_candidates_snapshot() -> dict:
-    """Load processed registered candidates and return snapshot dict."""
-    mayors_path = DATA_DIR / "mayor_registered.csv"
-    councillors_path = DATA_DIR / "councillor_registered.csv"
-
-    mayors: list[dict] = []
-    if mayors_path.exists():
-        df = pd.read_csv(mayors_path)
-        mayors = df.to_dict(orient="records")
-
-    councillors: dict[str, list] = {}
-    if councillors_path.exists():
-        df = pd.read_csv(councillors_path)
-        df["ward"] = df["ward"].astype(int)
-        for ward_num, group in df.groupby("ward"):
-            councillors[str(ward_num)] = (
-                group.drop(columns=["ward"]).to_dict(orient="records")
-            )
-
-    return {"mayors": mayors, "councillors": councillors}
 
 
 def save_json(data: Any, path: Path) -> None:
