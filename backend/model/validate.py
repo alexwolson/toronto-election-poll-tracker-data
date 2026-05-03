@@ -346,6 +346,46 @@ def validate_challengers(df: pd.DataFrame) -> None:
         )
 
 
+def validate_registered_mayors(df: pd.DataFrame) -> None:
+    """Validate a mayor_registered DataFrame from fetch_candidates.py."""
+    required = ["first_name", "last_name", "status", "date_nomination"]
+    _check_required_columns(df, required, "mayor_registered")
+
+    null_names = df[df["first_name"].isna() | df["last_name"].isna()]
+    if not null_names.empty:
+        raise ValidationError(f"Missing first_name or last_name in {len(null_names)} row(s)")
+
+    null_status = df[df["status"].isna() | (df["status"].astype(str).str.strip() == "")]
+    if not null_status.empty:
+        raise ValidationError(f"Missing status in {len(null_status)} row(s)")
+
+    bad_dates = df[pd.to_datetime(df["date_nomination"], errors="coerce").isna()]
+    if not bad_dates.empty:
+        raise ValidationError(f"Unparseable date_nomination in {len(bad_dates)} row(s)")
+
+
+def validate_registered_councillors(df: pd.DataFrame) -> None:
+    """Validate a councillor_registered DataFrame from fetch_candidates.py."""
+    required = ["ward", "first_name", "last_name", "status", "date_nomination"]
+    _check_required_columns(df, required, "councillor_registered")
+
+    null_names = df[df["first_name"].isna() | df["last_name"].isna()]
+    if not null_names.empty:
+        raise ValidationError(f"Missing first_name or last_name in {len(null_names)} row(s)")
+
+    bad_ward = df[~df["ward"].between(1, 25)]
+    if not bad_ward.empty:
+        raise ValidationError(f"ward values outside 1–25: {bad_ward['ward'].tolist()}")
+
+    null_status = df[df["status"].isna() | (df["status"].astype(str).str.strip() == "")]
+    if not null_status.empty:
+        raise ValidationError(f"Missing status in {len(null_status)} row(s)")
+
+    bad_dates = df[pd.to_datetime(df["date_nomination"], errors="coerce").isna()]
+    if not bad_dates.empty:
+        raise ValidationError(f"Unparseable date_nomination in {len(bad_dates)} row(s)")
+
+
 def _check_required_columns(df: pd.DataFrame, required: list[str], name: str) -> None:
     missing = [c for c in required if c not in df.columns]
     if missing:

@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Fetch candidate data
+        run: uv run scripts/fetch_candidates.py
+
       - name: Process raw data
         run: uv run scripts/process_all.py
 
@@ -34,6 +37,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/processed/
+          git add data/processed/ data/raw/candidates/
           git diff --cached --quiet || git commit -m "data: update model snapshot [skip ci]"
           git push
