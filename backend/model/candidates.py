@@ -11,19 +11,9 @@ class CandidateProfile(TypedDict):
     summary: str
 
 
+# Editorial potential/declined — people who have NOT filed nomination papers.
+# "declared" is derived dynamically from the city API via build_candidate_status().
 CANDIDATE_STATUS: dict[str, list[CandidateProfile]] = {
-    "declared": [
-        {
-            "id": "bradford",
-            "name": "Brad Bradford",
-            "summary": "Ward 19 city councillor since 2018 and declared 2026 mayoral candidate.",
-        },
-        {
-            "id": "sanders",
-            "name": "Lyall Sanders",
-            "summary": "Social activist and declared 2026 mayoral candidate.",
-        },
-    ],
     "potential": [
         {
             "id": "chow",
@@ -75,5 +65,51 @@ CANDIDATE_STATUS: dict[str, list[CandidateProfile]] = {
     ],
 }
 
-
 DECLINED_CANDIDATE_IDS = {candidate["id"] for candidate in CANDIDATE_STATUS["declined"]}
+
+# Editorial summaries for candidates who may file nomination papers.
+# Keyed by lowercase "firstname lastname". Used by build_candidate_status().
+_CANDIDATE_EDITORIAL: dict[str, CandidateProfile] = {
+    "brad bradford": {
+        "id": "bradford",
+        "name": "Brad Bradford",
+        "summary": "Ward 19 city councillor since 2018 and declared 2026 mayoral candidate.",
+    },
+    "lyall sanders": {
+        "id": "sanders",
+        "name": "Lyall Sanders",
+        "summary": "Social activist and declared 2026 mayoral candidate.",
+    },
+}
+
+
+def build_candidate_status(
+    declared_records: list[dict],
+) -> dict[str, list[CandidateProfile]]:
+    """Build complete candidate status from API records + editorial data.
+
+    declared_records: list of dicts with keys first_name, last_name, status.
+    Only records with status == 'Active' are included in declared.
+    """
+    declared: list[CandidateProfile] = []
+    for record in declared_records:
+        if record.get("status") != "Active":
+            continue
+        name_key = f"{record['first_name']} {record['last_name']}".lower()
+        editorial = _CANDIDATE_EDITORIAL.get(name_key)
+        if editorial:
+            declared.append(editorial)
+        else:
+            declared.append(
+                {
+                    "id": record["last_name"].lower(),
+                    "name": f"{record['first_name']} {record['last_name']}",
+                    "summary": "",
+                }
+            )
+
+    return {
+        "declared": declared,
+        "potential": CANDIDATE_STATUS["potential"],
+        "declined": CANDIDATE_STATUS["declined"],
+    }
