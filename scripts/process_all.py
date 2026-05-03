@@ -247,6 +247,88 @@ def process_challengers(input_path: Path) -> pd.DataFrame:
     return df
 
 
+def process_challengers_merged(
+    api_path: Path,
+    editorial_path: Path,
+    defeatability: pd.DataFrame,
+) -> pd.DataFrame:
+    """Merge registered councillors (API) with editorial overlay, excluding incumbents.
+
+    api_path: path to councillor_registered.csv (from city API)
+    editorial_path: path to challengers.csv (editorial overlay, may be empty)
+    defeatability: ward_defeatability DataFrame (used to filter incumbents)
+
+    Returns a DataFrame satisfying the challengers schema with defaults for
+    candidates who have no editorial entry.
+    """
+    if not api_path.exists():
+        print(f"  Skipping challengers merge: {api_path} (not found)")
+        return pd.DataFrame()
+
+    api_df = pd.read_csv(api_path)
+    api_df["ward"] = api_df["ward"].astype(int)
+    api_df["candidate_name"] = api_df["first_name"] + " " + api_df["last_name"]
+    api_df["_name_key"] = api_df["candidate_name"].str.lower().str.strip()
+    api_df = api_df[api_df["status"] == "Active"].copy()
+
+    # Build incumbent lookup: set of (ward, name_key) pairs (only for running incumbents)
+    running_incumbents: set[tuple[int, str]] = set()
+    for _, row in defeatability.iterrows():
+        if bool(row.get("is_running", True)):
+            running_incumbents.add((int(row["ward"]), str(row["councillor_name"]).lower().strip()))
+
+    api_df = api_df[
+        ~api_df.apply(
+            lambda r: (r["ward"], r["_name_key"]) in running_incumbents, axis=1
+        )
+    ].copy()
+
+    # Load editorial overlay (may be empty)
+    editorial: dict[tuple[int, str], dict] = {}
+    if editorial_path.exists():
+        ed_df = pd.read_csv(editorial_path)
+        if not ed_df.empty:
+            ed_df["ward"] = ed_df["ward"].astype(int)
+            ed_df["_name_key"] = ed_df["candidate_name"].str.lower().str.strip()
+            for _, row in ed_df.iterrows():
+                editorial[(int(row["ward"]), row["_name_key"])] = row.to_dict()
+
+    today = datetime.now(timezone.utc).date().isoformat()
+    rows = []
+    for _, row in api_df.iterrows():
+        key = (int(row["ward"]), row["_name_key"])
+        ed = editorial.get(key, {})
+        rows.append(
+            {
+                "ward": int(row["ward"]),
+                "candidate_name": row["candidate_name"],
+                "name_recognition_tier": ed.get("name_recognition_tier", "unknown"),
+                "fundraising_tier": ed.get("fundraising_tier", "low"),
+                "mayoral_alignment": ed.get("mayoral_alignment", "unaligned"),
+                "is_endorsed_by_departing": bool(ed.get("is_endorsed_by_departing", False)),
+                "notes": ed.get("notes", "") or "",
+                "last_updated": ed.get("last_updated", today) or today,
+            }
+        )
+
+    if not rows:
+        return pd.DataFrame(
+            columns=[
+                "ward", "candidate_name", "name_recognition_tier",
+                "fundraising_tier", "mayoral_alignment",
+                "is_endorsed_by_departing", "notes", "last_updated",
+            ]
+        )
+    result = pd.DataFrame(rows)
+    result["ward"] = result["ward"].astype(int)
+    try:
+        validate_challengers(result)
+    except ValidationError as e:
+        print(f"ERROR in merged challengers: {e}", file=sys.stderr)
+        sys.exit(1)
+    return result
+
+
 def process_registered_mayors(input_path: Path) -> pd.DataFrame:
     """Load and validate registered mayor candidates CSV."""
     if not input_path.exists():
@@ -418,6 +500,7 @@ def main() -> None:
     else:
         print(f"  Skipping: {population_path} (not found, growth will be 0.0)")
 
+    defeatability = pd.DataFrame()
     print("Processing ward defeatability...")
     defeatability_path = RAW / "defeatability" / "ward_defeatability.csv"
     watcher_path = RAW / "defeatability" / "data-qT4Kx.csv"
@@ -442,13 +525,21 @@ def main() -> None:
     else:
         print(f"  Skipping: {full_defeatability_path} (not found)")
 
-    print("Processing challengers...")
-    challengers_path = RAW / "candidates" / "challengers.csv"
-    if challengers_path.exists():
-        challengers = process_challengers(challengers_path)
-        write_processed(challengers, PROCESSED / "challengers.csv")
+    print("Processing challengers (merging API + editorial)...")
+    councillor_reg_path = RAW / "candidates" / "councillor_registered.csv"
+    challengers_editorial_path = RAW / "candidates" / "challengers.csv"
+    if councillor_reg_path.exists():
+        merged_challengers = process_challengers_merged(
+            councillor_reg_path,
+            challengers_editorial_path,
+            defeatability,
+        )
+        if not merged_challengers.empty:
+            write_processed(merged_challengers, PROCESSED / "challengers.csv")
+        else:
+            print("  No challengers after merge (councillor_registered.csv may be empty)")
     else:
-        print(f"  Skipping: {challengers_path} (not found)")
+        print(f"  Skipping challengers merge: {councillor_reg_path} (not found)")
 
     print("Processing registered mayor candidates...")
     mayor_reg_path = RAW / "candidates" / "mayor_registered.csv"
