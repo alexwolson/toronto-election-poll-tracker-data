@@ -124,6 +124,12 @@ def test_validate_registered_mayors_rejects_null_name():
         validate_registered_mayors(df)
 
 
+def test_validate_registered_mayors_rejects_empty_status():
+    df = pd.DataFrame([_base_mayor_row(status="")])
+    with pytest.raises(ValidationError, match="Missing status"):
+        validate_registered_mayors(df)
+
+
 def test_validate_registered_councillors_rejects_null_name():
     df = pd.DataFrame([_base_councillor_row(last_name=None)])
     with pytest.raises(ValidationError, match="last_name"):

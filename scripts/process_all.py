@@ -249,6 +249,9 @@ def process_challengers(input_path: Path) -> pd.DataFrame:
 
 def process_registered_mayors(input_path: Path) -> pd.DataFrame:
     """Load and validate registered mayor candidates CSV."""
+    if not input_path.exists():
+        print(f"ERROR: registered mayors file not found: {input_path}", file=sys.stderr)
+        sys.exit(1)
     df = pd.read_csv(input_path)
 
     try:
@@ -263,6 +266,9 @@ def process_registered_mayors(input_path: Path) -> pd.DataFrame:
 
 def process_registered_councillors(input_path: Path) -> pd.DataFrame:
     """Load and validate registered councillor candidates CSV."""
+    if not input_path.exists():
+        print(f"ERROR: registered councillors file not found: {input_path}", file=sys.stderr)
+        sys.exit(1)
     df = pd.read_csv(input_path)
 
     try:
