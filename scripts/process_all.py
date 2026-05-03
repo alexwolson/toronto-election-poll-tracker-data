@@ -229,23 +229,6 @@ def process_defeatability_full(input_path: Path) -> pd.DataFrame:
     return df
 
 
-def process_challengers(input_path: Path) -> pd.DataFrame:
-    """Load and validate challengers CSV."""
-    if not input_path.exists():
-        print(f"ERROR: challengers file not found: {input_path}", file=sys.stderr)
-        sys.exit(1)
-
-    df = pd.read_csv(input_path)
-
-    try:
-        df["ward"] = df["ward"].astype(int)
-        validate_challengers(df)
-    except (ValidationError, ValueError) as e:
-        print(f"ERROR in {input_path}: {e}", file=sys.stderr)
-        sys.exit(1)
-
-    return df
-
 
 def process_challengers_merged(
     api_path: Path,
@@ -306,8 +289,8 @@ def process_challengers_merged(
                 "fundraising_tier": ed.get("fundraising_tier", "low"),
                 "mayoral_alignment": ed.get("mayoral_alignment", "unaligned"),
                 "is_endorsed_by_departing": bool(ed.get("is_endorsed_by_departing", False)),
-                "notes": ed.get("notes", "") or "",
-                "last_updated": ed.get("last_updated", today) or today,
+                "notes": "" if pd.isna(ed.get("notes")) else (ed.get("notes") or ""),
+                "last_updated": today if pd.isna(ed.get("last_updated")) else (ed.get("last_updated") or today),
             }
         )
 
@@ -550,7 +533,6 @@ def main() -> None:
         print(f"  Skipping: {mayor_reg_path} (not found)")
 
     print("Processing registered councillor candidates...")
-    councillor_reg_path = RAW / "candidates" / "councillor_registered.csv"
     if councillor_reg_path.exists():
         councillor_reg = process_registered_councillors(councillor_reg_path)
         write_processed(councillor_reg, PROCESSED / "councillor_registered.csv")

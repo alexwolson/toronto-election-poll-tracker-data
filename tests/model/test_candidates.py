@@ -2,7 +2,6 @@
 """Tests for candidates.py build_candidate_status function."""
 from __future__ import annotations
 
-import pytest
 from backend.model.candidates import build_candidate_status
 
 
