@@ -26,7 +26,9 @@ from backend.model.validate import (
     validate_defeatability,
     validate_mayoral_results,
     validate_polls,
+    validate_registered_councillors,
     validate_registered_electors,
+    validate_registered_mayors,
     validate_ward_population,
 )
 
@@ -245,6 +247,43 @@ def process_challengers(input_path: Path) -> pd.DataFrame:
     return df
 
 
+def process_registered_mayors(input_path: Path) -> pd.DataFrame:
+    """Load and validate registered mayor candidates CSV."""
+    if not input_path.exists():
+        print(f"  Skipping: {input_path} (not found)")
+        return pd.DataFrame()
+
+    df = pd.read_csv(input_path)
+
+    try:
+        validate_registered_mayors(df)
+    except ValidationError as e:
+        print(f"ERROR in {input_path}: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    df["date_nomination"] = pd.to_datetime(df["date_nomination"]).dt.strftime("%Y-%m-%d")
+    return df
+
+
+def process_registered_councillors(input_path: Path) -> pd.DataFrame:
+    """Load and validate registered councillor candidates CSV."""
+    if not input_path.exists():
+        print(f"  Skipping: {input_path} (not found)")
+        return pd.DataFrame()
+
+    df = pd.read_csv(input_path)
+
+    try:
+        df["ward"] = df["ward"].astype(int)
+        validate_registered_councillors(df)
+    except (ValidationError, ValueError) as e:
+        print(f"ERROR in {input_path}: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    df["date_nomination"] = pd.to_datetime(df["date_nomination"]).dt.strftime("%Y-%m-%d")
+    return df
+
+
 def process_mayoral_results(input_path: Path) -> pd.DataFrame:
     """Load and validate mayoral results CSV."""
     if not input_path.exists():
@@ -412,6 +451,18 @@ def main() -> None:
         write_processed(challengers, PROCESSED / "challengers.csv")
     else:
         print(f"  Skipping: {challengers_path} (not found)")
+
+    print("Processing registered mayor candidates...")
+    mayor_reg = process_registered_mayors(RAW / "candidates" / "mayor_registered.csv")
+    if not mayor_reg.empty:
+        write_processed(mayor_reg, PROCESSED / "mayor_registered.csv")
+
+    print("Processing registered councillor candidates...")
+    councillor_reg = process_registered_councillors(
+        RAW / "candidates" / "councillor_registered.csv"
+    )
+    if not councillor_reg.empty:
+        write_processed(councillor_reg, PROCESSED / "councillor_registered.csv")
 
     print("Done. All outputs written to data/processed/.")
 
