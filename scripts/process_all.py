@@ -249,10 +249,6 @@ def process_challengers(input_path: Path) -> pd.DataFrame:
 
 def process_registered_mayors(input_path: Path) -> pd.DataFrame:
     """Load and validate registered mayor candidates CSV."""
-    if not input_path.exists():
-        print(f"  Skipping: {input_path} (not found)")
-        return pd.DataFrame()
-
     df = pd.read_csv(input_path)
 
     try:
@@ -267,10 +263,6 @@ def process_registered_mayors(input_path: Path) -> pd.DataFrame:
 
 def process_registered_councillors(input_path: Path) -> pd.DataFrame:
     """Load and validate registered councillor candidates CSV."""
-    if not input_path.exists():
-        print(f"  Skipping: {input_path} (not found)")
-        return pd.DataFrame()
-
     df = pd.read_csv(input_path)
 
     try:
@@ -453,16 +445,20 @@ def main() -> None:
         print(f"  Skipping: {challengers_path} (not found)")
 
     print("Processing registered mayor candidates...")
-    mayor_reg = process_registered_mayors(RAW / "candidates" / "mayor_registered.csv")
-    if not mayor_reg.empty:
+    mayor_reg_path = RAW / "candidates" / "mayor_registered.csv"
+    if mayor_reg_path.exists():
+        mayor_reg = process_registered_mayors(mayor_reg_path)
         write_processed(mayor_reg, PROCESSED / "mayor_registered.csv")
+    else:
+        print(f"  Skipping: {mayor_reg_path} (not found)")
 
     print("Processing registered councillor candidates...")
-    councillor_reg = process_registered_councillors(
-        RAW / "candidates" / "councillor_registered.csv"
-    )
-    if not councillor_reg.empty:
+    councillor_reg_path = RAW / "candidates" / "councillor_registered.csv"
+    if councillor_reg_path.exists():
+        councillor_reg = process_registered_councillors(councillor_reg_path)
         write_processed(councillor_reg, PROCESSED / "councillor_registered.csv")
+    else:
+        print(f"  Skipping: {councillor_reg_path} (not found)")
 
     print("Done. All outputs written to data/processed/.")
 
