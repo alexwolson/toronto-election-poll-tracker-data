@@ -7,7 +7,7 @@ import pandas as pd
 
 from .aggregator import aggregate_polls, get_latest_scenario_polls, get_scenario_polls
 from .aggregator import exclude_polls_with_declined_candidates
-from .candidates import CANDIDATE_STATUS, DECLINED_CANDIDATE_IDS
+from .candidates import build_candidate_status, DECLINED_CANDIDATE_IDS
 from .phase import detect_phase
 from .simulation import WardSimulation, SAFE_DEFEATABILITY_THRESHOLD
 
@@ -27,6 +27,12 @@ def _data_dir() -> Path:
 def load_processed_data() -> dict:
     """Load all processed data files."""
     d = _data_dir()
+    mayor_reg_path = d / "mayor_registered.csv"
+    mayor_registered = (
+        pd.read_csv(mayor_reg_path).to_dict("records")
+        if mayor_reg_path.exists()
+        else []
+    )
     return {
         "defeatability": pd.read_csv(d / "ward_defeatability.csv"),
         "challengers": pd.read_csv(d / "challengers.csv"),
@@ -34,6 +40,7 @@ def load_processed_data() -> dict:
         "coattails": pd.read_csv(d / "coattail_adjustments.csv"),
         "polls": pd.read_csv(d / "polls.csv"),
         "ward_polls": pd.read_csv(d / "ward_polls.csv"),
+        "mayor_registered": mayor_registered,
     }
 
 
@@ -168,5 +175,5 @@ def run_model() -> dict:
         "phase": detect_phase(data["challengers"]),
         "scenarios": SCENARIOS,
         "default_scenario": DEFAULT_SCENARIO,
-        "candidate_status": CANDIDATE_STATUS,
+        "candidate_status": build_candidate_status(data["mayor_registered"]),
     }
