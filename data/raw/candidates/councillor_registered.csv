@@ -1,5 +1,5 @@
 ward,first_name,last_name,status,date_nomination
-1,Alaa,Adib,Active,2026-05-01
+1,Ala'a,Adib,Active,2026-05-01
 1,Saima,Babar,Active,2026-05-01
 2,Jennifer,Alexander,Active,2026-05-01
 4,Nadia,Guerrera,Active,2026-05-01
@@ -15,9 +15,11 @@ ward,first_name,last_name,status,date_nomination
 11,Gabriel,Blanc,Active,2026-05-01
 11,Keenan,Courtis,Active,2026-05-01
 11,Terri,Hawkes,Active,2026-05-01
+11,Alice,Li,Active,2026-05-04
 13,Walied,Khogali Ali,Active,2026-05-01
 13,Curran,Stikuts,Active,2026-05-01
 13,Nicki,Ward,Active,2026-05-01
+17,Shelley,Carroll,Active,2026-05-04
 17,Sabrina,Zuniga,Active,2026-05-01
 18,Natik,Yusifov,Active,2026-05-01
 19,James,Dann,Active,2026-05-01
