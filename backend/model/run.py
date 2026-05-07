@@ -59,6 +59,36 @@ def _classify_race(row: dict, challengers_for_ward: list[dict]) -> str:
     return "safe"
 
 
+def _derive_endorsed_by_departing(
+    challengers: pd.DataFrame, ward_data: pd.DataFrame
+) -> pd.DataFrame:
+    """Derive is_endorsed_by_departing from the named endorsements list.
+
+    For open-seat wards (is_running=False), checks whether the departing
+    councillor's name appears as a token in the challenger's endorsements field.
+    All other wards get False.
+    """
+    departing = (
+        ward_data[~ward_data["is_running"].astype(bool)][["ward", "councillor_name"]]
+        .set_index("ward")["councillor_name"]
+        .to_dict()
+    )
+
+    def _check(row: pd.Series) -> bool:
+        departing_name = departing.get(int(row["ward"]))
+        if not departing_name:
+            return False
+        raw = row.get("endorsements", "")
+        if pd.isna(raw):
+            return False
+        tokens = [e.strip() for e in str(raw).split("|")]
+        return departing_name in tokens
+
+    result = challengers.copy()
+    result["is_endorsed_by_departing"] = result.apply(_check, axis=1)
+    return result
+
+
 def _ensure_generic_challenger(
     challengers: pd.DataFrame, ward_data: pd.DataFrame
 ) -> pd.DataFrame:
@@ -66,8 +96,8 @@ def _ensure_generic_challenger(
         "ward",
         "candidate_name",
         "name_recognition_tier",
-        "fundraising_tier",
         "mayoral_alignment",
+        "endorsements",
         "is_endorsed_by_departing",
     ]
     out = challengers.copy()
@@ -89,8 +119,8 @@ def _ensure_generic_challenger(
                     "ward": ward,
                     "candidate_name": "Generic Challenger",
                     "name_recognition_tier": "unknown",
-                    "fundraising_tier": "low",
                     "mayoral_alignment": "unaligned",
+                    "endorsements": "",
                     "is_endorsed_by_departing": False,
                 }
             )
@@ -106,6 +136,9 @@ def run_model() -> dict:
     """Run the full model pipeline and return structured results."""
     data = load_processed_data()
     data["challengers"] = _ensure_generic_challenger(
+        data["challengers"], data["defeatability"]
+    )
+    data["challengers"] = _derive_endorsed_by_departing(
         data["challengers"], data["defeatability"]
     )
 
@@ -172,7 +205,10 @@ def run_model() -> dict:
         "composition_std": round(float(results["composition_std"]), 2),
         "composition_by_mayor": results["composition_by_mayor"],
         "mayoral_averages": mayoral_shares,
-        "phase": detect_phase(data["challengers"]),
+        "phase": detect_phase(
+            data["challengers"],
+            has_financials=any((_data_dir().parent / "raw" / "financial").glob("*.csv")),
+        ),
         "scenarios": SCENARIOS,
         "default_scenario": DEFAULT_SCENARIO,
         "candidate_status": build_candidate_status(data["mayor_registered"]),

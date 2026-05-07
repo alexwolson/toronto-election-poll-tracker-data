@@ -36,17 +36,23 @@ PHASE_DESCRIPTIONS: dict[int, dict[str, str]] = {
 }
 
 
-def detect_phase(challengers: pd.DataFrame) -> dict:
+def detect_phase(challengers: pd.DataFrame, has_financials: bool = False) -> dict:
     """Detect the current model phase from the challengers dataset.
+
+    Args:
+        challengers: The challengers DataFrame (post-pipeline, with Generic
+            Challenger rows included).
+        has_financials: True when financial filing data has been incorporated
+            into the challengers dataset (Phase 3 signal). Defaults to False.
 
     Returns a dict with keys: phase (int), label (str), description (str).
     """
     real = challengers[challengers["candidate_name"] != "Generic Challenger"] if not challengers.empty else challengers
     if real.empty:
         phase = 1
-    elif "fundraising_tier" not in real.columns or real["fundraising_tier"].isna().all():
-        phase = 2
-    else:
+    elif has_financials:
         phase = 3
+    else:
+        phase = 2
 
     return {"phase": phase, **PHASE_DESCRIPTIONS[phase]}
