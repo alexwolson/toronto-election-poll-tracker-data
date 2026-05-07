@@ -74,7 +74,7 @@ def test_process_challengers_merged_empty_api_returns_empty(tmp_path):
     councillor_path = tmp_path / "councillor_registered.csv"
     pd.DataFrame(columns=["ward", "first_name", "last_name", "status", "date_nomination"]).to_csv(councillor_path, index=False)
     editorial_path = tmp_path / "challengers.csv"
-    pd.DataFrame(columns=["ward", "candidate_name", "name_recognition_tier", "fundraising_tier", "mayoral_alignment", "is_endorsed_by_departing", "notes", "last_updated"]).to_csv(editorial_path, index=False)
+    pd.DataFrame(columns=["ward", "candidate_name", "name_recognition_tier", "mayoral_alignment", "endorsements", "notes", "last_updated"]).to_csv(editorial_path, index=False)
     defeatability = _defeatability_df(1, "Some Incumbent")
     result = pa.process_challengers_merged(councillor_path, editorial_path, defeatability)
     assert result.empty
@@ -88,7 +88,7 @@ def test_process_challengers_merged_incumbent_is_excluded(tmp_path):
         {"ward": 1, "first_name": "Real", "last_name": "Challenger", "status": "Active", "date_nomination": "2026-05-01"},
     ]).to_csv(councillor_path, index=False)
     editorial_path = tmp_path / "challengers.csv"
-    pd.DataFrame(columns=["ward", "candidate_name", "name_recognition_tier", "fundraising_tier", "mayoral_alignment", "is_endorsed_by_departing", "notes", "last_updated"]).to_csv(editorial_path, index=False)
+    pd.DataFrame(columns=["ward", "candidate_name", "name_recognition_tier", "mayoral_alignment", "endorsements", "notes", "last_updated"]).to_csv(editorial_path, index=False)
     defeatability = _defeatability_df(1, "Some Incumbent", is_running=True)
     result = pa.process_challengers_merged(councillor_path, editorial_path, defeatability)
     assert len(result) == 1
@@ -103,7 +103,7 @@ def test_process_challengers_merged_open_seat_includes_all(tmp_path):
         {"ward": 1, "first_name": "Real", "last_name": "Challenger", "status": "Active", "date_nomination": "2026-05-01"},
     ]).to_csv(councillor_path, index=False)
     editorial_path = tmp_path / "challengers.csv"
-    pd.DataFrame(columns=["ward", "candidate_name", "name_recognition_tier", "fundraising_tier", "mayoral_alignment", "is_endorsed_by_departing", "notes", "last_updated"]).to_csv(editorial_path, index=False)
+    pd.DataFrame(columns=["ward", "candidate_name", "name_recognition_tier", "mayoral_alignment", "endorsements", "notes", "last_updated"]).to_csv(editorial_path, index=False)
     defeatability = _defeatability_df(1, "Some Incumbent", is_running=False)
     result = pa.process_challengers_merged(councillor_path, editorial_path, defeatability)
     assert len(result) == 2
@@ -120,9 +120,8 @@ def test_process_challengers_merged_editorial_overlay_applied(tmp_path):
         "ward": 5,
         "candidate_name": "Jane Doe",
         "name_recognition_tier": "well-known",
-        "fundraising_tier": "high",
-        "mayoral_alignment": "pro-chow",
-        "is_endorsed_by_departing": True,
+        "mayoral_alignment": "chow",
+        "endorsements": "Josh Matlow|CUPE Local 79",
         "notes": "well funded",
         "last_updated": "2026-05-01",
     }]).to_csv(editorial_path, index=False)
@@ -130,8 +129,8 @@ def test_process_challengers_merged_editorial_overlay_applied(tmp_path):
     result = pa.process_challengers_merged(councillor_path, editorial_path, defeatability)
     assert len(result) == 1
     assert result.iloc[0]["name_recognition_tier"] == "well-known"
-    assert result.iloc[0]["fundraising_tier"] == "high"
-    assert bool(result.iloc[0]["is_endorsed_by_departing"]) is True
+    assert result.iloc[0]["endorsements"] == "Josh Matlow|CUPE Local 79"
+    assert result.iloc[0]["mayoral_alignment"] == "chow"
 
 
 def test_process_challengers_merged_defaults_for_unmatched(tmp_path):
@@ -141,14 +140,13 @@ def test_process_challengers_merged_defaults_for_unmatched(tmp_path):
         {"ward": 7, "first_name": "New", "last_name": "Person", "status": "Active", "date_nomination": "2026-05-01"},
     ]).to_csv(councillor_path, index=False)
     editorial_path = tmp_path / "challengers.csv"
-    pd.DataFrame(columns=["ward", "candidate_name", "name_recognition_tier", "fundraising_tier", "mayoral_alignment", "is_endorsed_by_departing", "notes", "last_updated"]).to_csv(editorial_path, index=False)
+    pd.DataFrame(columns=["ward", "candidate_name", "name_recognition_tier", "mayoral_alignment", "endorsements", "notes", "last_updated"]).to_csv(editorial_path, index=False)
     defeatability = _defeatability_df(7, "Someone Else", is_running=True)
     result = pa.process_challengers_merged(councillor_path, editorial_path, defeatability)
     assert len(result) == 1
     assert result.iloc[0]["name_recognition_tier"] == "unknown"
-    assert result.iloc[0]["fundraising_tier"] == "low"
     assert result.iloc[0]["mayoral_alignment"] == "unaligned"
-    assert bool(result.iloc[0]["is_endorsed_by_departing"]) is False
+    assert result.iloc[0]["endorsements"] == ""
 
 
 def test_process_challengers_merged_output_satisfies_challengers_schema(tmp_path):
@@ -159,7 +157,7 @@ def test_process_challengers_merged_output_satisfies_challengers_schema(tmp_path
         {"ward": 3, "first_name": "Test", "last_name": "Candidate", "status": "Active", "date_nomination": "2026-05-01"},
     ]).to_csv(councillor_path, index=False)
     editorial_path = tmp_path / "challengers.csv"
-    pd.DataFrame(columns=["ward", "candidate_name", "name_recognition_tier", "fundraising_tier", "mayoral_alignment", "is_endorsed_by_departing", "notes", "last_updated"]).to_csv(editorial_path, index=False)
+    pd.DataFrame(columns=["ward", "candidate_name", "name_recognition_tier", "mayoral_alignment", "endorsements", "notes", "last_updated"]).to_csv(editorial_path, index=False)
     defeatability = _defeatability_df(3, "Other Incumbent", is_running=True)
     result = pa.process_challengers_merged(councillor_path, editorial_path, defeatability)
     validate_challengers(result)  # must not raise

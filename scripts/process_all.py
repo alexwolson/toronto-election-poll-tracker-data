@@ -281,14 +281,15 @@ def process_challengers_merged(
     for _, row in api_df.iterrows():
         key = (int(row["ward"]), row["_name_key"])
         ed = editorial.get(key, {})
+        raw_endorsements = ed.get("endorsements", "")
+        endorsements = "" if pd.isna(raw_endorsements) else (raw_endorsements or "")
         rows.append(
             {
                 "ward": int(row["ward"]),
                 "candidate_name": row["candidate_name"],
                 "name_recognition_tier": ed.get("name_recognition_tier", "unknown"),
-                "fundraising_tier": ed.get("fundraising_tier", "low"),
                 "mayoral_alignment": ed.get("mayoral_alignment", "unaligned"),
-                "is_endorsed_by_departing": bool(ed.get("is_endorsed_by_departing", False)),
+                "endorsements": endorsements,
                 "notes": "" if pd.isna(ed.get("notes")) else (ed.get("notes") or ""),
                 "last_updated": today if pd.isna(ed.get("last_updated")) else (ed.get("last_updated") or today),
             }
@@ -298,8 +299,7 @@ def process_challengers_merged(
         return pd.DataFrame(
             columns=[
                 "ward", "candidate_name", "name_recognition_tier",
-                "fundraising_tier", "mayoral_alignment",
-                "is_endorsed_by_departing", "notes", "last_updated",
+                "mayoral_alignment", "endorsements", "notes", "last_updated",
             ]
         )
     result = pd.DataFrame(rows)
