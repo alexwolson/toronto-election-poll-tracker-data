@@ -272,3 +272,49 @@ def test_endorsement_nan_treated_as_zero():
         f"NaN endorsements ({prob_nan:.3f}) should behave like empty string ({prob_empty:.3f}), "
         f"not like one endorsement"
     )
+
+
+def test_endorsement_count_is_capped():
+    """Endorsement count boost is capped at MAX_ENDORSEMENTS_COUNTED.
+
+    A candidate with 10 endorsements should not win more often than one with
+    MAX_ENDORSEMENTS_COUNTED endorsements — the cap prevents outsized boosts.
+    """
+    from backend.model.simulation import MAX_ENDORSEMENTS_COUNTED
+    ward = 9
+
+    def _run(n_endorsements: int) -> float:
+        endorsements = "|".join(f"Endorser {i}" for i in range(n_endorsements))
+        challenger = pd.DataFrame([{
+            "ward": ward,
+            "candidate_name": "Challenger A",
+            "name_recognition_tier": "unknown",
+            "mayoral_alignment": "unaligned",
+            "is_endorsed_by_departing": False,
+            "endorsements": endorsements,
+        }, {
+            "ward": ward,
+            "candidate_name": "Challenger B",
+            "name_recognition_tier": "unknown",
+            "mayoral_alignment": "unaligned",
+            "is_endorsed_by_departing": False,
+            "endorsements": "",
+        }])
+        sim = WardSimulation(
+            ward_data=_minimal_ward_data(ward, is_running=False),
+            mayoral_averages=_minimal_mayoral_averages(),
+            coattails=_empty_coattails(),
+            challengers=challenger,
+            leans=_empty_leans(),
+            n_draws=500,
+            seed=0,
+        )
+        result = sim.run()
+        return result["candidate_win_probabilities"][ward].get("Challenger A", 0.0)
+
+    prob_at_cap = _run(MAX_ENDORSEMENTS_COUNTED)
+    prob_over_cap = _run(MAX_ENDORSEMENTS_COUNTED + 5)
+
+    assert abs(prob_at_cap - prob_over_cap) < 0.05, (
+        f"Win prob at cap ({prob_at_cap:.3f}) should equal win prob over cap ({prob_over_cap:.3f})"
+    )

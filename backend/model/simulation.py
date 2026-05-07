@@ -35,6 +35,9 @@ ENDORSEMENT_BOOST = 1.0
 # Per-endorsement logit strength boost, applied in all races
 ENDORSEMENT_WEIGHT = 0.3
 
+# Maximum endorsements counted toward strength (prevents outsized boosts for heavily-endorsed candidates)
+MAX_ENDORSEMENTS_COUNTED = 5
+
 # Additional Gaussian noise applied to each candidate's strength in open seat races
 OPEN_SEAT_NOISE_SIGMA = 0.4
 
@@ -105,7 +108,7 @@ class WardSimulation:
         raw = cand.get("endorsements", "")
         raw_endorsements = "" if pd.isna(raw) else str(raw)
         endorsement_count = len([e for e in raw_endorsements.split("|") if e.strip()])
-        mu_tier += ENDORSEMENT_WEIGHT * endorsement_count
+        mu_tier += ENDORSEMENT_WEIGHT * min(endorsement_count, MAX_ENDORSEMENTS_COUNTED)
 
         w_a = 2.0
         alignment = cand["mayoral_alignment"]
