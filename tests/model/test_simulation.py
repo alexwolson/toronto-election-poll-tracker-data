@@ -97,9 +97,8 @@ def test_safe_incumbent_win_probability_is_not_one():
                 "ward": ward,
                 "candidate_name": "Unknown Challenger",
                 "name_recognition_tier": "unknown",
-                "fundraising_tier": "low",
                 "mayoral_alignment": "unaligned",
-                "is_endorsed_by_departing": False,
+                "endorsements": "",
             }
         ]
     )
@@ -153,9 +152,8 @@ def test_incumbent_ward_simulation_produces_valid_win_probability():
                 "ward": ward,
                 "candidate_name": "Known Challenger",
                 "name_recognition_tier": "known",
-                "fundraising_tier": "low",
                 "mayoral_alignment": "unaligned",
-                "is_endorsed_by_departing": False,
+                "endorsements": "",
             }
         ]
     )
@@ -205,7 +203,6 @@ def test_endorsement_count_boosts_candidate_strength():
                 "candidate_name": "Challenger B",
                 "name_recognition_tier": "unknown",
                 "mayoral_alignment": "unaligned",
-                "is_endorsed_by_departing": False,
                 "endorsements": "",
             }
         ]
@@ -248,14 +245,12 @@ def test_endorsement_nan_treated_as_zero():
             "candidate_name": "Challenger A",
             "name_recognition_tier": "unknown",
             "mayoral_alignment": "unaligned",
-            "is_endorsed_by_departing": False,
             "endorsements": endorsements,
         }, {
             "ward": ward,
             "candidate_name": "Challenger B",
             "name_recognition_tier": "unknown",
             "mayoral_alignment": "unaligned",
-            "is_endorsed_by_departing": False,
             "endorsements": "",
         }])
         sim = WardSimulation(
