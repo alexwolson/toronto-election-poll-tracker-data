@@ -14,36 +14,42 @@ def _base_challengers_row(**overrides) -> dict:
         "ward": 1,
         "candidate_name": "Test Candidate",
         "name_recognition_tier": "known",
-        "fundraising_tier": "high",
         "mayoral_alignment": "unaligned",
-        "is_endorsed_by_departing": False,
+        "endorsements": "",
         "last_updated": "2026-01-01",
     }
     base.update(overrides)
     return base
 
 
-def test_validate_challengers_accepts_medium_fundraising_tier():
-    """'medium' fundraising tier is handled by simulation.py but was excluded
-    from the validation allowlist, causing a crash for any challenger with
-    fundraising_tier='medium'.
-    """
-    df = pd.DataFrame([_base_challengers_row(fundraising_tier="medium")])
-    # Should not raise
+def test_validate_challengers_accepts_empty_endorsements():
+    """Empty endorsements string is valid — candidate has no known endorsers."""
+    df = pd.DataFrame([_base_challengers_row(endorsements="")])
     validate_challengers(df)
 
 
-def test_validate_challengers_still_rejects_invalid_fundraising_tier():
-    """An unrecognised fundraising tier like 'very-high' must still be rejected."""
-    df = pd.DataFrame([_base_challengers_row(fundraising_tier="very-high")])
-    with pytest.raises(ValidationError, match="fundraising_tier"):
-        validate_challengers(df)
+def test_validate_challengers_accepts_single_endorser():
+    """A single named endorser is valid."""
+    df = pd.DataFrame([_base_challengers_row(endorsements="Josh Matlow")])
+    validate_challengers(df)
 
 
-def test_validate_challengers_accepts_high_and_low():
-    """Original valid tiers must still pass."""
-    for tier in ("high", "low"):
-        df = pd.DataFrame([_base_challengers_row(fundraising_tier=tier)])
+def test_validate_challengers_accepts_pipe_separated_endorsers():
+    """Multiple endorsers separated by pipes are valid."""
+    df = pd.DataFrame([_base_challengers_row(endorsements="Josh Matlow|CUPE Local 79")])
+    validate_challengers(df)
+
+
+def test_validate_challengers_rejects_missing_endorsements_column():
+    """Missing endorsements column must raise ValidationError."""
+    df = pd.DataFrame([{
+        "ward": 1,
+        "candidate_name": "Test Candidate",
+        "name_recognition_tier": "known",
+        "mayoral_alignment": "unaligned",
+        "last_updated": "2026-01-01",
+    }])
+    with pytest.raises(ValidationError, match="endorsements"):
         validate_challengers(df)
 
 

@@ -318,9 +318,8 @@ def validate_challengers(df: pd.DataFrame) -> None:
         "ward",
         "candidate_name",
         "name_recognition_tier",
-        "fundraising_tier",
         "mayoral_alignment",
-        "is_endorsed_by_departing",
+        "endorsements",
         "last_updated",
     ]
     _check_required_columns(df, required, "challengers")
@@ -330,19 +329,12 @@ def validate_challengers(df: pd.DataFrame) -> None:
     if not bad_ward.empty:
         raise ValidationError(f"ward values outside 1–25: {bad_ward['ward'].tolist()}")
 
-    # tiers must be valid
+    # name_recognition_tier must be valid
     valid_recog = {"well-known", "known", "unknown"}
     bad_recog = df[~df["name_recognition_tier"].isin(valid_recog)]
     if not bad_recog.empty:
         raise ValidationError(
             f"Invalid name_recognition_tier in wards: {bad_recog['ward'].tolist()}"
-        )
-
-    valid_fund = {"high", "medium", "low"}
-    bad_fund = df[~df["fundraising_tier"].isin(valid_fund)]
-    if not bad_fund.empty:
-        raise ValidationError(
-            f"Invalid fundraising_tier in wards: {bad_fund['ward'].tolist()}"
         )
 
 
