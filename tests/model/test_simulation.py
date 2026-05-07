@@ -1,7 +1,7 @@
 """Tests for WardSimulation."""
 import pandas as pd
 import numpy as np
-from backend.model.simulation import WardSimulation
+from backend.model.simulation import WardSimulation, ENDORSEMENT_WEIGHT
 
 
 def _minimal_ward_data(ward: int, is_running: bool) -> pd.DataFrame:
@@ -194,7 +194,6 @@ def test_endorsement_count_boosts_candidate_strength():
     A candidate with 3 endorsements should have a higher win probability than
     an identical candidate with 0 endorsements, all else equal.
     """
-    from backend.model.simulation import ENDORSEMENT_WEIGHT
     ward = 5
 
     # Add a second challenger (unknown tier, no endorsements) so Challenger A must
@@ -235,4 +234,46 @@ def test_endorsement_count_boosts_candidate_strength():
     assert prob_three > prob_none, (
         f"3-endorsement candidate ({prob_three:.3f}) should win more often than "
         f"0-endorsement candidate ({prob_none:.3f})"
+    )
+
+
+def test_endorsement_nan_treated_as_zero():
+    """A challenger with NaN endorsements (empty CSV cell) should get zero endorsement boost,
+    not one phantom endorsement from str(NaN) == 'nan'."""
+    ward = 7
+
+    def _run(endorsements) -> float:
+        challenger = pd.DataFrame([{
+            "ward": ward,
+            "candidate_name": "Challenger A",
+            "name_recognition_tier": "unknown",
+            "mayoral_alignment": "unaligned",
+            "is_endorsed_by_departing": False,
+            "endorsements": endorsements,
+        }, {
+            "ward": ward,
+            "candidate_name": "Challenger B",
+            "name_recognition_tier": "unknown",
+            "mayoral_alignment": "unaligned",
+            "is_endorsed_by_departing": False,
+            "endorsements": "",
+        }])
+        sim = WardSimulation(
+            ward_data=_minimal_ward_data(ward, is_running=False),
+            mayoral_averages=_minimal_mayoral_averages(),
+            coattails=_empty_coattails(),
+            challengers=challenger,
+            leans=_empty_leans(),
+            n_draws=500,
+            seed=0,
+        )
+        result = sim.run()
+        return result["candidate_win_probabilities"][ward].get("Challenger A", 0.0)
+
+    prob_nan = _run(np.nan)
+    prob_empty = _run("")
+
+    assert abs(prob_nan - prob_empty) < 0.05, (
+        f"NaN endorsements ({prob_nan:.3f}) should behave like empty string ({prob_empty:.3f}), "
+        f"not like one endorsement"
     )

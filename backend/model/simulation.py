@@ -102,7 +102,8 @@ class WardSimulation:
         tier_baselines = {"well-known": 2.0, "known": 1.0, "unknown": 0.0}
         mu_tier = tier_baselines.get(cand["name_recognition_tier"], 0.0)
 
-        raw_endorsements = str(cand.get("endorsements", ""))
+        raw = cand.get("endorsements", "")
+        raw_endorsements = "" if pd.isna(raw) else str(raw)
         endorsement_count = len([e for e in raw_endorsements.split("|") if e.strip()])
         mu_tier += ENDORSEMENT_WEIGHT * endorsement_count
 
