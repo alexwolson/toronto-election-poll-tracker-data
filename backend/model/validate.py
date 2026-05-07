@@ -337,6 +337,13 @@ def validate_challengers(df: pd.DataFrame) -> None:
             f"Invalid name_recognition_tier in wards: {bad_recog['ward'].tolist()}"
         )
 
+    # endorsements must not be null (empty string is valid, but NaN is not)
+    null_endorsements = df[df["endorsements"].isna()]
+    if not null_endorsements.empty:
+        raise ValidationError(
+            f"endorsements must not be null in wards: {null_endorsements['ward'].tolist()}"
+        )
+
 
 def validate_registered_mayors(df: pd.DataFrame) -> None:
     """Validate a mayor_registered DataFrame from fetch_candidates.py."""

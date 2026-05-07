@@ -53,6 +53,14 @@ def test_validate_challengers_rejects_missing_endorsements_column():
         validate_challengers(df)
 
 
+def test_validate_challengers_rejects_null_endorsements():
+    """NaN endorsements must be rejected — empty string is valid but null is not."""
+    import numpy as np
+    df = pd.DataFrame([_base_challengers_row(endorsements=np.nan)])
+    with pytest.raises(ValidationError, match="endorsements"):
+        validate_challengers(df)
+
+
 # ---------------------------------------------------------------------------
 # validate_registered_mayors
 # ---------------------------------------------------------------------------
