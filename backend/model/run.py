@@ -98,7 +98,6 @@ def _ensure_generic_challenger(
         "name_recognition_tier",
         "mayoral_alignment",
         "endorsements",
-        "is_endorsed_by_departing",
     ]
     out = challengers.copy()
     for col in required_cols:
@@ -121,7 +120,6 @@ def _ensure_generic_challenger(
                     "name_recognition_tier": "unknown",
                     "mayoral_alignment": "unaligned",
                     "endorsements": "",
-                    "is_endorsed_by_departing": False,
                 }
             )
 
