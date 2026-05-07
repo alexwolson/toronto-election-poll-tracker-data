@@ -22,16 +22,16 @@ def _minimal_mayoral_averages() -> pd.DataFrame:
     return pd.DataFrame([{"candidate": "chow", "share": 0.40}])
 
 
-def _minimal_challenger(ward: int) -> pd.DataFrame:
+def _minimal_challenger(ward: int, endorsements: str = "") -> pd.DataFrame:
     return pd.DataFrame(
         [
             {
                 "ward": ward,
                 "candidate_name": "Challenger A",
                 "name_recognition_tier": "known",
-                "fundraising_tier": "low",
                 "mayoral_alignment": "unaligned",
                 "is_endorsed_by_departing": False,
+                "endorsements": endorsements,
             }
         ]
     )
@@ -186,3 +186,53 @@ def test_incumbent_ward_simulation_produces_valid_win_probability():
     )
     assert ward in result["candidate_win_probabilities"]
     assert "Incumbent" in result["candidate_win_probabilities"][ward]
+
+
+def test_endorsement_count_boosts_candidate_strength():
+    """Each named endorser adds ENDORSEMENT_WEIGHT to the candidate's logit strength.
+
+    A candidate with 3 endorsements should have a higher win probability than
+    an identical candidate with 0 endorsements, all else equal.
+    """
+    from backend.model.simulation import ENDORSEMENT_WEIGHT
+    ward = 5
+
+    # Add a second challenger (unknown tier, no endorsements) so Challenger A must
+    # compete and the endorsement boost is detectable.
+    competitor = pd.DataFrame(
+        [
+            {
+                "ward": ward,
+                "candidate_name": "Challenger B",
+                "name_recognition_tier": "unknown",
+                "mayoral_alignment": "unaligned",
+                "is_endorsed_by_departing": False,
+                "endorsements": "",
+            }
+        ]
+    )
+
+    def _run_with_endorsements(endorsements: str) -> float:
+        challengers = pd.concat(
+            [_minimal_challenger(ward, endorsements=endorsements), competitor],
+            ignore_index=True,
+        )
+        sim = WardSimulation(
+            ward_data=_minimal_ward_data(ward, is_running=False),
+            mayoral_averages=_minimal_mayoral_averages(),
+            coattails=_empty_coattails(),
+            challengers=challengers,
+            leans=_empty_leans(),
+            n_draws=2000,
+            seed=42,
+        )
+        result = sim.run()
+        return result["candidate_win_probabilities"][ward].get("Challenger A", 0.0)
+
+    prob_none = _run_with_endorsements("")
+    prob_three = _run_with_endorsements("Endorser A|Endorser B|Endorser C")
+
+    assert prob_three > prob_none, (
+        f"3-endorsement candidate ({prob_three:.3f}) should win more often than "
+        f"0-endorsement candidate ({prob_none:.3f})"
+    )

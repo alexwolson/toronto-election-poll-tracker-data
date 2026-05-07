@@ -32,6 +32,9 @@ SAFE_INCUMBENT_WIN_PROB = 0.97
 # Endorsement boost for the candidate backed by the departing councillor (open seats)
 ENDORSEMENT_BOOST = 1.0
 
+# Per-endorsement logit strength boost, applied in all races
+ENDORSEMENT_WEIGHT = 0.3
+
 # Additional Gaussian noise applied to each candidate's strength in open seat races
 OPEN_SEAT_NOISE_SIGMA = 0.4
 
@@ -99,12 +102,9 @@ class WardSimulation:
         tier_baselines = {"well-known": 2.0, "known": 1.0, "unknown": 0.0}
         mu_tier = tier_baselines.get(cand["name_recognition_tier"], 0.0)
 
-        fundraising_bonuses = {
-            "high": 0.5,
-            "medium": 0.0,
-            "low": -0.5,
-        }
-        mu_tier += fundraising_bonuses.get(cand.get("fundraising_tier", "medium"), 0.0)
+        raw_endorsements = str(cand.get("endorsements", ""))
+        endorsement_count = len([e for e in raw_endorsements.split("|") if e.strip()])
+        mu_tier += ENDORSEMENT_WEIGHT * endorsement_count
 
         w_a = 2.0
         alignment = cand["mayoral_alignment"]
