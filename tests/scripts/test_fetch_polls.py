@@ -54,3 +54,52 @@ def test_parse_share_empty(fp):
 
 def test_parse_share_small_value(fp):
     assert fp._parse_share("8%") == pytest.approx(0.08)
+
+
+from bs4 import BeautifulSoup
+
+
+def test_firm_slug_known(fp):
+    assert fp._firm_slug("Liaison Strategies") == "liaison"
+
+
+def test_firm_slug_variant(fp):
+    assert fp._firm_slug("Pallas") == "pallas"
+
+
+def test_firm_slug_unknown(fp):
+    with pytest.raises(ValueError, match="Unknown polling firm"):
+        fp._firm_slug("Mystery Pollsters Inc.")
+
+
+def test_candidate_col_names_maps_known(fp):
+    headers = ["Polling Firm", "Methodology", "Poll Date", "Sample Size", "MOE",
+               "Bradford", "Chow", "Lead"]
+    result = fp._candidate_col_names(headers)
+    assert result == {"Bradford": "bradford", "Chow": "chow"}
+
+
+def test_candidate_col_names_skips_metadata(fp):
+    headers = ["Polling Firm", "Poll Date", "MOE", "Lead"]
+    assert fp._candidate_col_names(headers) == {}
+
+
+def _make_table(headers: list[str]) -> "BeautifulSoup":
+    ths = "".join(f"<th>{h}</th>" for h in headers)
+    html = f"<table class='wikitable'><tbody><tr>{ths}</tr></tbody></table>"
+    return BeautifulSoup(html, "lxml").find("table")
+
+
+def test_is_polling_table_true(fp):
+    table = _make_table(["Polling Firm", "Methodology", "Poll Date", "Sample Size"])
+    assert fp._is_polling_table(table) is True
+
+
+def test_is_polling_table_false_missing_poll_date(fp):
+    table = _make_table(["Polling Firm", "Methodology", "Sample Size"])
+    assert fp._is_polling_table(table) is False
+
+
+def test_is_polling_table_false_non_polling(fp):
+    table = _make_table(["Candidate", "Party", "Status"])
+    assert fp._is_polling_table(table) is False

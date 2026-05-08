@@ -88,3 +88,38 @@ def _parse_share(s: str) -> float | None:
         return round(float(s) / 100, 4)
     except ValueError as exc:
         raise ValueError(f"Unparseable share value: {s!r}") from exc
+
+
+def _cell_text(cell) -> str:
+    """Extract plain text from a BeautifulSoup td/th cell."""
+    return cell.get_text(strip=True)
+
+
+def _firm_slug(firm: str) -> str:
+    """Map a Wikipedia firm name to its poll_id slug."""
+    firm = firm.strip()
+    if firm not in FIRM_SLUG:
+        raise ValueError(
+            f"Unknown polling firm: {firm!r}. Add it to FIRM_SLUG in fetch_polls.py."
+        )
+    return FIRM_SLUG[firm]
+
+
+def _candidate_col_names(headers: list[str]) -> dict[str, str]:
+    """Return {header_name: candidate_slug} for all candidate share columns.
+
+    Skips metadata and non-share columns (Polling Firm, MOE, Lead, etc.).
+    Falls back to lowercased slug for names not in CANDIDATE_SLUG.
+    """
+    result: dict[str, str] = {}
+    for h in headers:
+        if h in _SKIP_COLS:
+            continue
+        result[h] = CANDIDATE_SLUG.get(h, h.lower().replace(" ", "_"))
+    return result
+
+
+def _is_polling_table(table) -> bool:
+    """Return True if this wikitable contains polling data."""
+    headers = {_cell_text(th) for th in table.find_all("th")}
+    return "Polling Firm" in headers and "Poll Date" in headers
