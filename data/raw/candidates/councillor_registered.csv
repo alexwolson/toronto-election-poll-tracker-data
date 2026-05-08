@@ -1,4 +1,5 @@
 ward,first_name,last_name,status,date_nomination
+1,Abraham,Abbey,Active,2026-05-08
 1,Ala'a,Adib,Active,2026-05-01
 1,Saima,Babar,Active,2026-05-01
 2,Jennifer,Alexander,Active,2026-05-01
@@ -11,12 +12,14 @@ ward,first_name,last_name,status,date_nomination
 5,Chiara,Padovani,Active,2026-05-01
 7,Amanda,Coombs,Active,2026-05-01
 8,Mike,Colle,Active,2026-05-01
+8,Jason,McDonald,Active,2026-05-07
 8,Daniel,Trayes,Active,2026-05-01
 10,Paul,Nash,Active,2026-05-01
 11,Gabriel,Blanc,Active,2026-05-01
 11,Keenan,Courtis,Active,2026-05-01
 11,Terri,Hawkes,Active,2026-05-01
 11,Alice,Li,Active,2026-05-04
+11,Huy,Lieu,Active,2026-05-07
 13,Joe,Cadeau,Active,2026-05-06
 13,Walied,Khogali Ali,Active,2026-05-01
 13,Curran,Stikuts,Active,2026-05-01
@@ -28,6 +31,8 @@ ward,first_name,last_name,status,date_nomination
 19,Tycen,Legg,Active,2026-05-01
 19,Kevin,Morrison,Active,2026-05-05
 19,Adam,Smith,Active,2026-05-01
+19,Austin,Vieira,Active,2026-05-07
+19,Jeff,Wahl,Active,2026-05-08
 20,Ariel-Rachel,Karokis,Active,2026-05-01
 20,Philip,Mills,Active,2026-05-01
 21,Krissan,Veerasingam,Active,2026-05-01
