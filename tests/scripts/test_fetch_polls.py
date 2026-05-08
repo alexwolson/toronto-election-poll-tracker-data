@@ -377,3 +377,25 @@ def test_parse_date_day_first_format(fp):
 
 def test_parse_share_dash_n_slash_a(fp):
     assert fp._parse_share("—N/a") is None
+
+
+def test_is_polling_table_skips_section_header_row(fp):
+    from bs4 import BeautifulSoup
+    html = """<html><body><table class="wikitable"><tbody>
+    <tr><th colspan="8">Head-to-head matchups</th></tr>
+    <tr><th>Polling Firm</th><th>Poll Date</th><th>Sample Size</th><th>MOE</th><th>Bradford</th><th>Chow</th><th>Lead</th></tr>
+    <tr><td>Pallas Data</td><td>March 8, 2026</td><td>735</td><td>±3.6%</td><td>38%</td><td>47%</td><td>9</td></tr>
+    </tbody></table></body></html>"""
+    table = BeautifulSoup(html, "lxml").find("table")
+    assert fp._is_polling_table(table) is True
+
+
+def test_parse_table_firm_name_normalised_from_alias(fp):
+    from bs4 import BeautifulSoup
+    # Wikipedia uses "Pallas" (alias) in some tables; should normalise to "Pallas Data"
+    html = """<html><body><table class="wikitable"><tbody>
+    <tr><th>Polling Firm</th><th>Poll Date</th><th>Sample Size</th><th>MOE</th><th>Bradford</th><th>Chow</th><th>Lead</th></tr>
+    <tr><td>Pallas</td><td>March 8, 2026</td><td>735</td><td>±3.6%</td><td>38%</td><td>47%</td><td>9</td></tr>
+    </tbody></table></body></html>"""
+    rows = fp.parse_polls(html)
+    assert rows[0]["firm"] == "Pallas Data"

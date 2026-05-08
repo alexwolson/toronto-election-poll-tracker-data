@@ -46,6 +46,16 @@ FIRM_SLUG: dict[str, str] = {
     "Abacus": "abacus",
 }
 
+FIRM_DISPLAY_NAME: dict[str, str] = {
+    "liaison": "Liaison Strategies",
+    "pallas": "Pallas Data",
+    "mainstreet": "Mainstreet Research",
+    "canadapulse": "Canada Pulse Insights/CityNews",
+    "forum": "Forum Research",
+    "ipsos": "Ipsos",
+    "abacus": "Abacus Data",
+}
+
 CANDIDATE_SLUG: dict[str, str] = {
     # Short-name form (used in test fixtures)
     "Bailão": "bailao",
@@ -163,11 +173,14 @@ def _is_polling_table(table) -> bool:
     """Return True if this wikitable contains polling data."""
     for tr in table.find_all("tr"):
         ths = tr.find_all("th")
-        if ths:
-            headers = {_cell_text(th) for th in ths}
-            has_firm = bool(headers & set(_FIRM_HEADER_VARIANTS))
-            has_date = bool(headers & set(_DATE_HEADER_VARIANTS))
-            return has_firm and has_date
+        if not ths:
+            continue
+        headers = {_cell_text(th) for th in ths}
+        if not (headers & _KNOWN_HEADER_COLS):
+            continue  # colspan section header row — skip
+        has_firm = bool(headers & set(_FIRM_HEADER_VARIANTS))
+        has_date = bool(headers & set(_DATE_HEADER_VARIANTS))
+        return has_firm and has_date
     return False
 
 
@@ -216,6 +229,7 @@ def _parse_table(table) -> list[dict]:
             continue
 
         slug = _firm_slug(firm)
+        firm = FIRM_DISPLAY_NAME[slug]  # normalise to canonical display name
         date_str = _resolve_header(row_data, _DATE_HEADER_VARIANTS)
         date = _parse_date(date_str)
 
