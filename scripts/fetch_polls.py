@@ -240,6 +240,14 @@ def _parse_table(table) -> list[dict]:
             except ValueError:
                 shares[cand_slug] = None
 
+        # Normalize if shares sum slightly above 1.0 due to Wikipedia rounding artifacts
+        total = sum(v for v in shares.values() if v is not None)
+        if total > 1.0:
+            shares = {
+                k: (round(v / total, 4) if v is not None else None)
+                for k, v in shares.items()
+            }
+
         field_tested = ",".join(sorted(s for s, v in shares.items() if v is not None))
 
         if is_head_to_head:
