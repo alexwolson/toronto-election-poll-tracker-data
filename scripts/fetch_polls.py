@@ -298,7 +298,7 @@ def write_output(rows: list[dict], output_dir: Path) -> None:
 
     sidecar_path = output_dir / "polls.json"
     sidecar_path.write_text(
-        json.dumps({"fetched_at": datetime.now(timezone.utc).isoformat()}, indent=2),
+        json.dumps({"fetched_at": datetime.now(timezone.utc).isoformat()}, indent=2) + "\n",
         encoding="utf-8",
     )
     print(f"  Written: {sidecar_path}")

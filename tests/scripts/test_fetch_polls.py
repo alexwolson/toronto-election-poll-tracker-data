@@ -340,3 +340,40 @@ def test_write_output_only_present_candidate_cols(fp, tmp_path):
     assert "chow" in df.columns
     # bailao not in MINIMAL_ROWS — should be absent from CSV
     assert "bailao" not in df.columns
+
+
+LIVE_WP_HTML = """
+<html><body>
+<table class="wikitable"><tbody>
+<tr>
+<th>Polling firm</th><th>Source</th><th>Date of poll</th>
+<th>Sample size</th><th>MOE</th>
+<th>Olivia Chow</th><th>Brad Bradford</th><th>Anthony Furey</th><th>Lead</th>
+</tr>
+<tr>
+<td>Liaison Strategies</td><td>IVR</td><td>13 April 2026</td>
+<td>1000</td><td>±3.1%</td><td>46%</td><td>35%</td><td>11%</td><td>11</td>
+</tr>
+</tbody></table>
+</body></html>"""
+
+
+def test_parse_polls_live_wikipedia_headers(fp):
+    rows = fp.parse_polls(LIVE_WP_HTML)
+    assert len(rows) == 1
+    assert rows[0]["poll_id"] == "liaison-2026-04-13"
+    assert rows[0]["chow"] == pytest.approx(0.46)
+    assert rows[0]["methodology"] == "IVR"
+
+
+def test_parse_polls_live_date_format(fp):
+    rows = fp.parse_polls(LIVE_WP_HTML)
+    assert rows[0]["date_conducted"] == "2026-04-13"
+
+
+def test_parse_date_day_first_format(fp):
+    assert fp._parse_date("13 April 2026") == "2026-04-13"
+
+
+def test_parse_share_dash_n_slash_a(fp):
+    assert fp._parse_share("—N/a") is None
