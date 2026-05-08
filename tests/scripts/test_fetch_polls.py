@@ -103,3 +103,18 @@ def test_is_polling_table_false_missing_poll_date(fp):
 def test_is_polling_table_false_non_polling(fp):
     table = _make_table(["Candidate", "Party", "Status"])
     assert fp._is_polling_table(table) is False
+
+
+def test_candidate_col_names_skips_empty_headers(fp):
+    headers = ["Polling Firm", "Poll Date", "", "Chow"]
+    result = fp._candidate_col_names(headers)
+    assert "" not in result
+    assert result == {"Chow": "chow"}
+
+
+def test_cell_text_strips_footnotes(fp):
+    from bs4 import BeautifulSoup as BS4
+
+    html = "<td>Poll Date<sup>[a]</sup></td>"
+    cell = BS4(html, "lxml").find("td")
+    assert fp._cell_text(cell) == "Poll Date"

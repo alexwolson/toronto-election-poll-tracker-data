@@ -15,6 +15,7 @@ Run: uv run scripts/fetch_polls.py
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -91,8 +92,9 @@ def _parse_share(s: str) -> float | None:
 
 
 def _cell_text(cell) -> str:
-    """Extract plain text from a BeautifulSoup td/th cell."""
-    return cell.get_text(strip=True)
+    """Extract plain text from a BeautifulSoup td/th cell, stripping footnote markers."""
+    text = cell.get_text(strip=True)
+    return re.sub(r"\[.*?\]", "", text).strip()
 
 
 def _firm_slug(firm: str) -> str:
@@ -113,6 +115,8 @@ def _candidate_col_names(headers: list[str]) -> dict[str, str]:
     """
     result: dict[str, str] = {}
     for h in headers:
+        if not h.strip():
+            continue
         if h in _SKIP_COLS:
             continue
         result[h] = CANDIDATE_SLUG.get(h, h.lower().replace(" ", "_"))
@@ -121,5 +125,9 @@ def _candidate_col_names(headers: list[str]) -> dict[str, str]:
 
 def _is_polling_table(table) -> bool:
     """Return True if this wikitable contains polling data."""
-    headers = {_cell_text(th) for th in table.find_all("th")}
-    return "Polling Firm" in headers and "Poll Date" in headers
+    for tr in table.find_all("tr"):
+        ths = tr.find_all("th")
+        if ths:
+            headers = {_cell_text(th) for th in ths}
+            return "Polling Firm" in headers and "Poll Date" in headers
+    return False
