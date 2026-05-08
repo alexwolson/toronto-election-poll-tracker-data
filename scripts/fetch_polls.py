@@ -47,6 +47,7 @@ FIRM_SLUG: dict[str, str] = {
 }
 
 CANDIDATE_SLUG: dict[str, str] = {
+    # Short-name form (used in test fixtures)
     "Bailão": "bailao",
     "Bradford": "bradford",
     "Chow": "chow",
@@ -56,6 +57,14 @@ CANDIDATE_SLUG: dict[str, str] = {
     "Tory": "tory",
     "Other": "other",
     "Undecided": "undecided",
+    # Full-name form (used on live Wikipedia)
+    "Ana Bailão": "bailao",
+    "Brad Bradford": "bradford",
+    "Olivia Chow": "chow",
+    "Anthony Furey": "furey",
+    "Michael Ford": "ford",
+    "Marco Mendicino": "mendicino",
+    "John Tory": "tory",
 }
 
 METADATA_COLS = [
@@ -66,22 +75,48 @@ ALL_CANDIDATE_COLS = [
     "bailao", "bradford", "chow", "furey", "ford",
     "mendicino", "tory", "other", "undecided",
 ]
-_SKIP_COLS = frozenset({"Polling Firm", "Methodology", "Poll Date", "Sample Size", "MOE", "Lead"})
-_KNOWN_HEADER_COLS = frozenset({"Polling Firm", "Poll Date", "Sample Size", "Methodology"})
+# Columns to skip when collecting candidate share columns — both fixture and live forms
+_SKIP_COLS = frozenset({
+    # Test fixture header names
+    "Polling Firm", "Methodology", "Poll Date", "Sample Size", "MOE", "Lead",
+    # Live Wikipedia header names
+    "Polling firm", "Source", "Date of poll", "Sample size",
+})
+# Columns that indicate a header row — both fixture and live forms
+_KNOWN_HEADER_COLS = frozenset({
+    "Polling Firm", "Poll Date", "Sample Size", "Methodology",
+    "Polling firm", "Date of poll", "Sample size", "Source",
+})
+# Maps header name → row_data key for firm column (case variants)
+_FIRM_HEADER_VARIANTS = ("Polling Firm", "Polling firm")
+# Maps header name → row_data key for date column (case variants)
+_DATE_HEADER_VARIANTS = ("Poll Date", "Date of poll")
+# Maps header name → row_data key for sample size column
+_SAMPLE_HEADER_VARIANTS = ("Sample Size", "Sample size")
+# Maps header name → row_data key for methodology column
+_METHODOLOGY_HEADER_VARIANTS = ("Methodology", "Source")
+# Sentinel texts in the Polling Firm column that identify non-data rows
+_NON_DATA_FIRM_TEXTS = frozenset({"Polling firm", "Polling Firm"})
 
 
 def _parse_date(s: str) -> str:
-    """Convert 'April 13, 2026' to '2026-04-13'."""
-    try:
-        return datetime.strptime(s.strip(), "%B %d, %Y").strftime("%Y-%m-%d")
-    except ValueError as exc:
-        raise ValueError(f"Unparseable poll date: {s!r}") from exc
+    """Convert 'April 13, 2026' or '13 April 2026' to '2026-04-13'."""
+    s = s.strip()
+    for fmt in ("%B %d, %Y", "%d %B %Y"):
+        try:
+            return datetime.strptime(s, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            pass
+    raise ValueError(f"Unparseable poll date: {s!r}")
 
 
 def _parse_share(s: str) -> float | None:
-    """Convert '46%' to 0.46; '—' or '' to None."""
+    """Convert '46%' to 0.46; '—', '–', '—N/a', or '' to None."""
     s = s.strip()
-    if not s or s in {"—", "–"}:  # U+2014 em-dash, U+2013 en-dash
+    if not s:
+        return None
+    # em-dash / en-dash, with or without trailing text (e.g. '—N/a')
+    if s.startswith(("—", "–")):
         return None
     s = s.rstrip("%").strip()
     if not s:
@@ -130,7 +165,9 @@ def _is_polling_table(table) -> bool:
         ths = tr.find_all("th")
         if ths:
             headers = {_cell_text(th) for th in ths}
-            return "Polling Firm" in headers and "Poll Date" in headers
+            has_firm = bool(headers & set(_FIRM_HEADER_VARIANTS))
+            has_date = bool(headers & set(_DATE_HEADER_VARIANTS))
+            return has_firm and has_date
     return False
 
 
@@ -138,6 +175,14 @@ def _normalise_methodology(s: str) -> str:
     """Lowercase methodology; preserve IVR as uppercase acronym."""
     low = s.lower()
     return "IVR" if low == "ivr" else low
+
+
+def _resolve_header(row_data: dict, variants: tuple[str, ...], default: str = "") -> str:
+    """Return first matching value from row_data given a list of header name variants."""
+    for v in variants:
+        if v in row_data:
+            return row_data[v]
+    return default
 
 
 def _parse_table(table) -> list[dict]:
@@ -166,12 +211,13 @@ def _parse_table(table) -> list[dict]:
             continue  # rowspan artifact — cell count doesn't match headers
         row_data = dict(zip(headers, cell_texts))
 
-        firm = row_data.get("Polling Firm", "").strip()
-        if not firm:
+        firm = _resolve_header(row_data, _FIRM_HEADER_VARIANTS).strip()
+        if not firm or firm in _NON_DATA_FIRM_TEXTS:
             continue
 
         slug = _firm_slug(firm)
-        date = _parse_date(row_data["Poll Date"])
+        date_str = _resolve_header(row_data, _DATE_HEADER_VARIANTS)
+        date = _parse_date(date_str)
 
         shares: dict[str, float | None] = {}
         for h, cand_slug in cand_map.items():
@@ -188,8 +234,10 @@ def _parse_table(table) -> list[dict]:
         else:
             poll_id = f"{slug}-{date}"
 
-        raw_n = row_data.get("Sample Size", "").replace(",", "").strip()
+        raw_n = _resolve_header(row_data, _SAMPLE_HEADER_VARIANTS).replace(",", "").strip()
         sample_size = int(raw_n) if raw_n.isdigit() else None
+
+        methodology_raw = _resolve_header(row_data, _METHODOLOGY_HEADER_VARIANTS).strip()
 
         rows.append({
             "poll_id": poll_id,
@@ -197,7 +245,7 @@ def _parse_table(table) -> list[dict]:
             "date_conducted": date,
             "date_published": date,
             "sample_size": sample_size,
-            "methodology": _normalise_methodology(row_data.get("Methodology", "").strip()),
+            "methodology": _normalise_methodology(methodology_raw),
             "field_tested": field_tested,
             **shares,
             "notes": "",
@@ -232,3 +280,50 @@ def parse_polls(html: str) -> list[dict]:
         )
 
     return all_rows
+
+
+def write_output(rows: list[dict], output_dir: Path) -> None:
+    """Write polls.csv and polls.json sidecar to output_dir."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    seen_cands = {c for row in rows for c in row if c not in set(METADATA_COLS + ["notes"])}
+    ordered_cands = [c for c in ALL_CANDIDATE_COLS if c in seen_cands]
+    extra_cands = sorted(c for c in seen_cands if c not in ALL_CANDIDATE_COLS)
+    cols = METADATA_COLS + ordered_cands + extra_cands + ["notes"]
+
+    df = pd.DataFrame(rows, columns=cols)
+    csv_path = output_dir / "polls.csv"
+    df.to_csv(csv_path, index=False)
+    print(f"  Written: {csv_path} ({len(df)} rows)")
+
+    sidecar_path = output_dir / "polls.json"
+    sidecar_path.write_text(
+        json.dumps({"fetched_at": datetime.now(timezone.utc).isoformat()}, indent=2),
+        encoding="utf-8",
+    )
+    print(f"  Written: {sidecar_path}")
+
+
+def fetch_html() -> str:
+    """Fetch Wikipedia page HTML via the Wikimedia REST API."""
+    r = requests.get(
+        WIKIPEDIA_URL,
+        headers={"User-Agent": USER_AGENT},
+        timeout=30,
+    )
+    r.raise_for_status()
+    return r.text
+
+
+def main() -> None:
+    print("Fetching Wikipedia polling page...")
+    html = fetch_html()
+    print("Parsing polling tables...")
+    rows = parse_polls(html)
+    print(f"Found {len(rows)} polls")
+    write_output(rows, OUTPUT_DIR)
+    print("Done.")
+
+
+if __name__ == "__main__":
+    main()

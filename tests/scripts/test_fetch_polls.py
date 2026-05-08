@@ -270,3 +270,73 @@ def test_parse_table_skips_mismatched_rows(fp):
     </tbody></table></body></html>"""
     rows = fp.parse_polls(html)
     assert len(rows) == 1  # second row skipped due to cell count mismatch
+
+
+import json
+import pandas as pd
+
+
+MINIMAL_ROWS = [
+    {
+        "poll_id": "liaison-2026-04-13",
+        "firm": "Liaison Strategies",
+        "date_conducted": "2026-04-13",
+        "date_published": "2026-04-13",
+        "sample_size": 1000,
+        "methodology": "IVR",
+        "field_tested": "bradford,chow,furey",
+        "bradford": 0.35,
+        "chow": 0.46,
+        "furey": 0.11,
+        "notes": "",
+    }
+]
+
+
+def test_write_output_creates_csv(fp, tmp_path):
+    fp.write_output(MINIMAL_ROWS, tmp_path)
+    assert (tmp_path / "polls.csv").exists()
+
+
+def test_write_output_csv_content(fp, tmp_path):
+    fp.write_output(MINIMAL_ROWS, tmp_path)
+    df = pd.read_csv(tmp_path / "polls.csv")
+    assert len(df) == 1
+    assert df.iloc[0]["poll_id"] == "liaison-2026-04-13"
+    assert df.iloc[0]["chow"] == pytest.approx(0.46)
+
+
+def test_write_output_csv_has_notes_column(fp, tmp_path):
+    fp.write_output(MINIMAL_ROWS, tmp_path)
+    df = pd.read_csv(tmp_path / "polls.csv")
+    assert "notes" in df.columns
+
+
+def test_write_output_sidecar_created(fp, tmp_path):
+    fp.write_output(MINIMAL_ROWS, tmp_path)
+    assert (tmp_path / "polls.json").exists()
+
+
+def test_write_output_sidecar_has_fetched_at(fp, tmp_path):
+    fp.write_output(MINIMAL_ROWS, tmp_path)
+    data = json.loads((tmp_path / "polls.json").read_text())
+    assert "fetched_at" in data
+
+
+def test_write_output_column_order(fp, tmp_path):
+    fp.write_output(MINIMAL_ROWS, tmp_path)
+    df = pd.read_csv(tmp_path / "polls.csv")
+    cols = list(df.columns)
+    assert cols[0] == "poll_id"
+    assert cols[1] == "firm"
+    assert cols[-1] == "notes"
+
+
+def test_write_output_only_present_candidate_cols(fp, tmp_path):
+    fp.write_output(MINIMAL_ROWS, tmp_path)
+    df = pd.read_csv(tmp_path / "polls.csv")
+    # MINIMAL_ROWS only has bradford, chow, furey
+    assert "bradford" in df.columns
+    assert "chow" in df.columns
+    # bailao not in MINIMAL_ROWS — should be absent from CSV
+    assert "bailao" not in df.columns
