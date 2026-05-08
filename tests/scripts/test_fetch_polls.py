@@ -252,3 +252,21 @@ def test_parse_polls_duplicate_id_raises(fp):
 def test_parse_polls_no_tables_raises(fp):
     with pytest.raises(RuntimeError, match="No polling tables found"):
         fp.parse_polls(EMPTY_HTML)
+
+
+def test_parse_polls_methodology_ivr_preserved(fp):
+    rows = fp.parse_polls(FIXTURE_HTML)
+    row = next(r for r in rows if r["poll_id"] == "liaison-2026-04-13")
+    assert row["methodology"] == "IVR"
+
+
+def test_parse_table_skips_mismatched_rows(fp):
+    from bs4 import BeautifulSoup
+    # Table where second data row has one fewer cell (rowspan artifact)
+    html = """<html><body><table class="wikitable"><tbody>
+    <tr><th>Polling Firm</th><th>Poll Date</th><th>Sample Size</th><th>MOE</th><th>Bradford</th><th>Chow</th><th>Lead</th></tr>
+    <tr><td>Liaison Strategies</td><td>April 13, 2026</td><td>1000</td><td>±3.1%</td><td>35%</td><td>46%</td><td>11</td></tr>
+    <tr><td>April 13, 2026</td><td>500</td><td>±4.4%</td><td>28%</td><td>40%</td><td>12</td></tr>
+    </tbody></table></body></html>"""
+    rows = fp.parse_polls(html)
+    assert len(rows) == 1  # second row skipped due to cell count mismatch

@@ -67,6 +67,7 @@ ALL_CANDIDATE_COLS = [
     "mendicino", "tory", "other", "undecided",
 ]
 _SKIP_COLS = frozenset({"Polling Firm", "Methodology", "Poll Date", "Sample Size", "MOE", "Lead"})
+_KNOWN_HEADER_COLS = frozenset({"Polling Firm", "Poll Date", "Sample Size", "Methodology"})
 
 
 def _parse_date(s: str) -> str:
@@ -133,6 +134,12 @@ def _is_polling_table(table) -> bool:
     return False
 
 
+def _normalise_methodology(s: str) -> str:
+    """Lowercase methodology; preserve IVR as uppercase acronym."""
+    low = s.lower()
+    return "IVR" if low == "ivr" else low
+
+
 def _parse_table(table) -> list[dict]:
     """Parse one polling wikitable into a list of poll row dicts."""
     # Extract headers from the first <tr> containing <th> elements
@@ -140,8 +147,10 @@ def _parse_table(table) -> list[dict]:
     for tr in table.find_all("tr"):
         ths = tr.find_all("th")
         if ths:
-            headers = [_cell_text(th) for th in ths]
-            break
+            candidate_texts = [_cell_text(th) for th in ths]
+            if any(t in _KNOWN_HEADER_COLS for t in candidate_texts):
+                headers = candidate_texts
+                break
 
     cand_map = _candidate_col_names(headers)
     is_head_to_head = len(cand_map) == 2
@@ -152,7 +161,10 @@ def _parse_table(table) -> list[dict]:
         if len(cells) < 4:
             continue  # header row or too short
 
-        row_data = dict(zip(headers, [_cell_text(c) for c in cells]))
+        cell_texts = [_cell_text(c) for c in cells]
+        if len(cell_texts) != len(headers):
+            continue  # rowspan artifact — cell count doesn't match headers
+        row_data = dict(zip(headers, cell_texts))
 
         firm = row_data.get("Polling Firm", "").strip()
         if not firm:
@@ -163,7 +175,10 @@ def _parse_table(table) -> list[dict]:
 
         shares: dict[str, float | None] = {}
         for h, cand_slug in cand_map.items():
-            shares[cand_slug] = _parse_share(row_data.get(h, ""))
+            try:
+                shares[cand_slug] = _parse_share(row_data.get(h, ""))
+            except ValueError:
+                shares[cand_slug] = None
 
         field_tested = ",".join(sorted(s for s, v in shares.items() if v is not None))
 
@@ -182,7 +197,7 @@ def _parse_table(table) -> list[dict]:
             "date_conducted": date,
             "date_published": date,
             "sample_size": sample_size,
-            "methodology": row_data.get("Methodology", "").strip(),
+            "methodology": _normalise_methodology(row_data.get("Methodology", "").strip()),
             "field_tested": field_tested,
             **shares,
             "notes": "",
