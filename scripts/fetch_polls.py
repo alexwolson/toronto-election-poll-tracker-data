@@ -79,7 +79,7 @@ def _parse_date(s: str) -> str:
 def _parse_share(s: str) -> float | None:
     """Convert '46%' to 0.46; '—' or '' to None."""
     s = s.strip()
-    if not s or s == "—" or s == "—":
+    if not s or s in {"—", "–"}:  # U+2014 em-dash, U+2013 en-dash
         return None
     s = s.rstrip("%").strip()
     if not s:

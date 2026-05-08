@@ -36,12 +36,16 @@ def test_parse_share_percentage(fp):
     assert fp._parse_share("46%") == pytest.approx(0.46)
 
 
-def test_parse_share_bold_stripped(fp):
+def test_parse_share_integer_percent(fp):
     assert fp._parse_share("35%") == pytest.approx(0.35)
 
 
 def test_parse_share_em_dash(fp):
     assert fp._parse_share("—") is None
+
+
+def test_parse_share_en_dash(fp):
+    assert fp._parse_share("–") is None
 
 
 def test_parse_share_empty(fp):
