@@ -118,3 +118,137 @@ def test_cell_text_strips_footnotes(fp):
     html = "<td>Poll Date<sup>[a]</sup></td>"
     cell = BS4(html, "lxml").find("td")
     assert fp._cell_text(cell) == "Poll Date"
+
+
+FIXTURE_HTML = """
+<html><body>
+<table class="wikitable">
+<tbody>
+<tr>
+<th>Polling Firm</th><th>Methodology</th><th>Poll Date</th>
+<th>Sample Size</th><th>MOE</th>
+<th>Bradford</th><th>Chow</th><th>Furey</th><th>Lead</th>
+</tr>
+<tr>
+<td>Liaison Strategies</td><td>IVR</td><td>April 13, 2026</td>
+<td>1000</td><td>±3.1%</td>
+<td>35%</td><td>46%</td><td>11%</td><td>11</td>
+</tr>
+<tr>
+<td>Pallas Data</td><td>IVR</td><td>March 8, 2026</td>
+<td>735</td><td>±3.6%</td>
+<td>26%</td><td>44%</td><td>—</td><td>18</td>
+</tr>
+</tbody>
+</table>
+<table class="wikitable">
+<tbody>
+<tr>
+<th>Polling Firm</th><th>Methodology</th><th>Poll Date</th>
+<th>Sample Size</th><th>MOE</th>
+<th>Bradford</th><th>Chow</th><th>Lead</th>
+</tr>
+<tr>
+<td>Pallas Data</td><td>IVR</td><td>March 8, 2026</td>
+<td>735</td><td>±3.6%</td>
+<td>38%</td><td>47%</td><td>9</td>
+</tr>
+</tbody>
+</table>
+<table class="wikitable">
+<tbody>
+<tr><th>Candidate</th><th>Party</th></tr>
+<tr><td>Someone</td><td>Independent</td></tr>
+</tbody>
+</table>
+</body></html>
+"""
+
+DUPLICATE_HTML = """
+<html><body>
+<table class="wikitable">
+<tbody>
+<tr>
+<th>Polling Firm</th><th>Methodology</th><th>Poll Date</th>
+<th>Sample Size</th><th>MOE</th><th>Bradford</th><th>Chow</th><th>Lead</th>
+</tr>
+<tr>
+<td>Liaison Strategies</td><td>IVR</td><td>April 13, 2026</td>
+<td>1000</td><td>±3.1%</td><td>35%</td><td>46%</td><td>11</td>
+</tr>
+<tr>
+<td>Liaison Strategies</td><td>IVR</td><td>April 13, 2026</td>
+<td>1000</td><td>±3.1%</td><td>35%</td><td>46%</td><td>11</td>
+</tr>
+</tbody>
+</table>
+</body></html>
+"""
+
+EMPTY_HTML = "<html><body><p>No tables here.</p></body></html>"
+
+
+def test_parse_polls_multi_candidate_count(fp):
+    rows = fp.parse_polls(FIXTURE_HTML)
+    main_rows = [r for r in rows if "v" not in r["poll_id"].split("-", 2)[-1]]
+    assert len(main_rows) == 2
+
+
+def test_parse_polls_multi_candidate_poll_id(fp):
+    rows = fp.parse_polls(FIXTURE_HTML)
+    ids = [r["poll_id"] for r in rows]
+    assert "liaison-2026-04-13" in ids
+
+
+def test_parse_polls_multi_candidate_shares(fp):
+    rows = fp.parse_polls(FIXTURE_HTML)
+    row = next(r for r in rows if r["poll_id"] == "liaison-2026-04-13")
+    assert row["chow"] == pytest.approx(0.46)
+    assert row["bradford"] == pytest.approx(0.35)
+    assert row["furey"] == pytest.approx(0.11)
+
+
+def test_parse_polls_multi_candidate_missing_share(fp):
+    rows = fp.parse_polls(FIXTURE_HTML)
+    row = next(r for r in rows if r["poll_id"] == "pallas-2026-03-08")
+    assert row["furey"] is None
+
+
+def test_parse_polls_multi_candidate_field_tested(fp):
+    rows = fp.parse_polls(FIXTURE_HTML)
+    row = next(r for r in rows if r["poll_id"] == "liaison-2026-04-13")
+    assert row["field_tested"] == "bradford,chow,furey"
+
+
+def test_parse_polls_multi_candidate_sample_size(fp):
+    rows = fp.parse_polls(FIXTURE_HTML)
+    row = next(r for r in rows if r["poll_id"] == "liaison-2026-04-13")
+    assert row["sample_size"] == 1000
+
+
+def test_parse_polls_head_to_head_poll_id(fp):
+    rows = fp.parse_polls(FIXTURE_HTML)
+    ids = [r["poll_id"] for r in rows]
+    assert "pallas-2026-03-08-bradford-v-chow" in ids
+
+
+def test_parse_polls_head_to_head_shares(fp):
+    rows = fp.parse_polls(FIXTURE_HTML)
+    row = next(r for r in rows if "bradford-v-chow" in r["poll_id"])
+    assert row["bradford"] == pytest.approx(0.38)
+    assert row["chow"] == pytest.approx(0.47)
+
+
+def test_parse_polls_skips_non_polling_table(fp):
+    rows = fp.parse_polls(FIXTURE_HTML)
+    assert len(rows) == 3  # 2 main + 1 head-to-head
+
+
+def test_parse_polls_duplicate_id_raises(fp):
+    with pytest.raises(ValueError, match="Duplicate poll_id"):
+        fp.parse_polls(DUPLICATE_HTML)
+
+
+def test_parse_polls_no_tables_raises(fp):
+    with pytest.raises(RuntimeError, match="No polling tables found"):
+        fp.parse_polls(EMPTY_HTML)
