@@ -9,11 +9,13 @@ ward,first_name,last_name,status,date_nomination
 4,Adam,Pham,Active,2026-05-01
 4,Vanessa,Raponi,Active,2026-05-01
 5,Daniel,Di Giorgio,Active,2026-05-01
+5,Nekpen,Obasogie,Active,2026-05-08
 5,Chiara,Padovani,Active,2026-05-01
 7,Amanda,Coombs,Active,2026-05-01
 8,Mike,Colle,Active,2026-05-01
 8,Jason,McDonald,Active,2026-05-07
 8,Daniel,Trayes,Active,2026-05-01
+10,Bashar,Kassir,Active,2026-05-08
 10,Paul,Nash,Active,2026-05-01
 11,Gabriel,Blanc,Active,2026-05-01
 11,Keenan,Courtis,Active,2026-05-01
@@ -35,6 +37,7 @@ ward,first_name,last_name,status,date_nomination
 19,Jeff,Wahl,Active,2026-05-08
 20,Ariel-Rachel,Karokis,Active,2026-05-01
 20,Philip,Mills,Active,2026-05-01
+21,Taiba,Ahmed,Active,2026-05-08
 21,Krissan,Veerasingam,Active,2026-05-01
 22,Dan,Lovell,Active,2026-05-01
 23,Kevin,Li,Active,2026-05-01
