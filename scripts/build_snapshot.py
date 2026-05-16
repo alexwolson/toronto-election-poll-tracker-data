@@ -124,14 +124,22 @@ def build_polls_snapshot() -> dict[str, Any]:
                 }
         return out
 
+    included_poll_ids = set(current_polls["poll_id"].tolist()) if not current_polls.empty else set()
+
     history = []
     for _, row in polls_df.sort_values("date_published", ascending=False).iterrows():
         row_field = field_candidates(row.get("field_tested"))
+        poll_id = str(row.get("poll_id", ""))
         excluded_reason = None
         if bool(row.get("_contains_declined", False)):
             excluded_reason = "declined_candidate"
-        elif len(row_field) == 2:
-            excluded_reason = "head_to_head"
+        elif poll_id not in included_poll_ids:
+            # Polls with "-v-" in their ID are Wikipedia's supplemental h2h snapshots.
+            # Other excluded polls were superseded by a better-matching scenario.
+            if "-v-" in poll_id or len(row_field) == 2:
+                excluded_reason = "head_to_head"
+            else:
+                excluded_reason = "superseded"
         history.append({
             "poll_id": str(row.get("poll_id", "")),
             "date_published": str(row.get("date_published", "")),
