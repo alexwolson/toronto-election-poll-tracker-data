@@ -91,16 +91,19 @@ _SKIP_COLS = frozenset({
     "Polling Firm", "Methodology", "Poll Date", "Sample Size", "MOE", "Lead",
     # Live Wikipedia header names
     "Polling firm", "Source", "Date of poll", "Sample size",
+    # Campaign-period table header names
+    "Polling dates",
 })
 # Columns that indicate a header row — both fixture and live forms
 _KNOWN_HEADER_COLS = frozenset({
     "Polling Firm", "Poll Date", "Sample Size", "Methodology",
     "Polling firm", "Date of poll", "Sample size", "Source",
+    "Polling dates",
 })
 # Maps header name → row_data key for firm column (case variants)
 _FIRM_HEADER_VARIANTS = ("Polling Firm", "Polling firm")
 # Maps header name → row_data key for date column (case variants)
-_DATE_HEADER_VARIANTS = ("Poll Date", "Date of poll")
+_DATE_HEADER_VARIANTS = ("Poll Date", "Date of poll", "Polling dates")
 # Maps header name → row_data key for sample size column
 _SAMPLE_HEADER_VARIANTS = ("Sample Size", "Sample size")
 # Maps header name → row_data key for methodology column
@@ -110,8 +113,15 @@ _NON_DATA_FIRM_TEXTS = frozenset({"Polling firm", "Polling Firm"})
 
 
 def _parse_date(s: str) -> str:
-    """Convert 'April 13, 2026' or '13 April 2026' to '2026-04-13'."""
+    """Convert 'April 13, 2026', '13 April 2026', or 'May 10-11, 2026' to '2026-04-13'.
+
+    For date ranges like 'May 10-11, 2026', uses the end date.
+    """
     s = s.strip()
+    # Handle ranges like "May 10-11, 2026" or "May 10 - 11, 2026" → use end date
+    range_match = re.match(r'^(\w+)\s+\d+\s*[-–]\s*(\d+),\s*(\d+)$', s)
+    if range_match:
+        s = f"{range_match.group(1)} {range_match.group(2)}, {range_match.group(3)}"
     for fmt in ("%B %d, %Y", "%d %B %Y"):
         try:
             return datetime.strptime(s, fmt).strftime("%Y-%m-%d")

@@ -399,3 +399,54 @@ def test_parse_table_firm_name_normalised_from_alias(fp):
     </tbody></table></body></html>"""
     rows = fp.parse_polls(html)
     assert rows[0]["firm"] == "Pallas Data"
+
+
+# --- Campaign period table format (new "Polling dates" header + date ranges) ---
+
+CAMPAIGN_PERIOD_HTML = """
+<html><body>
+<table class="wikitable"><tbody>
+<tr>
+<th>Polling firm</th><th>Source</th><th>Polling dates</th>
+<th>Sample size</th><th>MOE</th>
+<th>Brad Bradford</th><th>Olivia Chow</th><th>Other</th><th>Lead</th>
+</tr>
+<tr>
+<td>Liaison Strategies</td><td>IVR</td><td>May 10-11, 2026</td>
+<td>1000</td><td>± 3.1%</td>
+<td>37%</td><td>50%</td><td>13%</td><td>13</td>
+</tr>
+</tbody></table>
+</body></html>"""
+
+
+def test_parse_polls_campaign_period_recognized(fp):
+    rows = fp.parse_polls(CAMPAIGN_PERIOD_HTML)
+    assert len(rows) == 1
+
+
+def test_parse_polls_campaign_period_date(fp):
+    rows = fp.parse_polls(CAMPAIGN_PERIOD_HTML)
+    # Date range "May 10-11, 2026" → end date "2026-05-11"
+    assert rows[0]["date_conducted"] == "2026-05-11"
+
+
+def test_parse_polls_campaign_period_shares(fp):
+    rows = fp.parse_polls(CAMPAIGN_PERIOD_HTML)
+    row = rows[0]
+    assert row["bradford"] == pytest.approx(0.37)
+    assert row["chow"] == pytest.approx(0.50)
+    assert row["other"] == pytest.approx(0.13)
+
+
+def test_parse_polls_campaign_period_poll_id(fp):
+    rows = fp.parse_polls(CAMPAIGN_PERIOD_HTML)
+    assert rows[0]["poll_id"] == "liaison-2026-05-11"
+
+
+def test_parse_date_range(fp):
+    assert fp._parse_date("May 10-11, 2026") == "2026-05-11"
+
+
+def test_parse_date_range_with_spaces(fp):
+    assert fp._parse_date("May 10 - 11, 2026") == "2026-05-11"
