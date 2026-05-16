@@ -315,18 +315,38 @@ def parse_polls(html: str) -> list[dict]:
 
 
 def write_output(rows: list[dict], output_dir: Path) -> None:
-    """Write polls.csv and polls.json sidecar to output_dir."""
-    output_dir.mkdir(parents=True, exist_ok=True)
+    """Merge new Wikipedia rows with existing polls.csv and write output.
 
-    seen_cands = {c for row in rows for c in row if c not in set(METADATA_COLS + ["notes"])}
+    New polls (by poll_id) are added; polls no longer on Wikipedia are preserved
+    as historical data. Wikipedia is authoritative for poll values — if a poll_id
+    exists in both, the Wikipedia version wins.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = output_dir / "polls.csv"
+
+    incoming = pd.DataFrame(rows)
+
+    if csv_path.exists():
+        existing = pd.read_csv(csv_path)
+        # Drop any rows from existing that are being superseded by Wikipedia
+        existing = existing[~existing["poll_id"].isin(incoming["poll_id"])]
+        merged = pd.concat([existing, incoming], ignore_index=True)
+        merged = merged.sort_values("date_published", ascending=False).reset_index(drop=True)
+        new_count = len(incoming) - 0  # all incoming are either new or updates
+        print(f"  Preserved {len(existing)} historical polls, merged {len(incoming)} from Wikipedia")
+    else:
+        merged = incoming
+        print(f"  No existing polls.csv; writing {len(merged)} rows from Wikipedia")
+
+    seen_cands = {c for _, row in merged.iterrows() for c in row.index if c not in set(METADATA_COLS + ["notes"]) and pd.notna(row[c]) and row[c] != ""}
     ordered_cands = [c for c in ALL_CANDIDATE_COLS if c in seen_cands]
     extra_cands = sorted(c for c in seen_cands if c not in ALL_CANDIDATE_COLS)
     cols = METADATA_COLS + ordered_cands + extra_cands + ["notes"]
+    # Only keep columns that exist in merged
+    cols = [c for c in cols if c in merged.columns]
 
-    df = pd.DataFrame(rows, columns=cols)
-    csv_path = output_dir / "polls.csv"
-    df.to_csv(csv_path, index=False)
-    print(f"  Written: {csv_path} ({len(df)} rows)")
+    merged[cols].to_csv(csv_path, index=False)
+    print(f"  Written: {csv_path} ({len(merged)} rows total)")
 
     sidecar_path = output_dir / "polls.json"
     sidecar_path.write_text(
