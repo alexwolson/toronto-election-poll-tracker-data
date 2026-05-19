@@ -7,6 +7,7 @@ ward,first_name,last_name,status,date_nomination
 2,Jennifer,Alexander,Active,2026-05-01
 4,Nadia,Guerrera,Active,2026-05-01
 4,Diana Chan,McNally,Active,2026-05-01
+4,Jonathan,Nikolaou,Active,2026-05-19
 4,Bridget,Ogundipe,Active,2026-05-05
 4,Adam,Pham,Active,2026-05-01
 4,Vanessa,Raponi,Active,2026-05-01
@@ -50,5 +51,6 @@ ward,first_name,last_name,status,date_nomination
 21,Krissan,Veerasingam,Active,2026-05-01
 22,Dan,Lovell,Active,2026-05-01
 23,Kevin,Li,Active,2026-05-01
+23,Jamaal,Myers,Active,2026-05-19
 25,Shawn,Allen,Active,2026-05-01
 25,Jannette,Lumley,Active,2026-05-15
