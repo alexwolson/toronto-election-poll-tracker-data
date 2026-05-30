@@ -6,6 +6,7 @@ ward,first_name,last_name,status,date_nomination
 1,Norman,Hamilton,Active,2026-05-12
 2,Jennifer,Alexander,Active,2026-05-01
 4,Nadia,Guerrera,Active,2026-05-01
+4,Debbie,King,Active,2026-05-29
 4,Diana Chan,McNally,Active,2026-05-01
 4,Jonathan,Nikolaou,Active,2026-05-19
 4,Bridget,Ogundipe,Active,2026-05-05
@@ -39,10 +40,11 @@ ward,first_name,last_name,status,date_nomination
 13,Walied,Khogali Ali,Active,2026-05-01
 13,Curran,Stikuts,Active,2026-05-01
 13,Nicki,Ward,Active,2026-05-01
+14,Jason,Stevens,Active,2026-05-29
 17,Shelley,Carroll,Active,2026-05-04
 17,Gregory,Rodriguez,Active,2026-05-27
 17,Sabrina,Zuniga,Active,2026-05-01
-18,Natik,Yusifov,Active,2026-05-01
+18,Nathan,Yusifov,Active,2026-05-01
 18,Ardeshir,Zarezade,Active,2026-05-25
 19,James,Dann,Active,2026-05-01
 19,Natalie,Johnson,Active,2026-05-11
