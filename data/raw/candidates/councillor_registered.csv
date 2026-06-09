@@ -5,6 +5,7 @@ ward,first_name,last_name,status,date_nomination
 1,Vincent,Crisanti,Active,2026-05-12
 1,Norman,Hamilton,Active,2026-05-12
 2,Jennifer,Alexander,Active,2026-05-01
+3,Ted,Opitz,Active,2026-06-09
 4,Nadia,Guerrera,Active,2026-05-01
 4,Debbie,King,Active,2026-05-29
 4,Diana Chan,McNally,Active,2026-05-01
@@ -14,6 +15,7 @@ ward,first_name,last_name,status,date_nomination
 5,Daniel,Di Giorgio,Active,2026-05-01
 5,Nekpen,Obasogie,Active,2026-05-08
 5,Chiara,Padovani,Active,2026-05-01
+6,Conroy,Irving,Active,2026-06-08
 6,James,Pasternak,Active,2026-05-25
 7,Lorna,Antwi,Active,2026-05-11
 7,Amanda,Coombs,Active,2026-05-01
