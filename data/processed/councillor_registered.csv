@@ -12,6 +12,7 @@ ward,first_name,last_name,status,date_nomination
 4,Bridget,Ogundipe,Active,2026-05-05
 4,Adam,Pham,Active,2026-05-01
 4,Vanessa,Raponi,Active,2026-05-01
+4,Holly,Weber,Active,2026-06-09
 5,Daniel,Di Giorgio,Active,2026-05-01
 5,Nekpen,Obasogie,Active,2026-05-08
 5,Chiara,Padovani,Active,2026-05-01
@@ -36,6 +37,7 @@ ward,first_name,last_name,status,date_nomination
 11,Huy,Lieu,Active,2026-05-07
 11,Diana,Yoon,Active,2026-05-20
 12,Joshua,Kishner,Active,2026-06-01
+12,Mina,Nadimi,Active,2026-06-10
 13,Joe,Cadeau,Active,2026-05-06
 13,Tom,Cai,Active,2026-05-14
 13,Victoria,Davis,Active,2026-05-26
@@ -60,6 +62,7 @@ ward,first_name,last_name,status,date_nomination
 19,Adam,Smith,Active,2026-05-01
 19,Austin,Vieira,Active,2026-05-07
 19,Jeff,Wahl,Active,2026-05-08
+19,Devin,Wilkins,Active,2026-06-09
 19,Jennie,Worden,Active,2026-05-21
 20,Malik,Ahmad,Active,2026-05-15
 20,Ariel-Rachel,Karokis,Active,2026-05-01
