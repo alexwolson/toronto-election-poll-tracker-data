@@ -7,6 +7,7 @@ ward,first_name,last_name,status,date_nomination
 2,Jennifer,Alexander,Active,2026-05-01
 3,Anthony,Internicola,Active,2026-06-11
 3,Ted,Opitz,Active,2026-06-09
+4,Michael,Corcoran,Active,2026-06-19
 4,Nadia,Guerrera,Active,2026-05-01
 4,Debbie,King,Active,2026-05-29
 4,Diana Chan,McNally,Active,2026-05-01
@@ -84,6 +85,7 @@ ward,first_name,last_name,status,date_nomination
 22,Madhuri,Azad,Active,2026-05-19
 22,Jackson,Ho,Active,2026-06-12
 22,Dan,Lovell,Active,2026-05-01
+22,Donny,Morgan,Active,2026-06-19
 23,Han,Dong,Active,2026-06-17
 23,Kevin,Li,Active,2026-05-01
 23,Jamaal,Myers,Active,2026-05-19
