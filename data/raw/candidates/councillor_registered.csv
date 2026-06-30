@@ -44,6 +44,7 @@ ward,first_name,last_name,status,date_nomination
 11,Alice,Li,Active,2026-05-04
 11,Huy,Lieu,Active,2026-05-07
 11,Gian,Pileri,Active,2026-06-11
+11,Dianne,Saxe,Active,2026-06-29
 11,Diana,Yoon,Active,2026-05-20
 12,Jenny,Kalimbet,Active,2026-06-17
 12,Joshua,Kishner,Active,2026-06-01
@@ -66,6 +67,7 @@ ward,first_name,last_name,status,date_nomination
 17,Sabrina,Zuniga,Active,2026-05-01
 18,Nathan,Yusifov,Active,2026-05-01
 18,Ardeshir,Zarezade,Active,2026-05-25
+19,Jaana Syeda,Ali,Active,2026-06-30
 19,James,Dann,Active,2026-05-01
 19,Natalie,Johnson,Active,2026-05-11
 19,Tycen,Legg,Active,2026-05-01
