@@ -73,11 +73,54 @@ def test_compute_current_h2h_chow_uses_bradford_matchup_only():
 
 
 def test_compute_current_approval_reflects_recent_data():
-    """Approval weighted average should be close to most recent data (Jan 2026: 55/38/7)."""
+    """Approval weighted average must track the newest readings, not the
+    dormant 2023-25 Liaison backlog (June 2026 Mainstreet: 41/56/3)."""
     from backend.model.pool import compute_current_approval
     result = compute_current_approval(_load_approval())
-    assert 0.50 <= result["approve"] <= 0.60, f"approve={result['approve']:.3f}"
-    assert 0.33 <= result["disapprove"] <= 0.45, f"disapprove={result['disapprove']:.3f}"
+    assert 0.38 <= result["approve"] <= 0.50, f"approve={result['approve']:.3f}"
+    assert 0.45 <= result["disapprove"] <= 0.60, f"disapprove={result['disapprove']:.3f}"
+
+
+# --- exponential decay weights (dormant-series behaviour) ---
+
+def test_decay_weights_fresh_reading_outweighs_dormant_backlog():
+    """One fresh reading must outweigh 30 stale monthly rows combined —
+    the harmonic-rank weighting regression this replaces."""
+    from backend.model.pool import _decay_weights, APPROVAL_HALF_LIFE_DAYS
+    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    stale = pd.date_range("2023-06-01", "2025-11-01", freq="MS").strftime("%Y-%m-%d").tolist()
+    dates = pd.Series(stale + ["2026-06-18"])
+    weights = _decay_weights(dates, APPROVAL_HALF_LIFE_DAYS, ref)
+    assert weights.iloc[-1] > weights.iloc[:-1].sum()
+
+
+def test_decay_weights_halve_per_half_life():
+    from backend.model.pool import _decay_weights
+    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    dates = pd.Series(["2026-07-01", "2026-06-01"])  # 0 and 30 days old
+    weights = _decay_weights(dates, 30.0, ref)
+    assert abs(weights.iloc[0] - 1.0) < 1e-9
+    assert abs(weights.iloc[1] - 0.5) < 1e-9
+
+
+def test_decay_weights_nan_dates_get_zero():
+    from backend.model.pool import _decay_weights
+    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    weights = _decay_weights(pd.Series(["2026-07-01", None]), 30.0, ref)
+    assert weights.iloc[1] == 0.0
+
+
+def test_compute_current_approval_dormant_series_tracks_fresh_reading():
+    """Synthetic: a year of 55/38 monthly rows gone dormant, then one 41/56
+    reading two weeks ago — the estimate must land near the fresh reading."""
+    from backend.model.pool import compute_current_approval
+    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    months = pd.date_range("2025-02-01", "2026-01-01", freq="MS").strftime("%Y-%m-%d")
+    rows = [{"date": d, "approve": 0.55, "disapprove": 0.38, "not_sure": 0.07} for d in months]
+    rows.append({"date": "2026-06-18", "approve": 0.408, "disapprove": 0.560, "not_sure": 0.032})
+    result = compute_current_approval(pd.DataFrame(rows), ref)
+    assert result["approve"] < 0.46, f"approve={result['approve']:.3f} - stale rows still dominating"
+    assert result["disapprove"] > 0.50, f"disapprove={result['disapprove']:.3f}"
 
 
 def test_compute_candidate_capture_rates_has_bradford():
@@ -91,7 +134,7 @@ def test_compute_candidate_capture_rates_has_bradford():
 def test_compute_pool_model_returns_all_required_keys():
     from backend.model.pool import compute_pool_model
     result = compute_pool_model(_load_polls(), _load_approval())
-    assert result["phase_mode"] == "pre_nomination"
+    assert result["phase_mode"] in ("pre_nomination", "post_nomination")
     for key in ("chow_floor", "chow_ceiling", "anti_chow_pool",
                 "protective_progressive_activated", "protective_progressive_reserve"):
         assert key in result["pool"], f"Missing pool key: {key}"
@@ -108,6 +151,36 @@ def test_pool_model_floor_below_ceiling():
     from backend.model.pool import compute_pool_model
     result = compute_pool_model(_load_polls(), _load_approval())
     assert result["pool"]["chow_floor"] < result["pool"]["chow_ceiling"]
+
+
+def test_pool_model_ceiling_is_complement_of_anti_chow_pool():
+    """Ceiling = everyone not hostile to Chow (1 - disapprove), NOT approval.
+    Approval is not a vote-share ceiling: Chow's June 2026 polling exceeded
+    her approval, which made the old definition display a contradiction."""
+    from backend.model.pool import compute_pool_model
+    result = compute_pool_model(_load_polls(), _load_approval())
+    pool = result["pool"]
+    assert abs(pool["chow_ceiling"] - (1.0 - pool["anti_chow_pool"])) < 1e-3
+    assert pool["chow_ceiling"] > result["approval"]["approve"]
+
+
+def test_pool_model_ceiling_not_below_current_polling():
+    """The redefined ceiling must sit above current support (the confusion fix)."""
+    from backend.model.pool import compute_pool_model
+    result = compute_pool_model(_load_polls(), _load_approval())
+    pool = result["pool"]
+    if pool["chow_h2h_current"] is not None:
+        assert pool["chow_ceiling"] >= pool["chow_h2h_current"]
+
+
+def test_pool_model_exposes_signed_approval_gap():
+    """approve - current support, signed; negative = reluctant support."""
+    from backend.model.pool import compute_pool_model
+    result = compute_pool_model(_load_polls(), _load_approval())
+    pool = result["pool"]
+    assert "chow_approval_gap" in pool
+    expected = result["approval"]["approve"] - pool["chow_h2h_current"]
+    assert abs(pool["chow_approval_gap"] - expected) < 1e-3
 
 
 def test_pool_model_pp_components_non_negative():
@@ -235,3 +308,32 @@ def test_poll_detail_capture_polls_weight_normalised():
 
 
 
+
+
+# --- phase mode is date-aware (flips when nominations close Aug 21, 2026) ---
+
+def test_phase_mode_pre_nomination_before_close():
+    from backend.model.pool import compute_pool_model
+    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    result = compute_pool_model(_load_polls(), _load_approval(), ref)
+    assert result["phase_mode"] == "pre_nomination"
+    assert "close August 21, 2026" in result["phase_mode_context"]
+
+
+def test_phase_mode_post_nomination_after_close():
+    from backend.model.pool import compute_pool_model
+    ref = datetime(2026, 8, 22, tzinfo=timezone.utc)
+    result = compute_pool_model(_load_polls(), _load_approval(), ref)
+    assert result["phase_mode"] == "post_nomination"
+    assert "final" in result["phase_mode_context"]
+
+
+def test_phase_mode_boundary_is_nomination_close():
+    """2 p.m. ET on nomination day (18:00 UTC) is the cutover."""
+    from backend.model.pool import compute_pool_model
+    just_before = datetime(2026, 8, 21, 17, 59, tzinfo=timezone.utc)
+    just_after = datetime(2026, 8, 21, 18, 1, tzinfo=timezone.utc)
+    pre = compute_pool_model(_load_polls(), _load_approval(), just_before)
+    post = compute_pool_model(_load_polls(), _load_approval(), just_after)
+    assert pre["phase_mode"] == "pre_nomination"
+    assert post["phase_mode"] == "post_nomination"

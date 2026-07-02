@@ -22,16 +22,65 @@ FULL_FIELD_THRESHOLD = 3
 # Candidates to track in the anti-Chow pool.
 ANTI_CHOW_CANDIDATES = ["bradford"]
 
+# Nominations close at 2 p.m. ET on August 21, 2026 (Municipal Elections Act).
+# After this moment the candidate field is final and the pool model's
+# "anyone could still enter" framing no longer applies.
+NOMINATION_CLOSE = datetime(2026, 8, 21, 18, 0, tzinfo=timezone.utc)
 
-def _rank_weights(dates: pd.Series) -> pd.Series:
-    """Harmonic recency weights: most recent poll → 1/1, next → 1/2, etc.
+PHASE_MODE_CONTEXT = {
+    "pre_nomination": (
+        "Candidate nominations open May 1, 2026 and close August 21, 2026. "
+        "The field is not yet set — any candidate could still enter or withdraw. "
+        "This model characterises current voter preferences, not electoral outcomes."
+    ),
+    "post_nomination": (
+        "Nominations closed August 21, 2026 — the candidate field is final. "
+        "Pool figures describe the attitudinal structure of the electorate "
+        "(who is open to Chow, who is hostile); the campaign polling average "
+        "is the operative horse-race read."
+    ),
+}
 
-    Polls with equal dates receive consecutive ranks in their original order.
-    NaN dates receive weight 0.
+
+def _phase_mode(reference_date: datetime | None = None) -> str:
+    ref = reference_date if reference_date is not None else datetime.now(timezone.utc)
+    if ref.tzinfo is None:
+        ref = ref.replace(tzinfo=timezone.utc)
+    return "pre_nomination" if ref < NOMINATION_CLOSE else "post_nomination"
+
+# Recency half-lives. Horse-race polls decay at the aggregator's rate; approval
+# moves more slowly, so it gets a longer half-life. Exponential date decay
+# (rather than harmonic rank weighting) means a dormant series cannot swamp a
+# fresh reading: thirty stale monthly rows collectively decay toward zero
+# instead of collectively holding ~75% of the weight by rank count.
+POLL_HALF_LIFE_DAYS = 12.0
+APPROVAL_HALF_LIFE_DAYS = 30.0
+
+
+def _decay_weights(
+    dates: pd.Series,
+    half_life_days: float,
+    reference_date: datetime | None = None,
+) -> pd.Series:
+    """Exponential recency weights: 0.5 ** (age_days / half_life_days).
+
+    Age is measured from reference_date (defaults to now). Future dates get
+    weight 1.0; NaN dates receive weight 0.
     """
     parsed = pd.to_datetime(dates, utc=True, errors="coerce")
-    ranks = parsed.rank(method="first", ascending=False, na_option="bottom")
-    return (1.0 / ranks).where(parsed.notna(), 0.0)
+    ref = pd.Timestamp(reference_date) if reference_date else pd.Timestamp.now(tz=timezone.utc)
+    if ref.tzinfo is None:
+        ref = ref.tz_localize("UTC")
+    age_days = ((ref - parsed).dt.total_seconds() / 86400.0).clip(lower=0.0)
+    return (0.5 ** (age_days / half_life_days)).where(parsed.notna(), 0.0)
+
+
+def _normalise_max(weights: pd.Series) -> pd.Series:
+    """Scale weights so the largest is 1.0 (for per-poll detail displays)."""
+    max_w = float(weights.max()) if not weights.empty else 0.0
+    if max_w <= 0.0:
+        return weights
+    return weights / max_w
 
 
 def _count_non_chow_candidates(field_tested: object) -> int:
@@ -103,7 +152,7 @@ def compute_current_h2h_chow(
     if h2h.empty:
         return None
 
-    weights = _rank_weights(h2h["date_published"])
+    weights = _decay_weights(h2h["date_published"], POLL_HALF_LIFE_DAYS, reference_date)
     shares = pd.to_numeric(h2h["chow"], errors="coerce")
     valid = shares.notna()
     if not valid.any():
@@ -130,7 +179,7 @@ def compute_current_approval(
     if not required_cols.issubset(approval_df.columns):
         return {"approve": 0.0, "disapprove": 0.0, "not_sure": 0.0}
 
-    weights = _rank_weights(approval_df["date"])
+    weights = _decay_weights(approval_df["date"], APPROVAL_HALF_LIFE_DAYS, reference_date)
     total_w = float(weights.sum())
     if total_w <= 0:
         return {"approve": 0.0, "disapprove": 0.0, "not_sure": 0.0}
@@ -164,7 +213,7 @@ def compute_candidate_capture_rates(
             result[cand] = {"share": 0.0, "capture_rate": 0.0}
             continue
 
-        weights = _rank_weights(multi["date_published"])
+        weights = _decay_weights(multi["date_published"], POLL_HALF_LIFE_DAYS, reference_date)
         shares = pd.to_numeric(multi[cand], errors="coerce").fillna(0.0)
         total_w = float(weights.sum())
         if total_w <= 0:
@@ -244,7 +293,9 @@ def _get_approval_poll_detail(
     required = {"date", "approve", "disapprove", "not_sure"}
     if approval_df.empty or not required.issubset(approval_df.columns):
         return []
-    weights = _rank_weights(approval_df["date"])
+    weights = _normalise_max(
+        _decay_weights(approval_df["date"], APPROVAL_HALF_LIFE_DAYS, reference_date)
+    )
     has_source = "source" in approval_df.columns
     rows = []
     for idx, row in approval_df.iterrows():
@@ -314,7 +365,9 @@ def _get_h2h_poll_detail(
     ].copy()
     if h2h.empty:
         return []
-    weights = _rank_weights(h2h["date_published"])
+    weights = _normalise_max(
+        _decay_weights(h2h["date_published"], POLL_HALF_LIFE_DAYS, reference_date)
+    )
     rows = []
     for idx, row in h2h.iterrows():
         rows.append({
@@ -343,7 +396,9 @@ def _get_capture_poll_detail(
     ].copy()
     if multi.empty or "bradford" not in multi.columns:
         return []
-    weights = _rank_weights(multi["date_published"])
+    weights = _normalise_max(
+        _decay_weights(multi["date_published"], POLL_HALF_LIFE_DAYS, reference_date)
+    )
     rows = []
     for idx, row in multi.iterrows():
         rows.append({
@@ -370,7 +425,11 @@ def compute_pool_model(
     chow_floor = compute_chow_floor(polls_df)
     approval = compute_current_approval(approval_df, reference_date)
     anti_chow_pool = approval["disapprove"]
-    chow_ceiling = approval["approve"]
+    # Ceiling is everyone NOT hostile to Chow (approve + unsure), i.e. the
+    # complement of the anti-Chow pool. Approval alone is not a ceiling on
+    # vote share — voters demonstrably back candidates they disapprove of,
+    # and Chow's June 2026 polling exceeded her approval.
+    chow_ceiling = max(0.0, 1.0 - anti_chow_pool)
 
     chow_h2h = compute_current_h2h_chow(polls_df, reference_date)
     current_chow = chow_h2h if chow_h2h is not None else chow_floor
@@ -394,18 +453,20 @@ def compute_pool_model(
             ).sum()
         )
 
+    phase_mode = _phase_mode(reference_date)
+
     return {
-        "phase_mode": "pre_nomination",
-        "phase_mode_context": (
-            "Candidate nominations open May 1, 2026 and close August 21, 2026. "
-            "The field is not yet set — any candidate could still enter or withdraw. "
-            "This model characterises current voter preferences, not electoral outcomes."
-        ),
+        "phase_mode": phase_mode,
+        "phase_mode_context": PHASE_MODE_CONTEXT[phase_mode],
         "pool": {
             "chow_floor": round(chow_floor, 4),
             "chow_ceiling": round(chow_ceiling, 4),
             "anti_chow_pool": round(anti_chow_pool, 4),
             "chow_h2h_current": round(chow_h2h, 4) if chow_h2h is not None else None,
+            # Signed: approve minus current support. Negative means part of
+            # Chow's vote comes from voters who don't approve of her
+            # ("reluctant support") — soft support at risk, not headroom.
+            "chow_approval_gap": round(approval["approve"] - current_chow, 4),
             "protective_progressive_activated": round(pp_activated, 4),
             "protective_progressive_reserve": round(pp_reserve, 4),
         },
