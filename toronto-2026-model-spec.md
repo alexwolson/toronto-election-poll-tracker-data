@@ -327,7 +327,7 @@ $$
 Where $\alpha_w$ is the polling weight for ward $w$, and ranges from 0 (no polling, structural model only) to near 1 (recent, high-quality polling dominates).
 
 The polling weight $\alpha_w$ depends on:
-- **Recency**: A poll from the past week receives high weight. Weight decays over time, following the same exponential decay logic as the mayoral aggregator.
+- **Recency**: A poll from the past week receives high weight. Weight decays exponentially, but with a **45-day half-life** rather than the mayoral aggregator's 12-day one (editorial parameter). The citywide half-life models supersession — a fresh poll always replaces the last. Ward polls are rare one-off evidence with no replacement coming; fast clock decay would discard them within weeks for no reason other than the calendar, so they instead fade toward the structural model over months.
 - **Sample size**: A larger sample produces a more reliable estimate. Smaller samples receive proportionally less weight.
 
 When no ward-level polling exists (the default case for most or all wards), $\alpha_w = 0$ and the model relies entirely on the structural estimate.

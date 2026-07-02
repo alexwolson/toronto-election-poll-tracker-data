@@ -49,6 +49,14 @@ DECAY_LAMBDA = math.log(2) / POLL_HALF_LIFE_DAYS
 SAMPLE_SCALE = 400.0
 INCUMBENT_CANDIDATE = "chow"
 
+# Ward polls decay more slowly than citywide polls (editorial, spec Part 6).
+# The citywide 12-day half-life models supersession — a fresh poll always
+# replaces the last one. Ward polls are rare one-off evidence with no
+# replacement coming, so their weight fades toward the structural model over
+# months rather than weeks.
+WARD_POLL_HALF_LIFE_DAYS = 45.0
+WARD_POLL_DECAY_LAMBDA = math.log(2) / WARD_POLL_HALF_LIFE_DAYS
+
 # --- Mayoral draw uncertainty (spec Part 7, step 1) ---
 
 # Toronto 2026 municipal election day
@@ -231,12 +239,14 @@ class WardSimulation:
             latest = ward_p.sort_values("_date").iloc[-1]
             pub = latest["_date"].to_pydatetime()
 
-        ref = datetime.now(timezone.utc)
+        ref = self.reference_date if self.reference_date is not None else datetime.now(timezone.utc)
+        if ref.tzinfo is None:
+            ref = ref.replace(tzinfo=timezone.utc)
         if pub.tzinfo is None:
             pub = pub.replace(tzinfo=timezone.utc)
         age_days = max(0.0, (ref - pub).total_seconds() / 86400)
 
-        recency_weight = math.exp(-DECAY_LAMBDA * age_days)
+        recency_weight = math.exp(-WARD_POLL_DECAY_LAMBDA * age_days)
         sample_weight = min(1.0, float(latest["sample_size"]) / SAMPLE_SCALE)
         alpha_w = recency_weight * sample_weight
 
@@ -257,7 +267,9 @@ class WardSimulation:
         if ward_p.empty:
             return {}
 
-        ref = datetime.now(timezone.utc)
+        ref = self.reference_date if self.reference_date is not None else datetime.now(timezone.utc)
+        if ref.tzinfo is None:
+            ref = ref.replace(tzinfo=timezone.utc)
         weighted_sum: dict[str, float] = {}
         total_weight: dict[str, float] = {}
 
@@ -284,7 +296,7 @@ class WardSimulation:
                 continue
 
             age_days = max(0.0, (ref - pub_dt).total_seconds() / 86400)
-            row_weight = math.exp(-DECAY_LAMBDA * age_days) * min(
+            row_weight = math.exp(-WARD_POLL_DECAY_LAMBDA * age_days) * min(
                 1.0, float(sample_size) / SAMPLE_SCALE
             )
             if row_weight <= 0.0:

@@ -441,3 +441,66 @@ def test_mayoral_uncertainty_reported():
     assert unc["effective_sample_size"] == 600.0
     assert unc["drift_sigma"] > 0.0
     assert unc["concentration"] < 600.0
+
+
+# --- Ward-poll blend weight (Part 6): 45-day half-life, sample scaling ---
+
+def _ward_polls_df(date_published: str, sample_size: int = 400, inc_win_share: float = 0.91) -> pd.DataFrame:
+    return pd.DataFrame([{
+        "ward": 1,
+        "poll_id": "test-ward1",
+        "date_published": date_published,
+        "sample_size": sample_size,
+        "inc_win_share": inc_win_share,
+        "notes": "",
+    }])
+
+
+def _sim_with_ward_polls(ward_polls: pd.DataFrame, reference_date) -> WardSimulation:
+    sim = _safe_ward_sim(mayoral_eff_n=600.0, reference_date=reference_date, n_draws=10)
+    sim.ward_polls = ward_polls.copy()
+    sim.ward_polls["_parsed_date_published"] = pd.to_datetime(
+        sim.ward_polls["date_published"], errors="coerce", utc=True
+    )
+    return sim
+
+
+def test_ward_poll_weight_full_for_fresh_poll():
+    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    sim = _sim_with_ward_polls(_ward_polls_df("2026-07-01", sample_size=400), ref)
+    alpha, poll_p = sim._compute_ward_poll_weight(1)
+    assert abs(alpha - 1.0) < 0.01
+    assert poll_p == 0.91
+
+
+def test_ward_poll_weight_halves_after_45_days():
+    """Ward polls are rare one-off evidence, not a superseding series —
+    they decay with a 45-day half-life, not the citywide 12-day one."""
+    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    sim = _sim_with_ward_polls(_ward_polls_df("2026-05-17", sample_size=400), ref)  # 45 days old
+    alpha, _ = sim._compute_ward_poll_weight(1)
+    assert abs(alpha - 0.5) < 0.01
+
+
+def test_ward_poll_weight_scales_with_sample_size():
+    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    sim = _sim_with_ward_polls(_ward_polls_df("2026-07-01", sample_size=200), ref)
+    alpha, _ = sim._compute_ward_poll_weight(1)
+    assert abs(alpha - 0.5) < 0.01  # 200/400 sample scale
+
+
+def test_ward_poll_weight_zero_for_ward_without_polls():
+    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    sim = _sim_with_ward_polls(_ward_polls_df("2026-07-01"), ref)
+    alpha, poll_p = sim._compute_ward_poll_weight(2)
+    assert alpha == 0.0 and poll_p == 0.0
+
+
+def test_ward_poll_weight_uses_reference_date_not_wall_clock():
+    """Same poll, later reference date → smaller alpha."""
+    polls = _ward_polls_df("2026-06-24", sample_size=400)
+    early = _sim_with_ward_polls(polls, datetime(2026, 7, 1, tzinfo=timezone.utc))
+    late = _sim_with_ward_polls(polls, datetime(2026, 9, 1, tzinfo=timezone.utc))
+    a_early, _ = early._compute_ward_poll_weight(1)
+    a_late, _ = late._compute_ward_poll_weight(1)
+    assert a_late < a_early
