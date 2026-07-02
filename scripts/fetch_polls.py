@@ -77,6 +77,14 @@ CANDIDATE_SLUG: dict[str, str] = {
     "John Tory": "tory",
 }
 
+# Poll IDs that appear in Wikipedia's citywide polling tables but are actually
+# ward-level subsamples. They belong in ward_polls.csv, not the citywide series —
+# including them would bias the citywide average toward that ward's lean.
+EXCLUDED_POLL_IDS = frozenset({
+    # Forum's Toronto Centre (Ward 13) subsample, n=355; recorded in ward_polls.csv
+    "forum-2026-06-23",
+})
+
 METADATA_COLS = [
     "poll_id", "firm", "date_conducted", "date_published",
     "sample_size", "methodology", "field_tested",
@@ -298,6 +306,8 @@ def parse_polls(html: str) -> list[dict]:
         if not _is_polling_table(table):
             continue
         for row in _parse_table(table):
+            if row["poll_id"] in EXCLUDED_POLL_IDS:
+                continue
             if row["poll_id"] in seen_ids:
                 raise ValueError(
                     f"Duplicate poll_id: {row['poll_id']!r} — "

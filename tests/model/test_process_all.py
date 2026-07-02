@@ -161,3 +161,54 @@ def test_process_challengers_merged_output_satisfies_challengers_schema(tmp_path
     defeatability = _defeatability_df(3, "Other Incumbent", is_running=True)
     result = pa.process_challengers_merged(councillor_path, editorial_path, defeatability)
     validate_challengers(result)  # must not raise
+
+
+# ---------------------------------------------------------------------------
+# process_ward_polls
+# ---------------------------------------------------------------------------
+
+def test_process_ward_polls_missing_file_returns_empty_with_columns(tmp_path):
+    pa = _load_process_all()
+    result = pa.process_ward_polls(tmp_path / "ward_polls.csv")
+    assert result.empty
+    for col in ["ward", "poll_id", "date_published", "sample_size", "inc_win_share"]:
+        assert col in result.columns
+
+
+def test_process_ward_polls_valid_row_roundtrips(tmp_path):
+    pa = _load_process_all()
+    path = tmp_path / "ward_polls.csv"
+    pd.DataFrame([{
+        "ward": 13,
+        "poll_id": "forum-ward13-2026-06-23",
+        "firm": "Forum Research",
+        "date_conducted": "2026-06-23",
+        "date_published": "2026-06-24",
+        "sample_size": 355,
+        "methodology": "IVR",
+        "inc_win_share": 0.91,
+        "notes": "",
+    }]).to_csv(path, index=False)
+    result = pa.process_ward_polls(path)
+    assert len(result) == 1
+    assert result.iloc[0]["ward"] == 13
+    assert result.iloc[0]["inc_win_share"] == 0.91
+    assert result.iloc[0]["date_published"] == "2026-06-24"
+
+
+def test_process_ward_polls_invalid_share_exits(tmp_path):
+    """A vote share entered as a percentage (35 not 0.35) must fail fast."""
+    pa = _load_process_all()
+    path = tmp_path / "ward_polls.csv"
+    pd.DataFrame([{
+        "ward": 13,
+        "poll_id": "forum-ward13-2026-06-23",
+        "date_conducted": "2026-06-23",
+        "date_published": "2026-06-24",
+        "sample_size": 355,
+        "inc_win_share": 91.0,
+        "notes": "",
+    }]).to_csv(path, index=False)
+    import pytest
+    with pytest.raises(SystemExit):
+        pa.process_ward_polls(path)

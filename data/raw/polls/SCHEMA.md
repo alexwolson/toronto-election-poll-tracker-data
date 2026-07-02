@@ -1,6 +1,9 @@
 # polls.csv Schema
 
-One row per published poll.
+One row per published **citywide** mayoral poll. Ward-level subsamples do not
+belong here (they would bias the citywide average toward that ward's lean) —
+record them in `ward_polls.csv` and list their poll_id in `EXCLUDED_POLL_IDS`
+in `scripts/fetch_polls.py` so the Wikipedia fetch doesn't re-add them.
 
 ## Fixed metadata columns
 
@@ -31,3 +34,32 @@ Older rows leave columns for candidates who weren't tested blank (empty cell, no
 - `date_conducted` must be ≤ `date_published`
 - `sample_size` must be a positive integer if present
 - `poll_id` must be unique across all rows
+
+---
+
+# ward_polls.csv Schema
+
+One row per published **ward-level** councillor poll. Feeds the ward-level
+polling override (model spec Part 6): the simulation blends `inc_win_share`
+with the structural incumbent win probability, weighted by poll recency and
+sample size.
+
+| Column | Type | Required | Description |
+|---|---|---|---|
+| `ward` | integer | yes | Ward number, 1–25 |
+| `poll_id` | string | yes | Unique identifier, e.g. `forum-ward13-2026-06-23` |
+| `firm` | string | no | Polling firm name |
+| `date_conducted` | YYYY-MM-DD | no | Date range end if a range was reported |
+| `date_published` | YYYY-MM-DD | yes | Date the poll was publicly released |
+| `sample_size` | integer | yes | Ward respondents |
+| `methodology` | string | no | e.g. `IVR`, `online-panel` |
+| `inc_win_share` | float | yes | Poll-implied P(incumbent wins), in [0, 1] — NOT the raw vote share. Derive via `scripts/derive_ward_poll_win_share.py` and record the derivation in `notes` |
+| `notes` | string | no | Topline shares, derivation notes, anything noteworthy |
+
+## Validation rules
+
+- `ward` must be 1–25
+- `inc_win_share` must be in [0, 1]
+- `sample_size` must be a positive integer
+- `date_conducted` must be ≤ `date_published`
+- (`ward`, `poll_id`) pairs must be unique

@@ -154,3 +154,84 @@ def test_validate_registered_councillors_rejects_empty_status():
     df = pd.DataFrame([_base_councillor_row(status="")])
     with pytest.raises(ValidationError, match="Missing status"):
         validate_registered_councillors(df)
+
+
+# --- ward_polls validation ---
+
+from backend.model.validate import validate_ward_polls
+
+
+def _base_ward_poll_row(**overrides) -> dict:
+    base = {
+        "ward": 13,
+        "poll_id": "forum-ward13-2026-06-23",
+        "firm": "Forum Research",
+        "date_conducted": "2026-06-23",
+        "date_published": "2026-06-24",
+        "sample_size": 355,
+        "methodology": "IVR",
+        "inc_win_share": 0.91,
+        "notes": "",
+    }
+    base.update(overrides)
+    return base
+
+
+def test_validate_ward_polls_accepts_valid():
+    df = pd.DataFrame([_base_ward_poll_row()])
+    validate_ward_polls(df)
+
+
+def test_validate_ward_polls_accepts_empty_with_columns():
+    """An empty ward_polls file (header only) is valid — override stays inert."""
+    df = pd.DataFrame(
+        columns=["ward", "poll_id", "date_published", "sample_size", "inc_win_share"]
+    )
+    validate_ward_polls(df)
+
+
+def test_validate_ward_polls_rejects_missing_inc_win_share_column():
+    row = _base_ward_poll_row()
+    del row["inc_win_share"]
+    df = pd.DataFrame([row])
+    with pytest.raises(ValidationError, match="inc_win_share"):
+        validate_ward_polls(df)
+
+
+def test_validate_ward_polls_rejects_share_above_one():
+    """inc_win_share is a probability, not a percentage."""
+    df = pd.DataFrame([_base_ward_poll_row(inc_win_share=35.0)])
+    with pytest.raises(ValidationError, match="inc_win_share"):
+        validate_ward_polls(df)
+
+
+def test_validate_ward_polls_rejects_bad_ward():
+    df = pd.DataFrame([_base_ward_poll_row(ward=26)])
+    with pytest.raises(ValidationError, match="ward"):
+        validate_ward_polls(df)
+
+
+def test_validate_ward_polls_rejects_nonpositive_sample_size():
+    df = pd.DataFrame([_base_ward_poll_row(sample_size=0)])
+    with pytest.raises(ValidationError, match="sample_size"):
+        validate_ward_polls(df)
+
+
+def test_validate_ward_polls_rejects_conducted_after_published():
+    df = pd.DataFrame(
+        [_base_ward_poll_row(date_conducted="2026-06-25", date_published="2026-06-24")]
+    )
+    with pytest.raises(ValidationError, match="date_conducted"):
+        validate_ward_polls(df)
+
+
+def test_validate_ward_polls_rejects_unparseable_date():
+    df = pd.DataFrame([_base_ward_poll_row(date_published="not-a-date")])
+    with pytest.raises(ValidationError, match="date_published"):
+        validate_ward_polls(df)
+
+
+def test_validate_ward_polls_rejects_duplicate_ward_poll_id():
+    df = pd.DataFrame([_base_ward_poll_row(), _base_ward_poll_row()])
+    with pytest.raises(ValidationError, match="Duplicate"):
+        validate_ward_polls(df)

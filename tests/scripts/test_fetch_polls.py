@@ -444,6 +444,21 @@ def test_parse_polls_campaign_period_poll_id(fp):
     assert rows[0]["poll_id"] == "liaison-2026-05-11"
 
 
+def test_parse_polls_excludes_ward_level_subsamples(fp):
+    """Poll IDs in EXCLUDED_POLL_IDS (ward-level subsamples mislabeled as
+    citywide on Wikipedia) must be dropped during parsing."""
+    html = """<html><body><table class="wikitable"><tbody>
+    <tr><th>Polling firm</th><th>Source</th><th>Polling dates</th><th>Sample size</th><th>MOE</th><th>Brad Bradford</th><th>Olivia Chow</th><th>Other</th><th>Lead</th></tr>
+    <tr><td>Forum Research</td><td>IVR</td><td>June 22-23, 2026</td><td>355</td><td>±5.0%</td><td>34%</td><td>55%</td><td>10%</td><td>21</td></tr>
+    <tr><td>Mainstreet Research</td><td>IVR</td><td>June 17-18, 2026</td><td>1157</td><td>±2.9%</td><td>38%</td><td>44%</td><td>19%</td><td>6</td></tr>
+    </tbody></table></body></html>"""
+    rows = fp.parse_polls(html)
+    ids = [r["poll_id"] for r in rows]
+    assert "forum-2026-06-23" in fp.EXCLUDED_POLL_IDS
+    assert "forum-2026-06-23" not in ids
+    assert "mainstreet-2026-06-18" in ids
+
+
 def test_parse_date_range(fp):
     assert fp._parse_date("May 10-11, 2026") == "2026-05-11"
 

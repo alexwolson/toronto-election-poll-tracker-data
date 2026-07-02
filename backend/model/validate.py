@@ -135,6 +135,68 @@ def validate_polls(df: pd.DataFrame) -> None:
             )
 
 
+def validate_ward_polls(df: pd.DataFrame) -> None:
+    """Validate a ward_polls DataFrame against the ward_polls.csv schema."""
+    required = ["ward", "poll_id", "date_published", "sample_size", "inc_win_share"]
+    _check_required_columns(df, required, "ward_polls")
+
+    if df.empty:
+        return
+
+    # ward must be 1–25
+    bad_ward = df[~df["ward"].between(1, 25)]
+    if not bad_ward.empty:
+        raise ValidationError(f"ward values outside 1–25: {bad_ward['ward'].tolist()}")
+
+    # inc_win_share must be a probability in [0, 1]
+    bad_share = df[~df["inc_win_share"].between(0, 1)]
+    if not bad_share.empty:
+        raise ValidationError(
+            f"inc_win_share values outside [0, 1] in rows: "
+            f"{bad_share['poll_id'].tolist()}"
+        )
+
+    # sample_size must be positive
+    bad_n = df[df["sample_size"].isna() | (df["sample_size"] <= 0)]
+    if not bad_n.empty:
+        raise ValidationError(
+            f"sample_size must be positive in rows: {bad_n['poll_id'].tolist()}"
+        )
+
+    # date_published must be parseable
+    published = pd.to_datetime(df["date_published"], errors="coerce")
+    unparseable = df[published.isna()]
+    if not unparseable.empty:
+        raise ValidationError(
+            f"Unparseable date_published values in rows: "
+            f"{unparseable['poll_id'].tolist()}"
+        )
+
+    # date_conducted (if present) must be parseable and <= date_published
+    if "date_conducted" in df.columns:
+        conducted = pd.to_datetime(df["date_conducted"], errors="coerce")
+        bad_conducted = df[conducted.isna()]
+        if not bad_conducted.empty:
+            raise ValidationError(
+                f"Unparseable date_conducted values in rows: "
+                f"{bad_conducted['poll_id'].tolist()}"
+            )
+        bad_dates = df[conducted > published]
+        if not bad_dates.empty:
+            raise ValidationError(
+                f"date_conducted is after date_published in rows: "
+                f"{bad_dates['poll_id'].tolist()}"
+            )
+
+    # (ward, poll_id) must be unique
+    dupes = df[df.duplicated(subset=["ward", "poll_id"])]
+    if not dupes.empty:
+        raise ValidationError(
+            f"Duplicate ward/poll_id pairs: "
+            f"{list(zip(dupes['ward'].tolist(), dupes['poll_id'].tolist()))}"
+        )
+
+
 def validate_council_alignment(df: pd.DataFrame) -> None:
     """Validate a council_alignment DataFrame against the council_alignment.csv schema."""
     required = [

@@ -29,6 +29,7 @@ from backend.model.validate import (
     validate_registered_councillors,
     validate_registered_electors,
     validate_registered_mayors,
+    validate_ward_polls,
     validate_ward_population,
 )
 
@@ -54,6 +55,50 @@ def process_polls(input_path: Path) -> pd.DataFrame:
     # Normalise dates to ISO strings
     df["date_conducted"] = pd.to_datetime(df["date_conducted"]).dt.strftime("%Y-%m-%d")
     df["date_published"] = pd.to_datetime(df["date_published"]).dt.strftime("%Y-%m-%d")
+
+    return df
+
+
+WARD_POLL_COLUMNS = [
+    "ward",
+    "poll_id",
+    "firm",
+    "date_conducted",
+    "date_published",
+    "sample_size",
+    "methodology",
+    "inc_win_share",
+    "notes",
+]
+
+
+def process_ward_polls(input_path: Path) -> pd.DataFrame:
+    """Load, validate, and normalise ward-level polls CSV.
+
+    Ward polls are optional — if the raw file is missing, returns an empty
+    DataFrame with the expected columns so the model's override stays inert.
+    """
+    if not input_path.exists():
+        return pd.DataFrame(columns=WARD_POLL_COLUMNS)
+
+    df = pd.read_csv(input_path)
+
+    try:
+        if not df.empty:
+            df["ward"] = df["ward"].astype(int)
+        validate_ward_polls(df)
+    except (ValidationError, ValueError) as e:
+        print(f"ERROR in {input_path}: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    if not df.empty:
+        if "date_conducted" in df.columns:
+            df["date_conducted"] = pd.to_datetime(df["date_conducted"]).dt.strftime(
+                "%Y-%m-%d"
+            )
+        df["date_published"] = pd.to_datetime(df["date_published"]).dt.strftime(
+            "%Y-%m-%d"
+        )
 
     return df
 
@@ -430,6 +475,10 @@ def main() -> None:
     print("Processing polls...")
     polls = process_polls(RAW / "polls" / "polls.csv")
     write_processed(polls, PROCESSED / "polls.csv")
+
+    print("Processing ward polls...")
+    ward_polls = process_ward_polls(RAW / "polls" / "ward_polls.csv")
+    write_processed(ward_polls, PROCESSED / "ward_polls.csv")
 
     print("Computing mayoral polling average...")
     scenario_polls = get_latest_scenario_polls(polls)
