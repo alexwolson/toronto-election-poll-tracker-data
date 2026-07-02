@@ -21,16 +21,19 @@ PHASE_DESCRIPTIONS: dict[int, dict[str, str]] = {
     2: {
         "label": "Phase 2 — Registration Period",
         "description": (
-            "Candidates have registered. The model incorporates name recognition tiers "
-            "but full financial data is not yet available. Ward classifications are "
-            "preliminary and carry higher uncertainty."
+            "Candidates have registered. The model incorporates name recognition tiers, "
+            "endorsements, and ward-level polling where available. Toronto does not "
+            "publish campaign finance data until after election day, so the model runs "
+            "in this phase for the full campaign; fundraising signals enter through "
+            "editorial challenger assessments."
         ),
     },
     3: {
         "label": "Phase 3 — Financial Filings Available",
         "description": (
-            "Financial filing data is incorporated. The model runs at full capacity. "
-            "Ward classifications and win probabilities reflect all available inputs."
+            "Financial filing data is incorporated. Filings are published after "
+            "election day, so this is a retrospective mode for post-election "
+            "analysis and model validation."
         ),
     },
 }

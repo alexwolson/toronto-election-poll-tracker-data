@@ -421,9 +421,9 @@ The model operates in three phases corresponding to the availability of data ove
 
 **Phase 1 (pre-registration period):** The model shows structural factors only: incumbent vulnerability scores, ward mayoral leans (for all candidates with historical data), and councillor alignment differentials. Output is limited to identifying which wards are structurally most likely to be competitive. No challenger data is available. Mayoral scenario analysis is available based on early or hypothetical polling.
 
-**Phase 2 (registration through early financial filings):** Candidates have registered. The model incorporates name recognition tiers and any early fundraising signals. Ward classifications (safe/competitive/open) begin to take shape, but with high uncertainty due to incomplete financial data.
+**Phase 2 (registration through election day):** Candidates have registered. The model incorporates name recognition tiers, endorsements, and — where available — ward-level polling. Ward classifications (safe/competitive/open) take shape, with uncertainty reflecting the absence of systematic fundraising data.
 
-**Phase 3 (financial filings onward):** Full financial data is available. The model runs at full capacity with all inputs. Ward classifications firm up and win probabilities narrow.
+**Phase 3 (financial filings available):** Full financial data is available and the model runs with all inputs. **Editorial decision (July 2026): this phase will not occur during the campaign.** Toronto campaign financial statements are filed after election day (compliance deadline in early 2027), and the city's open data portal does not publish 2026 contribution data in machine-readable form during the campaign. The model therefore runs the entire campaign in Phase 2. Fundraising signal, to the extent it becomes public through news reporting or voluntary disclosure, enters through the editorial challenger overlay (name recognition tier adjustments and notes), not as a distinct data feed. Phase 3 exists as a retrospective mode for post-election analysis and model validation.
 
 The model's structure does not change between phases. It simply operates with fewer inputs in earlier phases and more in later phases. The phase label communicates to the user how much data is informing the projections.
 

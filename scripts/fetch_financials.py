@@ -15,10 +15,12 @@ from pathlib import Path
 import requests
 
 CKAN_BASE = "https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/action"
-# TODO: As of 2026-03-10, 'elections-campaign-contributions' only serves ZIP resources,
-# not CSV. This script will exit with "No CSV resources found" until the city publishes
-# 2026 campaign contributions as direct CSV downloads. The 2018 data is at
-# 'elections-campaign-contributions'. Update PACKAGE_IDS when 2026 data is available.
+# NOTE: As of 2026-03-10, 'elections-campaign-contributions' only serves ZIP resources,
+# not CSV, and Toronto does not publish campaign contributions during the campaign —
+# financial statements are filed after election day (compliance deadline early 2027).
+# Editorial decision (2026-07-01): the model runs the whole campaign in Phase 2 and
+# takes fundraising signal from the editorial challenger overlay instead. This script
+# exists for post-election analysis; update PACKAGE_IDS when 2026 filings are published.
 PACKAGE_IDS = [
     "elections-campaign-contributions",
 ]

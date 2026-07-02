@@ -15,8 +15,18 @@ from pathlib import Path
 
 import pandas as pd
 
-from backend.model.aggregator import aggregate_polls, get_latest_scenario_polls
+# Allow `uv run scripts/process_all.py` without PYTHONPATH=. (CI sets it; local runs shouldn't need it)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from backend.model.aggregator import (
+    aggregate_polls,
+    exclude_polls_with_declined_candidates,
+    get_latest_scenario_polls,
+    get_scenario_polls,
+)
+from backend.model.candidates import DECLINED_CANDIDATE_IDS
 from backend.model.coattails import compute_coattail_adjustment
+from backend.model.run import DEFAULT_SCENARIO, SCENARIOS
 from backend.model.lean import compute_ward_mayoral_lean
 from backend.model.names import KNOWN_CANDIDATES
 from backend.model.validate import (
@@ -481,7 +491,16 @@ def main() -> None:
     write_processed(ward_polls, PROCESSED / "ward_polls.csv")
 
     print("Computing mayoral polling average...")
-    scenario_polls = get_latest_scenario_polls(polls)
+    # Mirror the model's poll selection (run.py) so this artifact matches what
+    # the simulation actually uses: exclude declined candidates, filter to the
+    # default scenario, then prefer the most relevant field configuration.
+    scenario_candidates = SCENARIOS.get(DEFAULT_SCENARIO, [])
+    eligible_polls = exclude_polls_with_declined_candidates(
+        polls, DECLINED_CANDIDATE_IDS
+    )
+    scenario_polls = get_latest_scenario_polls(
+        get_scenario_polls(eligible_polls, scenario_candidates)
+    )
     avg_results = aggregate_polls(scenario_polls, KNOWN_CANDIDATES)
     avg_df = pd.DataFrame(
         [{"candidate": c, "share": s} for c, s in avg_results.items()]
