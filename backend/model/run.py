@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 from .aggregator import aggregate_polls, get_latest_scenario_polls, get_scenario_polls
-from .aggregator import exclude_polls_with_declined_candidates
+from .aggregator import effective_sample_size, exclude_polls_with_declined_candidates
 from .candidates import build_candidate_status, DECLINED_CANDIDATE_IDS
 from .phase import detect_phase
 from .simulation import WardSimulation, SAFE_DEFEATABILITY_THRESHOLD
@@ -161,6 +161,7 @@ def run_model() -> dict:
         challengers=data["challengers"],
         leans=data["leans"],
         ward_polls=data["ward_polls"],
+        mayoral_eff_n=effective_sample_size(current_polls),
     )
     results = sim.run()
 
@@ -203,6 +204,12 @@ def run_model() -> dict:
         "composition_std": round(float(results["composition_std"]), 2),
         "composition_by_mayor": results["composition_by_mayor"],
         "mayoral_averages": mayoral_shares,
+        "mayoral_win_probabilities": {
+            k: round(v, 4) for k, v in results["mayoral_win_probabilities"].items()
+        },
+        "mayoral_uncertainty": {
+            k: round(float(v), 4) for k, v in results["mayoral_uncertainty"].items()
+        },
         "phase": detect_phase(
             data["challengers"],
             has_financials=any((_data_dir().parent / "raw" / "financial").glob("*.csv")),

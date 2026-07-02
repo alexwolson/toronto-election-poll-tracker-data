@@ -318,3 +318,126 @@ def test_endorsement_count_is_capped():
     assert abs(prob_at_cap - prob_over_cap) < 0.05, (
         f"Win prob at cap ({prob_at_cap:.3f}) should equal win prob over cap ({prob_over_cap:.3f})"
     )
+
+
+# --- Mayoral uncertainty: Dirichlet concentration from effective sample + drift ---
+
+from datetime import datetime, timezone, timedelta
+
+from backend.model.simulation import (
+    ELECTION_DATE,
+    _dirichlet_concentration,
+    _mayoral_drift_sigma,
+)
+
+
+def _two_way_mayoral_averages() -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {"candidate": "chow", "share": 0.4421},
+            {"candidate": "bradford", "share": 0.3756},
+        ]
+    )
+
+
+def _safe_ward_sim(mayoral_eff_n=None, reference_date=None, n_draws=4000) -> WardSimulation:
+    """Minimal simulation over one safe ward — mayoral draw is what's under test."""
+    ward = 1
+    ward_data = pd.DataFrame(
+        [
+            {
+                "ward": ward,
+                "councillor_name": "Safe Councillor",
+                "is_running": True,
+                "defeatability_score": 10,
+                "is_byelection_incumbent": False,
+            }
+        ]
+    )
+    challengers = pd.DataFrame(
+        [
+            {
+                "ward": ward,
+                "candidate_name": "Unknown Challenger",
+                "name_recognition_tier": "unknown",
+                "mayoral_alignment": "unaligned",
+                "endorsements": "",
+            }
+        ]
+    )
+    coattails = pd.DataFrame(
+        [{"ward": ward, "alignment_delta": 0.0, "lean": 0.0, "p_w": 0.35}]
+    )
+    return WardSimulation(
+        ward_data=ward_data,
+        mayoral_averages=_two_way_mayoral_averages(),
+        coattails=coattails,
+        challengers=challengers,
+        leans=_empty_leans(),
+        n_draws=n_draws,
+        seed=42,
+        mayoral_eff_n=mayoral_eff_n,
+        reference_date=reference_date,
+    )
+
+
+def test_drift_sigma_zero_on_election_day():
+    assert _mayoral_drift_sigma(ELECTION_DATE) == 0.0
+
+
+def test_drift_sigma_zero_after_election_day():
+    assert _mayoral_drift_sigma(ELECTION_DATE + timedelta(days=10)) == 0.0
+
+
+def test_drift_sigma_grows_with_time_to_election():
+    one_month = _mayoral_drift_sigma(ELECTION_DATE - timedelta(days=30))
+    four_months = _mayoral_drift_sigma(ELECTION_DATE - timedelta(days=120))
+    assert 0.0 < one_month < four_months
+
+
+def test_concentration_decreases_with_drift():
+    no_drift = _dirichlet_concentration(0.54, eff_n=600.0, drift_sigma=0.0)
+    with_drift = _dirichlet_concentration(0.54, eff_n=600.0, drift_sigma=0.03)
+    assert with_drift < no_drift
+
+
+def test_concentration_increases_with_effective_sample():
+    sparse = _dirichlet_concentration(0.54, eff_n=200.0, drift_sigma=0.0)
+    dense = _dirichlet_concentration(0.54, eff_n=2000.0, drift_sigma=0.0)
+    assert sparse < dense
+    # Without drift, concentration should track the effective sample size
+    assert abs(dense - 2000.0) < 10.0
+
+
+def test_results_include_mayoral_win_probabilities():
+    sim = _safe_ward_sim(mayoral_eff_n=600.0, n_draws=500)
+    result = sim.run()
+    probs = result["mayoral_win_probabilities"]
+    assert set(probs) == {"chow", "bradford"}
+    assert abs(sum(probs.values()) - 1.0) < 1e-9
+
+
+def test_trailing_candidate_wins_draws_with_sparse_polling():
+    """Four months out with ~600 effective sample, a 6.6-point deficit should
+    NOT be a shutout — this is the eff_n=2000 hardcode regression test."""
+    ref = ELECTION_DATE - timedelta(days=117)  # ~July 1
+    sim = _safe_ward_sim(mayoral_eff_n=600.0, reference_date=ref)
+    result = sim.run()
+    assert result["mayoral_win_probabilities"]["bradford"] > 0.02
+
+
+def test_trailing_candidate_rarely_wins_with_dense_polling_at_election():
+    """On election day with heavy polling, the same deficit is nearly decisive."""
+    sim = _safe_ward_sim(mayoral_eff_n=20000.0, reference_date=ELECTION_DATE)
+    result = sim.run()
+    assert result["mayoral_win_probabilities"]["bradford"] < 0.005
+
+
+def test_mayoral_uncertainty_reported():
+    ref = ELECTION_DATE - timedelta(days=117)
+    sim = _safe_ward_sim(mayoral_eff_n=600.0, reference_date=ref)
+    result = sim.run()
+    unc = result["mayoral_uncertainty"]
+    assert unc["effective_sample_size"] == 600.0
+    assert unc["drift_sigma"] > 0.0
+    assert unc["concentration"] < 600.0

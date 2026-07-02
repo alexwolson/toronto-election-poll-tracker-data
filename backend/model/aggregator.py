@@ -40,6 +40,24 @@ def compute_poll_weights(
     return weights
 
 
+def effective_sample_size(
+    df: pd.DataFrame, reference_date: datetime | None = None
+) -> float:
+    """Decay-weighted effective sample size of an aggregated poll set.
+
+    Per spec Part 7, the Dirichlet concentration of the mayoral draw is derived
+    from the effective sample size of the polls being aggregated: each poll
+    contributes its sample size scaled by the same recency weight used in
+    aggregate_polls, so the effective sample grows with poll density and
+    shrinks as polls age.
+    """
+    if df.empty or "sample_size" not in df.columns:
+        return 0.0
+    weights = compute_poll_weights(df, reference_date)
+    sizes = pd.to_numeric(df["sample_size"], errors="coerce").fillna(0.0)
+    return float((weights * sizes).sum())
+
+
 def aggregate_polls(
     df: pd.DataFrame,
     candidates: list[str],

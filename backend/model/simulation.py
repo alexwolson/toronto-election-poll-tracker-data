@@ -49,6 +49,47 @@ DECAY_LAMBDA = math.log(2) / POLL_HALF_LIFE_DAYS
 SAMPLE_SCALE = 400.0
 INCUMBENT_CANDIDATE = "chow"
 
+# --- Mayoral draw uncertainty (spec Part 7, step 1) ---
+
+# Toronto 2026 municipal election day
+ELECTION_DATE = datetime(2026, 10, 26, tzinfo=timezone.utc)
+
+# Editorial parameter: campaign drift modelled as a random walk on vote share,
+# accumulating ~1.5 points of standard deviation per square-root month between
+# now and election day. Four months out this adds ~3 points of drift risk on
+# top of poll sampling error; it shrinks to zero on election day.
+DRIFT_SIGMA_PER_SQRT_MONTH = 0.015
+DAYS_PER_MONTH = 30.44
+
+# Fallback effective sample size when the caller doesn't supply one
+# (preserves the historical behaviour of the previously hardcoded value)
+LEGACY_MAYORAL_EFF_N = 2000.0
+
+# Floor so a stale or empty poll set never degenerates the Dirichlet
+MIN_MAYORAL_EFF_N = 50.0
+
+
+def _mayoral_drift_sigma(reference_date: datetime | None = None) -> float:
+    """Standard deviation of expected vote-share drift between now and e-day."""
+    ref = reference_date if reference_date is not None else datetime.now(timezone.utc)
+    days_remaining = max(0.0, (ELECTION_DATE - ref).total_seconds() / 86400.0)
+    return DRIFT_SIGMA_PER_SQRT_MONTH * math.sqrt(days_remaining / DAYS_PER_MONTH)
+
+
+def _dirichlet_concentration(
+    front_runner_share: float, eff_n: float, drift_sigma: float
+) -> float:
+    """Concentration such that the front-runner's share variance equals
+    sampling variance (at eff_n) plus campaign-drift variance.
+
+    For a Dirichlet with concentration c, Var(share) = p(1-p)/(c+1); solving
+    p(1-p)/(c+1) = p(1-p)/(eff_n+1) + drift_sigma^2 for c gives the blend.
+    """
+    p = min(max(front_runner_share, 1e-6), 1.0 - 1e-6)
+    sampling_var = p * (1.0 - p) / (eff_n + 1.0)
+    total_var = sampling_var + drift_sigma**2
+    return max(2.0, p * (1.0 - p) / total_var - 1.0)
+
 # Coattail strength parameter (gamma), must match coattails.py
 from .coattails import COATTAIL_STRENGTH as GAMMA
 
@@ -64,6 +105,8 @@ class WardSimulation:
         n_draws: int = 5000,
         seed: int = 42,
         ward_polls: pd.DataFrame | None = None,
+        mayoral_eff_n: float | None = None,
+        reference_date: datetime | None = None,
     ):
         """
         ward_data: [ward, councillor_name, is_running, defeatability_score, ...]
@@ -72,6 +115,10 @@ class WardSimulation:
         challengers: [ward, candidate_name, name_recognition_tier, mayoral_alignment, ...]
         leans: [ward, candidate, lean]
         ward_polls: Optional ward-level poll data for override (Part 6)
+        mayoral_eff_n: Decay-weighted effective sample size of the aggregated
+            mayoral polls (aggregator.effective_sample_size). Falls back to
+            LEGACY_MAYORAL_EFF_N when not supplied.
+        reference_date: "Today" for drift computation; defaults to now.
         """
         self.ward_data = ward_data
         self.mayoral_averages = mayoral_averages
@@ -79,6 +126,12 @@ class WardSimulation:
         self.challengers = challengers
         self.leans = leans
         self.n_draws = n_draws
+        self.mayoral_eff_n = (
+            float(mayoral_eff_n)
+            if mayoral_eff_n is not None and mayoral_eff_n > 0
+            else LEGACY_MAYORAL_EFF_N
+        )
+        self.reference_date = reference_date
         self.rng = np.random.default_rng(seed)
         if ward_polls is None:
             self.ward_polls = pd.DataFrame(
@@ -323,12 +376,19 @@ class WardSimulation:
     def run(self) -> dict[str, Any]:
         """Run the Monte Carlo simulation."""
 
-        # 1. Prepare Mayoral Dirichlet
-        eff_n = 2000
+        # 1. Prepare Mayoral Dirichlet.
+        # Concentration is derived from the polls' decay-weighted effective
+        # sample size plus a campaign-drift variance term (spec Part 7 step 1),
+        # so uncertainty widens when polling is sparse or election day is far.
+        eff_n = max(MIN_MAYORAL_EFF_N, self.mayoral_eff_n)
+        drift_sigma = _mayoral_drift_sigma(self.reference_date)
         candidates = self.mayoral_averages["candidate"].tolist()
         shares = self.mayoral_averages["share"].to_numpy()
         shares = shares / shares.sum()
-        alpha = shares * eff_n
+        concentration = _dirichlet_concentration(
+            float(shares.max()), eff_n, drift_sigma
+        )
+        alpha = shares * concentration
 
         # 2. Results storage
         ward_nums = sorted(self.ward_data["ward"].unique().tolist())
@@ -517,6 +577,11 @@ class WardSimulation:
                     "n_draws": n_draws,
                 }
 
+        mayoral_win_probs = {
+            candidate: float((mayor_winner_by_draw == candidate).mean())
+            for candidate in candidates
+        }
+
         return {
             "win_probabilities": win_probs,
             "incumbent_probability_interval": incumbent_probability_interval,
@@ -527,4 +592,10 @@ class WardSimulation:
             "composition_by_mayor": composition_by_mayor,
             "composition_dist": incumbent_wins_count,
             "winner_matrix": winner_names,
+            "mayoral_win_probabilities": mayoral_win_probs,
+            "mayoral_uncertainty": {
+                "effective_sample_size": eff_n,
+                "drift_sigma": drift_sigma,
+                "concentration": concentration,
+            },
         }
