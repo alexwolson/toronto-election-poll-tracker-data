@@ -31,6 +31,7 @@ ward,first_name,last_name,status,date_nomination
 8,Enzo,Torrone,Active,2026-05-11
 8,Daniel,Trayes,Active,2026-05-01
 9,Neil,Simon,Active,2026-06-12
+10,Ian,Cunningham,Active,2026-07-08
 10,Xue,Ding,Active,2026-06-22
 10,Andi,Hoang-Lefranc,Active,2026-06-18
 10,Bashar,Kassir,Active,2026-05-08
@@ -63,6 +64,7 @@ ward,first_name,last_name,status,date_nomination
 16,Stacey,Moffatt,Active,2026-06-05
 17,Jeffery,Adamson,Active,2026-06-01
 17,Shelley,Carroll,Active,2026-05-04
+17,Hassan Mubarak,Noor Mohamed,Active,2026-07-08
 17,Gregory,Rodriguez,Active,2026-05-27
 17,Roy,Samathanam,Active,2026-06-01
 17,Sabrina,Zuniga,Active,2026-05-01
