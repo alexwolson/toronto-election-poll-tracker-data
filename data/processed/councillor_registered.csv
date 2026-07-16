@@ -96,10 +96,12 @@ ward,first_name,last_name,status,date_nomination
 21,Madura,Shanmugaratnam,Active,2026-05-11
 21,Krissan,Veerasingam,Active,2026-05-01
 22,Madhuri,Azad,Active,2026-05-19
+22,Bill,Chan,Active,2026-07-15
 22,Jackson,Ho,Active,2026-06-12
 22,Dan,Lovell,Active,2026-05-01
 22,Donny,Morgan,Active,2026-06-19
 23,Han,Dong,Active,2026-06-17
+23,Sajawal,Javed,Active,2026-07-15
 23,Kevin,Li,Active,2026-05-01
 23,Jamaal,Myers,Active,2026-05-19
 23,John-Mark,Oleh,Active,2026-07-14
@@ -107,3 +109,4 @@ ward,first_name,last_name,status,date_nomination
 25,Ashan,Fernando,Active,2026-06-22
 25,Cheryl,Lewis-Thurab,Active,2026-06-16
 25,Jannette,Lumley,Active,2026-05-15
+25,Neethan,Shan,Active,2026-07-15
