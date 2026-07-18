@@ -26,6 +26,7 @@ from backend.model.aggregator import (
 )
 from backend.model.candidates import DECLINED_CANDIDATE_IDS
 from backend.model.coattails import compute_coattail_adjustment
+from backend.model.pool import NOMINATION_CLOSE
 from backend.model.run import DEFAULT_SCENARIO, SCENARIOS
 from backend.model.lean import compute_ward_mayoral_lean
 from backend.model.names import KNOWN_CANDIDATES
@@ -283,6 +284,51 @@ def process_defeatability_full(input_path: Path) -> pd.DataFrame:
 
     return df
 
+
+
+def warn_unregistered_incumbents(
+    defeatability: pd.DataFrame,
+    api_path: Path,
+    reference_date: datetime | None = None,
+    window_days: int = 35,
+) -> list[str]:
+    """Warn when an is_running incumbent is absent from the registration file
+    inside the final `window_days` (the closing ~5 weeks) before nominations close.
+
+    Incumbents commonly file close to the deadline, so a missing registration
+    is only worth flagging late in the window — at which point a still-absent
+    is_running=True councillor may signal a stale flag (they have retired or
+    are running elsewhere) that needs editorial re-verification. Returns the
+    list of "W<ward> <name>" strings flagged (empty if none / outside window).
+    """
+    ref = reference_date or datetime.now(timezone.utc)
+    if not (NOMINATION_CLOSE - pd.Timedelta(days=window_days) <= ref <= NOMINATION_CLOSE):
+        return []
+    if defeatability.empty or not api_path.exists():
+        return []
+
+    reg = pd.read_csv(api_path)
+    reg = reg[reg["status"] == "Active"]
+    registered = {
+        (int(w), f"{f} {l}".lower().strip())
+        for w, f, l in zip(reg["ward"], reg["first_name"], reg["last_name"])
+    }
+    flagged = []
+    for _, row in defeatability.iterrows():
+        if not bool(row.get("is_running", True)):
+            continue
+        key = (int(row["ward"]), str(row["councillor_name"]).lower().strip())
+        if key not in registered:
+            flagged.append(f"W{int(row['ward'])} {row['councillor_name']}")
+
+    if flagged:
+        days_left = (NOMINATION_CLOSE - ref).days
+        print(
+            f"  WARNING: {len(flagged)} is_running incumbent(s) not yet registered "
+            f"with {days_left} day(s) until nominations close "
+            f"({NOMINATION_CLOSE.date()}); re-verify is_running: " + ", ".join(flagged)
+        )
+    return flagged
 
 
 def process_challengers_merged(
@@ -603,6 +649,7 @@ def main() -> None:
             write_processed(merged_challengers, PROCESSED / "challengers.csv")
         else:
             print("  No challengers after merge (councillor_registered.csv may be empty)")
+        warn_unregistered_incumbents(defeatability, councillor_reg_path)
     else:
         print(f"  Skipping challengers merge: {councillor_reg_path} (not found)")
 

@@ -69,6 +69,68 @@ def _defeatability_df(ward: int, councillor_name: str, is_running: bool = True) 
     }])
 
 
+def _councillor_reg(tmp_path, rows):
+    path = tmp_path / "councillor_registered.csv"
+    cols = ["ward", "first_name", "last_name", "status", "date_nomination"]
+    pd.DataFrame(rows, columns=cols).to_csv(path, index=False)
+    return path
+
+
+def test_warn_unregistered_incumbents_flags_absent_running_incumbent(tmp_path):
+    from datetime import datetime, timezone
+    pa = _load_process_all()
+    # Incumbent flagged running but not in the registration file, inside the window.
+    reg = _councillor_reg(tmp_path, [
+        {"ward": 1, "first_name": "Real", "last_name": "Challenger", "status": "Active", "date_nomination": "2026-05-01"},
+    ])
+    defeat = _defeatability_df(1, "Some Incumbent", is_running=True)
+    flagged = pa.warn_unregistered_incumbents(
+        defeat, reg, reference_date=datetime(2026, 8, 1, tzinfo=timezone.utc)
+    )
+    assert flagged == ["W1 Some Incumbent"]
+
+
+def test_warn_unregistered_incumbents_silent_when_registered(tmp_path):
+    from datetime import datetime, timezone
+    pa = _load_process_all()
+    reg = _councillor_reg(tmp_path, [
+        {"ward": 1, "first_name": "Some", "last_name": "Incumbent", "status": "Active", "date_nomination": "2026-08-01"},
+    ])
+    defeat = _defeatability_df(1, "Some Incumbent", is_running=True)
+    flagged = pa.warn_unregistered_incumbents(
+        defeat, reg, reference_date=datetime(2026, 8, 1, tzinfo=timezone.utc)
+    )
+    assert flagged == []
+
+
+def test_warn_unregistered_incumbents_silent_before_window(tmp_path):
+    from datetime import datetime, timezone
+    pa = _load_process_all()
+    reg = _councillor_reg(tmp_path, [
+        {"ward": 1, "first_name": "Real", "last_name": "Challenger", "status": "Active", "date_nomination": "2026-05-01"},
+    ])
+    defeat = _defeatability_df(1, "Some Incumbent", is_running=True)
+    # Early May is well outside the closing window — no warning even though absent.
+    flagged = pa.warn_unregistered_incumbents(
+        defeat, reg, reference_date=datetime(2026, 5, 15, tzinfo=timezone.utc)
+    )
+    assert flagged == []
+
+
+def test_warn_unregistered_incumbents_ignores_not_running(tmp_path):
+    from datetime import datetime, timezone
+    pa = _load_process_all()
+    reg = _councillor_reg(tmp_path, [
+        {"ward": 1, "first_name": "Real", "last_name": "Challenger", "status": "Active", "date_nomination": "2026-05-01"},
+    ])
+    # is_running=False (open seat) — absence is expected, not flagged.
+    defeat = _defeatability_df(1, "Retired Incumbent", is_running=False)
+    flagged = pa.warn_unregistered_incumbents(
+        defeat, reg, reference_date=datetime(2026, 8, 1, tzinfo=timezone.utc)
+    )
+    assert flagged == []
+
+
 def test_process_challengers_merged_empty_api_returns_empty(tmp_path):
     pa = _load_process_all()
     councillor_path = tmp_path / "councillor_registered.csv"
