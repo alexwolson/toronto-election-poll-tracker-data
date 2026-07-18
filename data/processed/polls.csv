@@ -1,10 +1,11 @@
 poll_id,firm,date_conducted,date_published,sample_size,methodology,field_tested,bailao,bradford,chow,furey,ford,mendicino,tory,other,notes
+liaison-2026-06-30,Liaison Strategies,2026-06-30,2026-06-30,1000,IVR,"bradford,chow,other",,0.4,0.49,,,,,0.11,
 mainstreet-2026-06-18,Mainstreet Research,2026-06-18,2026-06-18,1157,ivr/online,"bradford,chow,other",,0.3762,0.4356,,,,,0.1881,
 liaison-2026-05-11,Liaison Strategies,2026-05-11,2026-05-11,1000,IVR,"bradford,chow,other",,0.37,0.5,,,,,0.13,
 liaison-2026-04-13,Liaison Strategies,2026-04-13,2026-04-13,1000,IVR,"bradford,chow,furey,other",,0.35,0.46,0.11,,,,0.08,
 pallas-2026-03-08,Pallas Data,2026-03-08,2026-03-08,735,IVR,"bradford,chow,ford,other",,0.26,0.44,,0.21,,,0.08,
-liaison-2026-03-08,Liaison Strategies,2026-03-08,2026-03-08,1000,IVR,"bradford,chow,ford,furey,other",,0.26,0.44,0.08,0.16,,,0.06,
 pallas-2026-03-08-bradford-v-chow,Pallas Data,2026-03-08,2026-03-08,735,IVR,"bradford,chow",,0.38,0.47,,,,,,
+liaison-2026-03-08,Liaison Strategies,2026-03-08,2026-03-08,1000,IVR,"bradford,chow,ford,furey,other",,0.26,0.44,0.08,0.16,,,0.06,
 mainstreet-2026-02-22,Mainstreet Research,2026-02-22,2026-02-22,802,IVR,"bradford,chow,furey,tory",,0.17,0.43,0.06,,,0.34,,
 liaison-2026-02-02,Liaison Strategies,2026-02-02,2026-02-02,1000,IVR,"bradford,chow,furey,other,tory",,0.18,0.4,0.05,,,0.33,0.04,
 abacus-2026-01-27-bradford-v-chow,Abacus Data,2026-01-27,2026-01-27,1001,IVR,"bradford,chow",,0.38,0.39,,,,,,
