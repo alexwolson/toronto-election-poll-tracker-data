@@ -236,27 +236,31 @@ def compute_consolidation_trend(
     """Is Bradford's anti-Chow pool capture rate rising, stalling, or reversing?
 
     Compares Bradford's unweighted mean capture rate in multi-candidate polls
-    from the past 90 days vs polls older than 90 days.
-    Returns: "consolidating" | "stalling" | "reversing" | "insufficient_data"
+    from the past 90 days vs polls older than 90 days. When the recent window
+    has polling but every poll tests Bradford as the only named challenger,
+    the field has narrowed to a head-to-head race and the trend is the
+    terminal "consolidated" state.
+    Returns: "consolidating" | "stalling" | "reversing" | "consolidated"
+             | "insufficient_data"
     """
     if anti_chow_pool <= 0 or "bradford" not in polls_df.columns:
         return "insufficient_data"
 
     ref = reference_date or datetime.now(timezone.utc)
-    multi = polls_df[
-        polls_df["field_tested"].apply(_count_non_chow_candidates) >= 2
-    ].copy()
+    df = polls_df.copy()
+    df["_date"] = pd.to_datetime(df["date_published"], utc=True, errors="coerce")
+    df = df[df["_date"].notna()]
+    df["_non_chow"] = df["field_tested"].apply(_count_non_chow_candidates)
+    cutoff = ref - pd.Timedelta(days=90)
+
+    multi = df[df["_non_chow"] >= 2]
     if multi.empty:
         return "insufficient_data"
 
-    multi["_date"] = pd.to_datetime(multi["date_published"], utc=True, errors="coerce")
-    multi = multi[multi["_date"].notna()]
-    cutoff = ref - pd.Timedelta(days=90)
-
-    def mean_capture(df: pd.DataFrame) -> float | None:
-        if df.empty:
+    def mean_capture(sub: pd.DataFrame) -> float | None:
+        if sub.empty:
             return None
-        shares = pd.to_numeric(df["bradford"], errors="coerce").dropna()
+        shares = pd.to_numeric(sub["bradford"], errors="coerce").dropna()
         if shares.empty:
             return None
         return float(shares.mean()) / anti_chow_pool
@@ -264,7 +268,19 @@ def compute_consolidation_trend(
     recent_rate = mean_capture(multi[multi["_date"] >= cutoff])
     earlier_rate = mean_capture(multi[multi["_date"] < cutoff])
 
-    if recent_rate is None or earlier_rate is None:
+    if recent_rate is None:
+        # No recent multi-candidate polling. If recent polls exist and test
+        # Bradford as the sole named challenger, the field itself has narrowed
+        # to head-to-head: consolidation is complete, not unmeasurable.
+        recent_h2h = df[
+            (df["_date"] >= cutoff)
+            & (df["_non_chow"] == 1)
+            & pd.to_numeric(df["bradford"], errors="coerce").notna()
+        ]
+        if not recent_h2h.empty:
+            return "consolidated"
+        return "insufficient_data"
+    if earlier_rate is None:
         return "insufficient_data"
 
     delta = recent_rate - earlier_rate

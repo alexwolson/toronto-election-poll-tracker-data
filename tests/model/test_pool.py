@@ -141,7 +141,7 @@ def test_compute_pool_model_returns_all_required_keys():
     assert "bradford" in result["candidates"]
     assert "consolidation_trend" in result
     assert result["consolidation_trend"] in (
-        "consolidating", "stalling", "reversing", "insufficient_data"
+        "consolidating", "stalling", "reversing", "consolidated", "insufficient_data"
     )
     assert "approval" in result
     assert "data_notes" in result
@@ -192,10 +192,37 @@ def test_pool_model_pp_components_non_negative():
 
 
 def test_pool_model_consolidation_trend_is_consolidating():
-    """Bradford's capture rate has risen from ~33% (pre-Jan 2026) to ~60% (post-Jan 2026)."""
+    """Bradford's capture rate has risen from ~33% (pre-Jan 2026) to ~60% (post-Jan 2026).
+
+    Pinned to a mid-June 2026 reference date: the trend needs a multi-candidate
+    poll inside its 90-day recent window, and the last such poll was fielded
+    2026-04-13. With reference_date=now the classification degrades to
+    "insufficient_data" once that poll ages out (from 2026-07-13 onward).
+    """
     from backend.model.pool import compute_pool_model
-    result = compute_pool_model(_load_polls(), _load_approval())
+    ref = datetime(2026, 6, 15, tzinfo=timezone.utc)
+    result = compute_pool_model(_load_polls(), _load_approval(), reference_date=ref)
     assert result["consolidation_trend"] == "consolidating"
+
+
+def test_pool_model_consolidation_trend_consolidated_when_field_is_h2h():
+    """From mid-July 2026 every recent poll tests only Bradford against Chow.
+
+    The field has narrowed to a single named challenger, so the trend is the
+    terminal "consolidated" state — not "insufficient_data".
+    """
+    from backend.model.pool import compute_pool_model
+    ref = datetime(2026, 7, 18, tzinfo=timezone.utc)
+    result = compute_pool_model(_load_polls(), _load_approval(), reference_date=ref)
+    assert result["consolidation_trend"] == "consolidated"
+
+
+def test_pool_model_consolidation_trend_insufficient_without_recent_polls():
+    """With no polls of any kind in the 90-day window there is nothing to classify."""
+    from backend.model.pool import compute_pool_model
+    ref = datetime(2027, 7, 1, tzinfo=timezone.utc)
+    result = compute_pool_model(_load_polls(), _load_approval(), reference_date=ref)
+    assert result["consolidation_trend"] == "insufficient_data"
 
 
 

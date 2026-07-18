@@ -331,6 +331,20 @@ def process_challengers_merged(
             for _, row in ed_df.iterrows():
                 editorial[(int(row["ward"]), row["_name_key"])] = row.to_dict()
 
+    # Editorial rows that match no active registration are inert: the candidate
+    # gets unknown/unaligned defaults and the curated row silently does nothing.
+    # Warn so spelling mismatches vs the city API get caught (rows for people
+    # who simply have not registered yet, e.g. a watched non-candidate, also
+    # appear here — that is expected).
+    api_keys = {(int(r["ward"]), r["_name_key"]) for _, r in api_df.iterrows()}
+    orphans = sorted(set(editorial) - api_keys)
+    if orphans:
+        print(
+            "  WARNING: editorial challenger rows matching no active registration "
+            "(spelling mismatch or unregistered): "
+            + ", ".join(f"W{w} {name}" for w, name in orphans)
+        )
+
     today = datetime.now(timezone.utc).date().isoformat()
     rows = []
     for _, row in api_df.iterrows():

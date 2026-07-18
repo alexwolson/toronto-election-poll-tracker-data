@@ -60,9 +60,45 @@ def test_build_candidate_status_filters_non_active():
 
 def test_build_candidate_status_preserves_potential_and_declined():
     result = build_candidate_status([])
-    assert len(result["potential"]) > 0
     assert len(result["declined"]) > 0
-    assert any(c["id"] == "chow" for c in result["potential"])
+    # Chow registered on 2026-05-25, so she is editorial-declared, not potential.
+    assert not any(c["id"] == "chow" for c in result["potential"])
+
+
+def test_build_candidate_status_chow_is_editorial_declared():
+    record = {"first_name": "Olivia", "last_name": "Chow", "status": "Active"}
+    result = build_candidate_status([record])
+    (chow,) = [c for c in result["declared"] if c["id"] == "chow"]
+    assert chow["name"] == "Olivia Chow"
+    assert chow["summary"]
+
+
+def test_build_candidate_status_id_collision_gets_full_name_slug():
+    records = [
+        {"first_name": "Olivia", "last_name": "Chow", "status": "Active"},
+        {"first_name": "Braeden", "last_name": "Chow", "status": "Active"},
+    ]
+    result = build_candidate_status(records)
+    ids = [c["id"] for c in result["declared"]]
+    assert ids.count("chow") == 1
+    assert "braeden-chow" in ids
+
+
+def test_build_candidate_status_potential_filtered_against_declared():
+    """A stale potential entry for someone who has since registered is dropped."""
+    from backend.model.candidates import CANDIDATE_STATUS
+
+    CANDIDATE_STATUS["potential"].append(
+        {"id": "bradford", "name": "Brad Bradford", "summary": "stale entry"}
+    )
+    try:
+        result = build_candidate_status([BRADFORD_RECORD])
+        assert any(c["id"] == "bradford" for c in result["declared"])
+        assert not any(c["id"] == "bradford" for c in result["potential"])
+    finally:
+        CANDIDATE_STATUS["potential"] = [
+            c for c in CANDIDATE_STATUS["potential"] if c["id"] != "bradford"
+        ]
 
 
 def test_build_candidate_status_unknown_candidate_full_name():

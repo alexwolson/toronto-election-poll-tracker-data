@@ -14,13 +14,7 @@ class CandidateProfile(TypedDict):
 # Editorial potential/declined — people who have NOT filed nomination papers.
 # "declared" is derived dynamically from the city API via build_candidate_status().
 CANDIDATE_STATUS: dict[str, list[CandidateProfile]] = {
-    "potential": [
-        {
-            "id": "chow",
-            "name": "Olivia Chow",
-            "summary": "Incumbent mayor; decision on 2026 run pending.",
-        },
-    ],
+    "potential": [],
     "declined": [
         {
             "id": "furey",
@@ -70,6 +64,11 @@ DECLINED_CANDIDATE_IDS = {candidate["id"] for candidate in CANDIDATE_STATUS["dec
 # Editorial summaries for candidates who may file nomination papers.
 # Keyed by lowercase "firstname lastname". Used by build_candidate_status().
 _CANDIDATE_EDITORIAL: dict[str, CandidateProfile] = {
+    "olivia chow": {
+        "id": "chow",
+        "name": "Olivia Chow",
+        "summary": "Incumbent mayor since 2023; registered for re-election on May 25, 2026.",
+    },
     "brad bradford": {
         "id": "bradford",
         "name": "Brad Bradford",
@@ -91,6 +90,13 @@ def build_candidate_status(
     declared_records: list of dicts with keys first_name, last_name, status.
     Only records with status == 'Active' are included in declared.
     """
+    # Editorial and declined ids are reserved so an API-derived last-name slug
+    # can never collide with them (e.g. Braeden Chow must not get id "chow").
+    used_ids = (
+        {profile["id"] for profile in _CANDIDATE_EDITORIAL.values()}
+        | {profile["id"] for profile in CANDIDATE_STATUS["potential"]}
+        | DECLINED_CANDIDATE_IDS
+    )
     declared: list[CandidateProfile] = []
     for record in declared_records:
         if record.get("status") != "Active":
@@ -99,17 +105,26 @@ def build_candidate_status(
         editorial = _CANDIDATE_EDITORIAL.get(name_key)
         if editorial:
             declared.append(editorial)
-        else:
-            declared.append(
-                {
-                    "id": record["last_name"].lower(),
-                    "name": f"{record['first_name']} {record['last_name']}",
-                    "summary": "",
-                }
-            )
+            continue
+        candidate_id = record["last_name"].lower()
+        if candidate_id in used_ids:
+            candidate_id = name_key.replace(" ", "-")
+        used_ids.add(candidate_id)
+        declared.append(
+            {
+                "id": candidate_id,
+                "name": f"{record['first_name']} {record['last_name']}",
+                "summary": "",
+            }
+        )
 
+    declared_ids = {profile["id"] for profile in declared}
     return {
         "declared": declared,
-        "potential": CANDIDATE_STATUS["potential"],
+        "potential": [
+            profile
+            for profile in CANDIDATE_STATUS["potential"]
+            if profile["id"] not in declared_ids
+        ],
         "declined": CANDIDATE_STATUS["declined"],
     }
