@@ -2,7 +2,7 @@ ward,councillor_name,election_year,is_byelection_incumbent,is_running,vote_share
 1,Vincent Crisanti,2022,false,true,0.4107,0.0963,58,New Voter Margin: +2531,2026-03-10
 2,Stephen Holyday,2022,false,true,0.7228,0.2074,14,New Voter Margin: -8628,2026-03-10
 3,Amber Morley,2022,false,true,0.4644,0.1486,50,New Voter Margin: +7048,2026-03-10
-4,Gord Perks,2022,false,false,0.3548,0.1330,54,Perks not seeking re-election; Ward is Open,2026-04-30
+4,Gord Perks,2022,false,false,0.3548,0.1330,54,Perks not seeking re-election (announced 2026-04-30); Ward is Open; endorsed no successor as of 2026-07-18,2026-07-18
 5,Frances Nunziata,2022,false,true,0.4761,0.1310,53,New Voter Margin: +5709,2026-03-10
 6,James Pasternak,2022,false,true,0.7353,0.1784,22,New Voter Margin: -1660,2026-03-10
 7,Anthony Perruzza,2022,false,true,0.6130,0.1316,38,New Voter Margin: +1086,2026-07-18
@@ -17,7 +17,7 @@ ward,councillor_name,election_year,is_byelection_incumbent,is_running,vote_share
 16,Jon Burnside,2022,false,true,0.4468,0.1323,51,New Voter Margin: +2822,2026-03-10
 17,Shelley Carroll,2022,false,true,0.7179,0.1829,25,New Voter Margin: -82,2026-03-10
 18,Lily Cheng,2022,false,true,0.4172,0.1191,64,New Voter Margin: +12457,2026-07-18
-19,Brad Bradford,2022,false,false,0.5471,0.1950,26,Bradford running for Mayor; Ward is Open,2026-03-10
+19,Brad Bradford,2022,false,false,0.5471,0.1950,26,Bradford running for Mayor; Ward is Open; endorsed no successor as of 2026-07-18,2026-07-18
 20,Parthi Kandavel,2023,true,true,0.2734,0.0588,66,"New Voter Margin: +2187; Elected in by-election; under OPP investigation (Kennedy Rd development, confirmed May 2026) and not yet registered — 2026 intention unconfirmed, monitor",2026-07-18
 21,Michael Thompson,2022,false,true,0.5525,0.1400,34,New Voter Margin: +548,2026-07-18
 22,Nick Mantas,2022,false,true,0.4889,0.1226,47,New Voter Margin: +1331,2026-07-18
