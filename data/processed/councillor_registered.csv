@@ -37,7 +37,7 @@ ward,first_name,last_name,status,date_nomination
 9,Neil,Simon,Active,2026-06-12
 10,Ian,Cunningham,Active,2026-07-08
 10,Xue,Ding,Active,2026-06-22
-10,Andi,Hoang-Lefranc,Active,2026-06-18
+10,Andi,Hoàng-Lefranc,Active,2026-06-18
 10,Bashar,Kassir,Active,2026-05-08
 10,Ausma,Malik,Active,2026-07-07
 10,Paul,Nash,Active,2026-05-01
@@ -102,6 +102,7 @@ ward,first_name,last_name,status,date_nomination
 22,Bill,Chan,Active,2026-07-15
 22,Jackson,Ho,Active,2026-06-12
 22,Dan,Lovell,Active,2026-05-01
+22,Nick,Mantas,Active,2026-07-20
 22,Donny,Morgan,Active,2026-06-19
 23,Han,Dong,Active,2026-06-17
 23,Sajawal,Javed,Active,2026-07-15
@@ -112,4 +113,5 @@ ward,first_name,last_name,status,date_nomination
 25,Ashan,Fernando,Active,2026-06-22
 25,Cheryl,Lewis-Thurab,Active,2026-06-16
 25,Jannette,Lumley,Active,2026-05-15
+25,Zakir,Patel,Active,2026-07-20
 25,Neethan,Shan,Active,2026-07-15
