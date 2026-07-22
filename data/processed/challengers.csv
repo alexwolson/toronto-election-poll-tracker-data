@@ -30,7 +30,7 @@ ward,candidate_name,name_recognition_tier,mayoral_alignment,endorsements,notes,l
 9,Neil Simon,unknown,unaligned,,,2026-07-18
 10,Ian Cunningham,unknown,unaligned,,,2026-07-18
 10,Xue Ding,unknown,unaligned,,Business consultant with campaign site; possible 2022 registration but absent from official 2022 results (unverified),2026-07-18
-10,Andi Hoàng-Lefranc,unknown,unaligned,,,2026-07-21
+10,Andi Hoàng-Lefranc,unknown,unaligned,,,2026-07-22
 10,Bashar Kassir,unknown,unaligned,,,2026-05-19
 10,Paul Nash,unknown,unaligned,,,2026-05-19
 10,Husain Neemuchwala,unknown,unaligned,,,2026-05-19
@@ -56,6 +56,7 @@ ward,candidate_name,name_recognition_tier,mayoral_alignment,endorsements,notes,l
 13,Nicki Ward,well-known,unaligned,,Former president of a housing co-op; runner-up in Ward 13 in the 2022 election; Green Party candidate in Toronto Centre in the 2022 provincial election; not among top three named in Forum Ward 13 poll of 2026-06-23 (implies <=6% decided) — watch for tier downgrade if a second poll confirms,2026-05-07
 14,Susan Chapelle,known,unaligned,,"Former two-term District of Squamish, BC councillor (served through 2018; per Squamish Chief elected 2011 and 2014); finished third in the 2018 Squamish mayoral race with 1,674 votes (~24%). Has since moved to Toronto, practices as an RMT in the East Danforth area, and registered in Ward 14 on June 1, 2026. Campaign site (electsusanchapelle.com) self-describes as ""two-term elected municipal councillor""; no Toronto-area elected office, no endorsements, no slate or mayoral-camp affiliation found.",2026-07-18
 14,Jason Stevens,unknown,unaligned,,"Likely but unconfirmed match to Toronto perennial candidate Jason Stevens (2010 old Ward 19 Trinity-Spadina: 121 votes, 0.60%, last of 9; 2024 Ward 15 DVW by-election: 70 votes, 0.30%, in the 16-candidate field won by Rachel Chernos Lin; McMaster Students Union president 1994; small food business owner). No source directly ties the Ward 14 registrant to that record — identity certainty low, so tier defaults to unknown per spec.",2026-07-18
+15,Sheena Sharp,unknown,unaligned,,,2026-07-22
 16,Sinan Erdemir,unknown,unaligned,,Possibly a director of the Federation of Canadian Turkish Associations (registry listing only); no public profile found,2026-07-18
 16,Stacey Moffatt,unknown,unaligned,,,2026-07-18
 17,Jeffery Adamson,unknown,unaligned,,,2026-07-18
@@ -99,4 +100,4 @@ ward,candidate_name,name_recognition_tier,mayoral_alignment,endorsements,notes,l
 25,Ashan Fernando,known,unaligned,,"Third run in this ward: 2022 (1,984 votes, 10.12%, third of three) and 2025 byelection (182 votes, 0.94%, 20-candidate field). Surrey Place board member since 2022; disability and mental-health advocate; paralegal student. Sought 2016 provincial Liberal nomination (lost). No Chow/Bradford ties.",2026-07-18
 25,Cheryl Lewis-Thurab,known,unaligned,,"Ran for council in Ward 25 Scarborough-Rouge Park in 2018, taking 638 votes (2.21%, 5th of 6) — verified via Wikipedia official results and Global News 2018 candidate list. Repeat candidate in the same ward. Cited coaching-business bio (cltcoaching.com) is offline (404); leadership-coach/DEI-advocate background unverified and not load-bearing for tier.",2026-07-18
 25,Jannette Lumley,unknown,unaligned,,Business consultant / Reggaelution Talk Show host; no verified prior run; niche media presence not judged significant.,2026-07-18
-25,Zakir Patel,unknown,unaligned,,,2026-07-21
+25,Zakir Patel,unknown,unaligned,,,2026-07-22
