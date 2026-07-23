@@ -7,6 +7,7 @@ ward,first_name,last_name,status,date_nomination
 2,Jennifer,Alexander,Active,2026-05-01
 2,Stephen,Holyday,Active,2026-07-10
 3,Anthony,Internicola,Active,2026-06-11
+3,Cody,MacRae,Active,2026-07-22
 3,Amber,Morley,Active,2026-07-13
 3,Ted,Opitz,Active,2026-06-09
 4,Michael,Corcoran,Active,2026-06-19
@@ -63,9 +64,11 @@ ward,first_name,last_name,status,date_nomination
 13,Walied,Khogali Ali,Active,2026-05-01
 13,Chris,Moise,Active,2026-07-20
 13,Curran,Stikuts,Active,2026-05-01
+13,Daniel,Tate,Active,2026-07-22
 13,Nicki,Ward,Active,2026-05-01
 14,Susan,Chapelle,Active,2026-06-01
 14,Jason,Stevens,Active,2026-05-29
+15,Rachel,Chernos Lin,Active,2026-07-22
 15,Sheena,Sharp,Active,2026-07-21
 16,Jon,Burnside,Active,2026-06-02
 16,Sinan,Erdemir,Active,2026-06-18
@@ -98,10 +101,12 @@ ward,first_name,last_name,status,date_nomination
 21,Taiba,Ahmed,Active,2026-05-08
 21,Patience,Evbagharu,Active,2026-06-24
 21,Madura,Shanmugaratnam,Active,2026-05-11
+21,Michael,Thompson,Active,2026-07-22
 21,Krissan,Veerasingam,Active,2026-05-01
 22,Madhuri,Azad,Active,2026-05-19
 22,Bill,Chan,Active,2026-07-15
 22,Jackson,Ho,Active,2026-06-12
+22,Rakhee,Kotecha,Active,2026-07-22
 22,Dan,Lovell,Active,2026-05-01
 22,Nick,Mantas,Active,2026-07-20
 22,Donny,Morgan,Active,2026-06-19
@@ -110,6 +115,7 @@ ward,first_name,last_name,status,date_nomination
 23,Kevin,Li,Active,2026-05-01
 23,Jamaal,Myers,Active,2026-05-19
 23,John-Mark,Oleh,Active,2026-07-14
+24,Rajinder,Lall,Active,2026-07-22
 25,Shawn,Allen,Active,2026-05-01
 25,Ashan,Fernando,Active,2026-06-22
 25,Cheryl,Lewis-Thurab,Active,2026-06-16
