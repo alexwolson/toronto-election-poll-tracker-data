@@ -1,6 +1,8 @@
 """Tests for the Phase 1 mayoral pool model."""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 from pathlib import Path
+
 import pandas as pd
 
 _REPO_ROOT = Path(__file__).parent.parent.parent
@@ -35,6 +37,7 @@ def test_approval_rows_sum_to_one():
 def test_compute_chow_floor_returns_value_in_range():
     """Floor from full-field polls (3+ non-Chow candidates, n≥500) should be 37-44%."""
     from backend.model.pool import compute_chow_floor
+
     floor = compute_chow_floor(_load_polls())
     assert 0.37 <= floor <= 0.44, f"floor={floor:.3f} — expected 0.37-0.44"
 
@@ -42,30 +45,41 @@ def test_compute_chow_floor_returns_value_in_range():
 def test_compute_chow_floor_ignores_h2h_polls():
     """A dataframe containing only H2H polls returns 0.0."""
     from backend.model.pool import compute_chow_floor
-    h2h_only = pd.DataFrame([{
-        "date_published": "2026-03-08",
-        "field_tested": "bradford,chow",
-        "chow": 0.47,
-        "sample_size": 735,
-    }])
+
+    h2h_only = pd.DataFrame(
+        [
+            {
+                "date_published": "2026-03-08",
+                "field_tested": "bradford,chow",
+                "chow": 0.47,
+                "sample_size": 735,
+            }
+        ]
+    )
     assert compute_chow_floor(h2h_only) == 0.0
 
 
 def test_compute_chow_floor_ignores_small_sample_polls():
     """Polls with sample_size < 500 are excluded from floor estimation."""
     from backend.model.pool import compute_chow_floor
-    small_sample = pd.DataFrame([{
-        "date_published": "2025-10-06",
-        "field_tested": "bradford,chow,furey,tory,other",
-        "chow": 0.29,
-        "sample_size": 406,
-    }])
+
+    small_sample = pd.DataFrame(
+        [
+            {
+                "date_published": "2025-10-06",
+                "field_tested": "bradford,chow,furey,tory,other",
+                "chow": 0.29,
+                "sample_size": 406,
+            }
+        ]
+    )
     assert compute_chow_floor(small_sample) == 0.0
 
 
 def test_compute_current_h2h_chow_uses_bradford_matchup_only():
     """H2H Chow share uses only Bradford vs Chow polls, not Tory vs Chow."""
     from backend.model.pool import compute_current_h2h_chow
+
     result = compute_current_h2h_chow(_load_polls())
     # Most recent Bradford H2H (Mar 8): Chow 47% — should dominate with 12-day half-life
     assert result is not None
@@ -76,19 +90,28 @@ def test_compute_current_approval_reflects_recent_data():
     """Approval weighted average must track the newest readings, not the
     dormant 2023-25 Liaison backlog (June 2026 Mainstreet: 41/56/3)."""
     from backend.model.pool import compute_current_approval
+
     result = compute_current_approval(_load_approval())
     assert 0.38 <= result["approve"] <= 0.50, f"approve={result['approve']:.3f}"
-    assert 0.45 <= result["disapprove"] <= 0.60, f"disapprove={result['disapprove']:.3f}"
+    assert 0.45 <= result["disapprove"] <= 0.60, (
+        f"disapprove={result['disapprove']:.3f}"
+    )
 
 
 # --- exponential decay weights (dormant-series behaviour) ---
 
+
 def test_decay_weights_fresh_reading_outweighs_dormant_backlog():
     """One fresh reading must outweigh 30 stale monthly rows combined —
     the harmonic-rank weighting regression this replaces."""
-    from backend.model.pool import _decay_weights, APPROVAL_HALF_LIFE_DAYS
-    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
-    stale = pd.date_range("2023-06-01", "2025-11-01", freq="MS").strftime("%Y-%m-%d").tolist()
+    from backend.model.pool import APPROVAL_HALF_LIFE_DAYS, _decay_weights
+
+    ref = datetime(2026, 7, 1, tzinfo=UTC)
+    stale = (
+        pd.date_range("2023-06-01", "2025-11-01", freq="MS")
+        .strftime("%Y-%m-%d")
+        .tolist()
+    )
     dates = pd.Series(stale + ["2026-06-18"])
     weights = _decay_weights(dates, APPROVAL_HALF_LIFE_DAYS, ref)
     assert weights.iloc[-1] > weights.iloc[:-1].sum()
@@ -96,7 +119,8 @@ def test_decay_weights_fresh_reading_outweighs_dormant_backlog():
 
 def test_decay_weights_halve_per_half_life():
     from backend.model.pool import _decay_weights
-    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+
+    ref = datetime(2026, 7, 1, tzinfo=UTC)
     dates = pd.Series(["2026-07-01", "2026-06-01"])  # 0 and 30 days old
     weights = _decay_weights(dates, 30.0, ref)
     assert abs(weights.iloc[0] - 1.0) < 1e-9
@@ -105,7 +129,8 @@ def test_decay_weights_halve_per_half_life():
 
 def test_decay_weights_nan_dates_get_zero():
     from backend.model.pool import _decay_weights
-    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+
+    ref = datetime(2026, 7, 1, tzinfo=UTC)
     weights = _decay_weights(pd.Series(["2026-07-01", None]), 30.0, ref)
     assert weights.iloc[1] == 0.0
 
@@ -114,17 +139,36 @@ def test_compute_current_approval_dormant_series_tracks_fresh_reading():
     """Synthetic: a year of 55/38 monthly rows gone dormant, then one 41/56
     reading two weeks ago — the estimate must land near the fresh reading."""
     from backend.model.pool import compute_current_approval
-    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+
+    ref = datetime(2026, 7, 1, tzinfo=UTC)
     months = pd.date_range("2025-02-01", "2026-01-01", freq="MS").strftime("%Y-%m-%d")
-    rows = [{"date": d, "approve": 0.55, "disapprove": 0.38, "not_sure": 0.07} for d in months]
-    rows.append({"date": "2026-06-18", "approve": 0.408, "disapprove": 0.560, "not_sure": 0.032})
+    rows = [
+        {"date": d, "approve": 0.55, "disapprove": 0.38, "not_sure": 0.07}
+        for d in months
+    ]
+    rows.append(
+        {"date": "2026-06-18", "approve": 0.408, "disapprove": 0.560, "not_sure": 0.032}
+    )
     result = compute_current_approval(pd.DataFrame(rows), ref)
-    assert result["approve"] < 0.46, f"approve={result['approve']:.3f} - stale rows still dominating"
+    assert result["approve"] < 0.46, (
+        f"approve={result['approve']:.3f} - stale rows still dominating"
+    )
     assert result["disapprove"] > 0.50, f"disapprove={result['disapprove']:.3f}"
+
+
+def test_compute_candidate_capture_rates_tracks_alexander():
+    """Alexander registered July 29, 2026. No poll has fielded him yet, so he
+    must appear with a zero share rather than be absent from the pool model."""
+    from backend.model.pool import ANTI_CHOW_CANDIDATES, compute_candidate_capture_rates
+
+    assert "alexander" in ANTI_CHOW_CANDIDATES
+    result = compute_candidate_capture_rates(_load_polls(), anti_chow_pool=0.38)
+    assert result["alexander"] == {"share": 0.0, "capture_rate": 0.0}
 
 
 def test_compute_candidate_capture_rates_has_bradford():
     from backend.model.pool import compute_candidate_capture_rates
+
     result = compute_candidate_capture_rates(_load_polls(), anti_chow_pool=0.38)
     assert "bradford" in result
     assert 0.0 <= result["bradford"]["share"] <= 0.60
@@ -133,15 +177,25 @@ def test_compute_candidate_capture_rates_has_bradford():
 
 def test_compute_pool_model_returns_all_required_keys():
     from backend.model.pool import compute_pool_model
+
     result = compute_pool_model(_load_polls(), _load_approval())
     assert result["phase_mode"] in ("pre_nomination", "post_nomination")
-    for key in ("chow_floor", "chow_ceiling", "anti_chow_pool",
-                "protective_progressive_activated", "protective_progressive_reserve"):
+    for key in (
+        "chow_floor",
+        "chow_ceiling",
+        "anti_chow_pool",
+        "protective_progressive_activated",
+        "protective_progressive_reserve",
+    ):
         assert key in result["pool"], f"Missing pool key: {key}"
     assert "bradford" in result["candidates"]
     assert "consolidation_trend" in result
     assert result["consolidation_trend"] in (
-        "consolidating", "stalling", "reversing", "consolidated", "insufficient_data"
+        "consolidating",
+        "stalling",
+        "reversing",
+        "consolidated",
+        "insufficient_data",
     )
     assert "approval" in result
     assert "data_notes" in result
@@ -149,6 +203,7 @@ def test_compute_pool_model_returns_all_required_keys():
 
 def test_pool_model_floor_below_ceiling():
     from backend.model.pool import compute_pool_model
+
     result = compute_pool_model(_load_polls(), _load_approval())
     assert result["pool"]["chow_floor"] < result["pool"]["chow_ceiling"]
 
@@ -158,6 +213,7 @@ def test_pool_model_ceiling_is_complement_of_anti_chow_pool():
     Approval is not a vote-share ceiling: Chow's June 2026 polling exceeded
     her approval, which made the old definition display a contradiction."""
     from backend.model.pool import compute_pool_model
+
     result = compute_pool_model(_load_polls(), _load_approval())
     pool = result["pool"]
     assert abs(pool["chow_ceiling"] - (1.0 - pool["anti_chow_pool"])) < 1e-3
@@ -167,6 +223,7 @@ def test_pool_model_ceiling_is_complement_of_anti_chow_pool():
 def test_pool_model_ceiling_not_below_current_polling():
     """The redefined ceiling must sit above current support (the confusion fix)."""
     from backend.model.pool import compute_pool_model
+
     result = compute_pool_model(_load_polls(), _load_approval())
     pool = result["pool"]
     if pool["chow_h2h_current"] is not None:
@@ -176,6 +233,7 @@ def test_pool_model_ceiling_not_below_current_polling():
 def test_pool_model_exposes_signed_approval_gap():
     """approve - current support, signed; negative = reluctant support."""
     from backend.model.pool import compute_pool_model
+
     result = compute_pool_model(_load_polls(), _load_approval())
     pool = result["pool"]
     assert "chow_approval_gap" in pool
@@ -185,6 +243,7 @@ def test_pool_model_exposes_signed_approval_gap():
 
 def test_pool_model_pp_components_non_negative():
     from backend.model.pool import compute_pool_model
+
     result = compute_pool_model(_load_polls(), _load_approval())
     assert result["pool"]["protective_progressive_activated"] >= 0.0
     assert result["pool"]["protective_progressive_reserve"] >= 0.0
@@ -200,7 +259,8 @@ def test_pool_model_consolidation_trend_is_consolidating():
     "insufficient_data" once that poll ages out (from 2026-07-13 onward).
     """
     from backend.model.pool import compute_pool_model
-    ref = datetime(2026, 6, 15, tzinfo=timezone.utc)
+
+    ref = datetime(2026, 6, 15, tzinfo=UTC)
     result = compute_pool_model(_load_polls(), _load_approval(), reference_date=ref)
     assert result["consolidation_trend"] == "consolidating"
 
@@ -212,7 +272,8 @@ def test_pool_model_consolidation_trend_consolidated_when_field_is_h2h():
     terminal "consolidated" state — not "insufficient_data".
     """
     from backend.model.pool import compute_pool_model
-    ref = datetime(2026, 7, 18, tzinfo=timezone.utc)
+
+    ref = datetime(2026, 7, 18, tzinfo=UTC)
     result = compute_pool_model(_load_polls(), _load_approval(), reference_date=ref)
     assert result["consolidation_trend"] == "consolidated"
 
@@ -220,10 +281,10 @@ def test_pool_model_consolidation_trend_consolidated_when_field_is_h2h():
 def test_pool_model_consolidation_trend_insufficient_without_recent_polls():
     """With no polls of any kind in the 90-day window there is nothing to classify."""
     from backend.model.pool import compute_pool_model
-    ref = datetime(2027, 7, 1, tzinfo=timezone.utc)
+
+    ref = datetime(2027, 7, 1, tzinfo=UTC)
     result = compute_pool_model(_load_polls(), _load_approval(), reference_date=ref)
     assert result["consolidation_trend"] == "insufficient_data"
-
 
 
 # ── poll_detail ────────────────────────────────────────────────
@@ -231,6 +292,7 @@ def test_pool_model_consolidation_trend_insufficient_without_recent_polls():
 
 def test_poll_detail_keys_present():
     from backend.model.pool import compute_pool_model
+
     result = compute_pool_model(_load_polls(), _load_approval())
     assert "poll_detail" in result
     pd_keys = {"approval_polls", "floor_polls", "h2h_polls", "capture_polls"}
@@ -239,11 +301,19 @@ def test_poll_detail_keys_present():
 
 def test_poll_detail_approval_polls_shape():
     from backend.model.pool import compute_pool_model
+
     detail = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]
     polls = detail["approval_polls"]
     assert len(polls) > 0
     for row in polls:
-        assert set(row.keys()) == {"date", "firm", "approve", "disapprove", "not_sure", "weight"}
+        assert set(row.keys()) == {
+            "date",
+            "firm",
+            "approve",
+            "disapprove",
+            "not_sure",
+            "weight",
+        }
         assert 0.0 <= row["approve"] <= 1.0
         assert 0.0 <= row["disapprove"] <= 1.0
         assert 0.0 <= row["not_sure"] <= 1.0
@@ -253,48 +323,79 @@ def test_poll_detail_approval_polls_shape():
 def test_poll_detail_approval_polls_weight_normalised():
     """Most recent approval poll must have weight 1.0."""
     from backend.model.pool import compute_pool_model
-    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]["approval_polls"]
+
+    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
+        "approval_polls"
+    ]
     assert polls[0]["weight"] == 1.0, "First row (most recent) should have weight 1.0"
 
 
 def test_poll_detail_approval_polls_sorted_descending():
     from backend.model.pool import compute_pool_model
-    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]["approval_polls"]
+
+    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
+        "approval_polls"
+    ]
     dates = [r["date"] for r in polls]
-    assert dates == sorted(dates, reverse=True), "approval_polls should be sorted date desc"
+    assert dates == sorted(dates, reverse=True), (
+        "approval_polls should be sorted date desc"
+    )
 
 
 def test_poll_detail_floor_polls_sorted_descending():
     from backend.model.pool import compute_pool_model
-    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]["floor_polls"]
+
+    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
+        "floor_polls"
+    ]
     if len(polls) > 1:
         dates = [r["date"] for r in polls]
-        assert dates == sorted(dates, reverse=True), "floor_polls should be sorted date desc"
+        assert dates == sorted(dates, reverse=True), (
+            "floor_polls should be sorted date desc"
+        )
 
 
 def test_poll_detail_h2h_polls_sorted_descending():
     from backend.model.pool import compute_pool_model
-    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]["h2h_polls"]
+
+    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
+        "h2h_polls"
+    ]
     if len(polls) > 1:
         dates = [r["date"] for r in polls]
-        assert dates == sorted(dates, reverse=True), "h2h_polls should be sorted date desc"
+        assert dates == sorted(dates, reverse=True), (
+            "h2h_polls should be sorted date desc"
+        )
 
 
 def test_poll_detail_capture_polls_sorted_descending():
     from backend.model.pool import compute_pool_model
-    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]["capture_polls"]
+
+    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
+        "capture_polls"
+    ]
     if len(polls) > 1:
         dates = [r["date"] for r in polls]
-        assert dates == sorted(dates, reverse=True), "capture_polls should be sorted date desc"
+        assert dates == sorted(dates, reverse=True), (
+            "capture_polls should be sorted date desc"
+        )
 
 
 def test_poll_detail_floor_polls_shape():
     from backend.model.pool import compute_pool_model
+
     detail = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]
     polls = detail["floor_polls"]
     assert len(polls) > 0
     for row in polls:
-        assert set(row.keys()) == {"date", "firm", "field_tested", "chow", "sample_size", "candidate_weight"}
+        assert set(row.keys()) == {
+            "date",
+            "firm",
+            "field_tested",
+            "chow",
+            "sample_size",
+            "candidate_weight",
+        }
         assert 0.0 <= row["chow"] <= 1.0
         assert row["sample_size"] >= 500
         assert row["candidate_weight"] >= 3  # FULL_FIELD_THRESHOLD non-Chow candidates
@@ -302,46 +403,66 @@ def test_poll_detail_floor_polls_shape():
 
 def test_poll_detail_h2h_polls_shape():
     from backend.model.pool import compute_pool_model
+
     detail = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]
     polls = detail["h2h_polls"]
     assert len(polls) > 0
     for row in polls:
-        assert set(row.keys()) == {"date", "firm", "chow", "bradford", "sample_size", "recency_weight"}
+        assert set(row.keys()) == {
+            "date",
+            "firm",
+            "chow",
+            "bradford",
+            "sample_size",
+            "recency_weight",
+        }
         assert 0.0 <= row["chow"] <= 1.0
         assert 0.0 <= row["recency_weight"] <= 1.0
 
 
 def test_poll_detail_h2h_polls_weight_normalised():
     from backend.model.pool import compute_pool_model
-    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]["h2h_polls"]
+
+    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
+        "h2h_polls"
+    ]
     assert polls[0]["recency_weight"] == 1.0
 
 
 def test_poll_detail_capture_polls_shape():
     from backend.model.pool import compute_pool_model
+
     detail = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]
     polls = detail["capture_polls"]
     assert len(polls) > 0
     for row in polls:
-        assert set(row.keys()) == {"date", "firm", "field_tested", "bradford", "recency_weight"}
+        assert set(row.keys()) == {
+            "date",
+            "firm",
+            "field_tested",
+            "bradford",
+            "recency_weight",
+        }
         assert 0.0 <= row["bradford"] <= 1.0
         assert 0.0 <= row["recency_weight"] <= 1.0
 
 
 def test_poll_detail_capture_polls_weight_normalised():
     from backend.model.pool import compute_pool_model
-    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]["capture_polls"]
+
+    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
+        "capture_polls"
+    ]
     assert polls[0]["recency_weight"] == 1.0
-
-
-
 
 
 # --- phase mode is date-aware (flips when nominations close Aug 21, 2026) ---
 
+
 def test_phase_mode_pre_nomination_before_close():
     from backend.model.pool import compute_pool_model
-    ref = datetime(2026, 7, 1, tzinfo=timezone.utc)
+
+    ref = datetime(2026, 7, 1, tzinfo=UTC)
     result = compute_pool_model(_load_polls(), _load_approval(), ref)
     assert result["phase_mode"] == "pre_nomination"
     assert "close August 21, 2026" in result["phase_mode_context"]
@@ -349,7 +470,8 @@ def test_phase_mode_pre_nomination_before_close():
 
 def test_phase_mode_post_nomination_after_close():
     from backend.model.pool import compute_pool_model
-    ref = datetime(2026, 8, 22, tzinfo=timezone.utc)
+
+    ref = datetime(2026, 8, 22, tzinfo=UTC)
     result = compute_pool_model(_load_polls(), _load_approval(), ref)
     assert result["phase_mode"] == "post_nomination"
     assert "final" in result["phase_mode_context"]
@@ -358,8 +480,9 @@ def test_phase_mode_post_nomination_after_close():
 def test_phase_mode_boundary_is_nomination_close():
     """2 p.m. ET on nomination day (18:00 UTC) is the cutover."""
     from backend.model.pool import compute_pool_model
-    just_before = datetime(2026, 8, 21, 17, 59, tzinfo=timezone.utc)
-    just_after = datetime(2026, 8, 21, 18, 1, tzinfo=timezone.utc)
+
+    just_before = datetime(2026, 8, 21, 17, 59, tzinfo=UTC)
+    just_after = datetime(2026, 8, 21, 18, 1, tzinfo=UTC)
     pre = compute_pool_model(_load_polls(), _load_approval(), just_before)
     post = compute_pool_model(_load_polls(), _load_approval(), just_after)
     assert pre["phase_mode"] == "pre_nomination"

@@ -1,4 +1,5 @@
 """Tests for fetch_polls.py parsing logic."""
+
 from __future__ import annotations
 
 import importlib.util
@@ -73,10 +74,38 @@ def test_firm_slug_unknown(fp):
 
 
 def test_candidate_col_names_maps_known(fp):
-    headers = ["Polling Firm", "Methodology", "Poll Date", "Sample Size", "MOE",
-               "Bradford", "Chow", "Lead"]
+    headers = [
+        "Polling Firm",
+        "Methodology",
+        "Poll Date",
+        "Sample Size",
+        "MOE",
+        "Bradford",
+        "Chow",
+        "Lead",
+    ]
     result = fp._candidate_col_names(headers)
     assert result == {"Bradford": "bradford", "Chow": "chow"}
+
+
+def test_candidate_col_names_maps_alexander_full_name(fp):
+    """Wikipedia uses full names; without an explicit mapping the slug fallback
+    would produce 'chris_alexander' and the model would never see the column."""
+    headers = ["Polling Firm", "Poll Date", "Chris Alexander", "Olivia Chow"]
+    result = fp._candidate_col_names(headers)
+    assert result == {"Chris Alexander": "alexander", "Olivia Chow": "chow"}
+
+
+def test_candidate_col_names_maps_alexander_short_name(fp):
+    headers = ["Polling Firm", "Poll Date", "Alexander", "Chow"]
+    result = fp._candidate_col_names(headers)
+    assert result == {"Alexander": "alexander", "Chow": "chow"}
+
+
+def test_alexander_in_all_candidate_cols(fp):
+    """Must be a known column so it orders with the rest instead of being
+    appended as an unrecognised extra."""
+    assert "alexander" in fp.ALL_CANDIDATE_COLS
 
 
 def test_candidate_col_names_skips_metadata(fp):
@@ -84,7 +113,7 @@ def test_candidate_col_names_skips_metadata(fp):
     assert fp._candidate_col_names(headers) == {}
 
 
-def _make_table(headers: list[str]) -> "BeautifulSoup":
+def _make_table(headers: list[str]) -> BeautifulSoup:
     ths = "".join(f"<th>{h}</th>" for h in headers)
     html = f"<table class='wikitable'><tbody><tr>{ths}</tr></tbody></table>"
     return BeautifulSoup(html, "lxml").find("table")
@@ -261,7 +290,7 @@ def test_parse_polls_methodology_ivr_preserved(fp):
 
 
 def test_parse_table_skips_mismatched_rows(fp):
-    from bs4 import BeautifulSoup
+
     # Table where second data row has one fewer cell (rowspan artifact)
     html = """<html><body><table class="wikitable"><tbody>
     <tr><th>Polling Firm</th><th>Poll Date</th><th>Sample Size</th><th>MOE</th><th>Bradford</th><th>Chow</th><th>Lead</th></tr>
@@ -273,8 +302,8 @@ def test_parse_table_skips_mismatched_rows(fp):
 
 
 import json
-import pandas as pd
 
+import pandas as pd
 
 MINIMAL_ROWS = [
     {
@@ -381,6 +410,7 @@ def test_parse_share_dash_n_slash_a(fp):
 
 def test_is_polling_table_skips_section_header_row(fp):
     from bs4 import BeautifulSoup
+
     html = """<html><body><table class="wikitable"><tbody>
     <tr><th colspan="8">Head-to-head matchups</th></tr>
     <tr><th>Polling Firm</th><th>Poll Date</th><th>Sample Size</th><th>MOE</th><th>Bradford</th><th>Chow</th><th>Lead</th></tr>
@@ -391,7 +421,7 @@ def test_is_polling_table_skips_section_header_row(fp):
 
 
 def test_parse_table_firm_name_normalised_from_alias(fp):
-    from bs4 import BeautifulSoup
+
     # Wikipedia uses "Pallas" (alias) in some tables; should normalise to "Pallas Data"
     html = """<html><body><table class="wikitable"><tbody>
     <tr><th>Polling Firm</th><th>Poll Date</th><th>Sample Size</th><th>MOE</th><th>Bradford</th><th>Chow</th><th>Lead</th></tr>

@@ -74,6 +74,14 @@ _CANDIDATE_EDITORIAL: dict[str, CandidateProfile] = {
         "name": "Brad Bradford",
         "summary": "Ward 19 city councillor since 2018 and declared 2026 mayoral candidate.",
     },
+    "chris alexander": {
+        "id": "alexander",
+        "name": "Chris Alexander",
+        "summary": (
+            "Former Conservative MP for Ajax—Pickering and Harper-era minister "
+            "of citizenship and immigration; registered for mayor on July 29, 2026."
+        ),
+    },
     "lyall sanders": {
         "id": "sanders",
         "name": "Lyall Sanders",

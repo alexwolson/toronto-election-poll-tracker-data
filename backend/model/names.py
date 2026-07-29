@@ -14,6 +14,10 @@ _REGISTRY: dict[str, str] = {
     "brad bradford": "bradford",
     "bradford brad": "bradford",
     "bradford": "bradford",
+    # Chris Alexander
+    "chris alexander": "alexander",
+    "alexander chris": "alexander",
+    "alexander": "alexander",
     # Ana Bailao
     "ana bailão": "bailao",
     "bailão ana": "bailao",

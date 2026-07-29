@@ -1,9 +1,9 @@
 # tests/model/test_candidates.py
 """Tests for candidates.py build_candidate_status function."""
+
 from __future__ import annotations
 
 from backend.model.candidates import build_candidate_status
-
 
 BRADFORD_RECORD = {
     "first_name": "Brad",
@@ -23,6 +23,28 @@ WITHDRAWN_RECORD = {
     "status": "Withdrawn",
     "date_nomination": "2026-05-01",
 }
+
+
+ALEXANDER_RECORD = {
+    "first_name": "Chris",
+    "last_name": "Alexander",
+    "status": "Active",
+    "date_nomination": "2026-07-29",
+}
+
+
+def test_build_candidate_status_alexander_uses_editorial_profile():
+    result = build_candidate_status([ALEXANDER_RECORD])
+    assert len(result["declared"]) == 1
+    assert result["declared"][0]["id"] == "alexander"
+    assert result["declared"][0]["name"] == "Chris Alexander"
+    assert result["declared"][0]["summary"] != ""
+
+
+def test_build_candidate_status_alexander_does_not_collide_with_bradford():
+    result = build_candidate_status([ALEXANDER_RECORD, BRADFORD_RECORD])
+    ids = sorted(c["id"] for c in result["declared"])
+    assert ids == ["alexander", "bradford"]
 
 
 def test_build_candidate_status_empty_records_returns_empty_declared():

@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -58,6 +58,7 @@ FIRM_DISPLAY_NAME: dict[str, str] = {
 
 CANDIDATE_SLUG: dict[str, str] = {
     # Short-name form (used in test fixtures)
+    "Alexander": "alexander",
     "Bailão": "bailao",
     "Bradford": "bradford",
     "Chow": "chow",
@@ -68,6 +69,7 @@ CANDIDATE_SLUG: dict[str, str] = {
     "Other": "other",
     "Undecided": "undecided",
     # Full-name form (used on live Wikipedia)
+    "Chris Alexander": "alexander",
     "Ana Bailão": "bailao",
     "Brad Bradford": "bradford",
     "Olivia Chow": "chow",
@@ -80,34 +82,67 @@ CANDIDATE_SLUG: dict[str, str] = {
 # Poll IDs that appear in Wikipedia's citywide polling tables but are actually
 # ward-level subsamples. They belong in ward_polls.csv, not the citywide series —
 # including them would bias the citywide average toward that ward's lean.
-EXCLUDED_POLL_IDS = frozenset({
-    # Forum's Toronto Centre (Ward 13) subsample, n=355; recorded in ward_polls.csv
-    "forum-2026-06-23",
-})
+EXCLUDED_POLL_IDS = frozenset(
+    {
+        # Forum's Toronto Centre (Ward 13) subsample, n=355; recorded in ward_polls.csv
+        "forum-2026-06-23",
+    }
+)
 
 METADATA_COLS = [
-    "poll_id", "firm", "date_conducted", "date_published",
-    "sample_size", "methodology", "field_tested",
+    "poll_id",
+    "firm",
+    "date_conducted",
+    "date_published",
+    "sample_size",
+    "methodology",
+    "field_tested",
 ]
 ALL_CANDIDATE_COLS = [
-    "bailao", "bradford", "chow", "furey", "ford",
-    "mendicino", "tory", "other", "undecided",
+    "alexander",
+    "bailao",
+    "bradford",
+    "chow",
+    "furey",
+    "ford",
+    "mendicino",
+    "tory",
+    "other",
+    "undecided",
 ]
 # Columns to skip when collecting candidate share columns — both fixture and live forms
-_SKIP_COLS = frozenset({
-    # Test fixture header names
-    "Polling Firm", "Methodology", "Poll Date", "Sample Size", "MOE", "Lead",
-    # Live Wikipedia header names
-    "Polling firm", "Source", "Date of poll", "Sample size",
-    # Campaign-period table header names
-    "Polling dates",
-})
+_SKIP_COLS = frozenset(
+    {
+        # Test fixture header names
+        "Polling Firm",
+        "Methodology",
+        "Poll Date",
+        "Sample Size",
+        "MOE",
+        "Lead",
+        # Live Wikipedia header names
+        "Polling firm",
+        "Source",
+        "Date of poll",
+        "Sample size",
+        # Campaign-period table header names
+        "Polling dates",
+    }
+)
 # Columns that indicate a header row — both fixture and live forms
-_KNOWN_HEADER_COLS = frozenset({
-    "Polling Firm", "Poll Date", "Sample Size", "Methodology",
-    "Polling firm", "Date of poll", "Sample size", "Source",
-    "Polling dates",
-})
+_KNOWN_HEADER_COLS = frozenset(
+    {
+        "Polling Firm",
+        "Poll Date",
+        "Sample Size",
+        "Methodology",
+        "Polling firm",
+        "Date of poll",
+        "Sample size",
+        "Source",
+        "Polling dates",
+    }
+)
 # Maps header name → row_data key for firm column (case variants)
 _FIRM_HEADER_VARIANTS = ("Polling Firm", "Polling firm")
 # Maps header name → row_data key for date column (case variants)
@@ -127,12 +162,14 @@ def _parse_date(s: str) -> str:
     """
     s = s.strip()
     # Handle ranges like "May 10-11, 2026" or "May 10 - 11, 2026" → use end date
-    range_match = re.match(r'^(\w+)\s+\d+\s*[-–]\s*(\d+),\s*(\d+)$', s)
+    range_match = re.match(r"^(\w+)\s+\d+\s*[-–]\s*(\d+),\s*(\d+)$", s)
     if range_match:
         s = f"{range_match.group(1)} {range_match.group(2)}, {range_match.group(3)}"
     for fmt in ("%B %d, %Y", "%d %B %Y"):
         try:
-            return datetime.strptime(s, fmt).strftime("%Y-%m-%d")
+            # Calendar date only — tzinfo is set purely to keep the parse
+            # timezone-explicit; it cannot affect the %Y-%m-%d output.
+            return datetime.strptime(s, fmt).replace(tzinfo=UTC).strftime("%Y-%m-%d")
         except ValueError:
             pass
     raise ValueError(f"Unparseable poll date: {s!r}")
@@ -208,7 +245,9 @@ def _normalise_methodology(s: str) -> str:
     return "IVR" if low == "ivr" else low
 
 
-def _resolve_header(row_data: dict, variants: tuple[str, ...], default: str = "") -> str:
+def _resolve_header(
+    row_data: dict, variants: tuple[str, ...], default: str = ""
+) -> str:
     """Return first matching value from row_data given a list of header name variants."""
     for v in variants:
         if v in row_data:
@@ -274,22 +313,28 @@ def _parse_table(table) -> list[dict]:
         else:
             poll_id = f"{slug}-{date}"
 
-        raw_n = _resolve_header(row_data, _SAMPLE_HEADER_VARIANTS).replace(",", "").strip()
+        raw_n = (
+            _resolve_header(row_data, _SAMPLE_HEADER_VARIANTS).replace(",", "").strip()
+        )
         sample_size = int(raw_n) if raw_n.isdigit() else None
 
-        methodology_raw = _resolve_header(row_data, _METHODOLOGY_HEADER_VARIANTS).strip()
+        methodology_raw = _resolve_header(
+            row_data, _METHODOLOGY_HEADER_VARIANTS
+        ).strip()
 
-        rows.append({
-            "poll_id": poll_id,
-            "firm": firm,
-            "date_conducted": date,
-            "date_published": date,
-            "sample_size": sample_size,
-            "methodology": _normalise_methodology(methodology_raw),
-            "field_tested": field_tested,
-            **shares,
-            "notes": "",
-        })
+        rows.append(
+            {
+                "poll_id": poll_id,
+                "firm": firm,
+                "date_conducted": date,
+                "date_published": date,
+                "sample_size": sample_size,
+                "methodology": _normalise_methodology(methodology_raw),
+                "field_tested": field_tested,
+                **shares,
+                "notes": "",
+            }
+        )
 
     return rows
 
@@ -341,14 +386,22 @@ def write_output(rows: list[dict], output_dir: Path) -> None:
         # Drop any rows from existing that are being superseded by Wikipedia
         existing = existing[~existing["poll_id"].isin(incoming["poll_id"])]
         merged = pd.concat([existing, incoming], ignore_index=True)
-        merged = merged.sort_values("date_published", ascending=False).reset_index(drop=True)
-        new_count = len(incoming) - 0  # all incoming are either new or updates
-        print(f"  Preserved {len(existing)} historical polls, merged {len(incoming)} from Wikipedia")
+        merged = merged.sort_values("date_published", ascending=False).reset_index(
+            drop=True
+        )
+        print(
+            f"  Preserved {len(existing)} historical polls, merged {len(incoming)} from Wikipedia"
+        )
     else:
         merged = incoming
         print(f"  No existing polls.csv; writing {len(merged)} rows from Wikipedia")
 
-    seen_cands = {c for _, row in merged.iterrows() for c in row.index if c not in set(METADATA_COLS + ["notes"]) and pd.notna(row[c]) and row[c] != ""}
+    seen_cands = {
+        c
+        for _, row in merged.iterrows()
+        for c in row.index
+        if c not in set(METADATA_COLS + ["notes"]) and pd.notna(row[c]) and row[c] != ""
+    }
     ordered_cands = [c for c in ALL_CANDIDATE_COLS if c in seen_cands]
     extra_cands = sorted(c for c in seen_cands if c not in ALL_CANDIDATE_COLS)
     cols = METADATA_COLS + ordered_cands + extra_cands + ["notes"]
@@ -360,7 +413,7 @@ def write_output(rows: list[dict], output_dir: Path) -> None:
 
     sidecar_path = output_dir / "polls.json"
     sidecar_path.write_text(
-        json.dumps({"fetched_at": datetime.now(timezone.utc).isoformat()}, indent=2) + "\n",
+        json.dumps({"fetched_at": datetime.now(UTC).isoformat()}, indent=2) + "\n",
         encoding="utf-8",
     )
     print(f"  Written: {sidecar_path}")

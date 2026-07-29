@@ -5,12 +5,12 @@ Characterises voter preference pools without predicting electoral outcomes.
 
 Designed for the pre-nomination period (before August 21, 2026).
 """
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pandas as pd
-
 
 # Floor uses candidate-count weighting (not recency) — it is a structural property.
 # Polls with fewer than 500 respondents are excluded as unreliable.
@@ -19,13 +19,14 @@ MIN_FLOOR_SAMPLE_SIZE = 500
 # Minimum number of non-Chow named candidates for a poll to count as "full field."
 FULL_FIELD_THRESHOLD = 3
 
-# Candidates to track in the anti-Chow pool.
-ANTI_CHOW_CANDIDATES = ["bradford"]
+# Candidates to track in the anti-Chow pool. A candidate no poll has fielded
+# yet reports share=0.0 — absent from the numerator, still named in the output.
+ANTI_CHOW_CANDIDATES = ["bradford", "alexander"]
 
 # Nominations close at 2 p.m. ET on August 21, 2026 (Municipal Elections Act).
 # After this moment the candidate field is final and the pool model's
 # "anyone could still enter" framing no longer applies.
-NOMINATION_CLOSE = datetime(2026, 8, 21, 18, 0, tzinfo=timezone.utc)
+NOMINATION_CLOSE = datetime(2026, 8, 21, 18, 0, tzinfo=UTC)
 
 PHASE_MODE_CONTEXT = {
     "pre_nomination": (
@@ -43,10 +44,11 @@ PHASE_MODE_CONTEXT = {
 
 
 def _phase_mode(reference_date: datetime | None = None) -> str:
-    ref = reference_date if reference_date is not None else datetime.now(timezone.utc)
+    ref = reference_date if reference_date is not None else datetime.now(UTC)
     if ref.tzinfo is None:
-        ref = ref.replace(tzinfo=timezone.utc)
+        ref = ref.replace(tzinfo=UTC)
     return "pre_nomination" if ref < NOMINATION_CLOSE else "post_nomination"
+
 
 # Recency half-lives. Horse-race polls decay at the aggregator's rate; approval
 # moves more slowly, so it gets a longer half-life. Exponential date decay
@@ -68,7 +70,11 @@ def _decay_weights(
     weight 1.0; NaN dates receive weight 0.
     """
     parsed = pd.to_datetime(dates, utc=True, errors="coerce")
-    ref = pd.Timestamp(reference_date) if reference_date else pd.Timestamp.now(tz=timezone.utc)
+    ref = (
+        pd.Timestamp(reference_date)
+        if reference_date
+        else pd.Timestamp.now(tz=UTC)
+    )
     if ref.tzinfo is None:
         ref = ref.tz_localize("UTC")
     age_days = ((ref - parsed).dt.total_seconds() / 86400.0).clip(lower=0.0)
@@ -88,7 +94,8 @@ def _count_non_chow_candidates(field_tested: object) -> int:
     if pd.isna(field_tested):
         return 0
     return sum(
-        1 for p in str(field_tested).split(",")
+        1
+        for p in str(field_tested).split(",")
         if p.strip().lower() not in ("chow", "other", "")
     )
 
@@ -108,9 +115,14 @@ def compute_chow_floor(polls_df: pd.DataFrame) -> float:
 
     df = polls_df.copy()
     df["_non_chow_count"] = df["field_tested"].apply(_count_non_chow_candidates)
-    df["_n"] = pd.to_numeric(df.get("sample_size", pd.Series(dtype=float)), errors="coerce").fillna(0)
+    df["_n"] = pd.to_numeric(
+        df.get("sample_size", pd.Series(dtype=float)), errors="coerce"
+    ).fillna(0)
 
-    full_field = df[(df["_non_chow_count"] >= FULL_FIELD_THRESHOLD) & (df["_n"] >= MIN_FLOOR_SAMPLE_SIZE)]
+    full_field = df[
+        (df["_non_chow_count"] >= FULL_FIELD_THRESHOLD)
+        & (df["_n"] >= MIN_FLOOR_SAMPLE_SIZE)
+    ]
     if full_field.empty:
         return 0.0
 
@@ -179,14 +191,18 @@ def compute_current_approval(
     if not required_cols.issubset(approval_df.columns):
         return {"approve": 0.0, "disapprove": 0.0, "not_sure": 0.0}
 
-    weights = _decay_weights(approval_df["date"], APPROVAL_HALF_LIFE_DAYS, reference_date)
+    weights = _decay_weights(
+        approval_df["date"], APPROVAL_HALF_LIFE_DAYS, reference_date
+    )
     total_w = float(weights.sum())
     if total_w <= 0:
         return {"approve": 0.0, "disapprove": 0.0, "not_sure": 0.0}
 
     return {
         col: float(
-            (pd.to_numeric(approval_df[col], errors="coerce").fillna(0.0) * weights).sum()
+            (
+                pd.to_numeric(approval_df[col], errors="coerce").fillna(0.0) * weights
+            ).sum()
             / total_w
         )
         for col in ("approve", "disapprove", "not_sure")
@@ -213,7 +229,9 @@ def compute_candidate_capture_rates(
             result[cand] = {"share": 0.0, "capture_rate": 0.0}
             continue
 
-        weights = _decay_weights(multi["date_published"], POLL_HALF_LIFE_DAYS, reference_date)
+        weights = _decay_weights(
+            multi["date_published"], POLL_HALF_LIFE_DAYS, reference_date
+        )
         shares = pd.to_numeric(multi[cand], errors="coerce").fillna(0.0)
         total_w = float(weights.sum())
         if total_w <= 0:
@@ -222,10 +240,12 @@ def compute_candidate_capture_rates(
 
         share = float((shares * weights).sum() / total_w)
         capture_rate = share / anti_chow_pool if anti_chow_pool > 0 else 0.0
-        result[cand] = {"share": round(share, 4), "capture_rate": round(capture_rate, 4)}
+        result[cand] = {
+            "share": round(share, 4),
+            "capture_rate": round(capture_rate, 4),
+        }
 
     return result
-
 
 
 def compute_consolidation_trend(
@@ -246,7 +266,7 @@ def compute_consolidation_trend(
     if anti_chow_pool <= 0 or "bradford" not in polls_df.columns:
         return "insufficient_data"
 
-    ref = reference_date or datetime.now(timezone.utc)
+    ref = reference_date or datetime.now(UTC)
     df = polls_df.copy()
     df["_date"] = pd.to_datetime(df["date_published"], utc=True, errors="coerce")
     df = df[df["_date"].notna()]
@@ -315,14 +335,16 @@ def _get_approval_poll_detail(
     has_source = "source" in approval_df.columns
     rows = []
     for idx, row in approval_df.iterrows():
-        rows.append({
-            "date": str(row["date"]),
-            "firm": str(row["source"]) if has_source else "",
-            "approve": round(_safe_float(row["approve"]), 4),
-            "disapprove": round(_safe_float(row["disapprove"]), 4),
-            "not_sure": round(_safe_float(row["not_sure"]), 4),
-            "weight": round(float(weights[idx]), 4),
-        })
+        rows.append(
+            {
+                "date": str(row["date"]),
+                "firm": str(row["source"]) if has_source else "",
+                "approve": round(_safe_float(row["approve"]), 4),
+                "disapprove": round(_safe_float(row["disapprove"]), 4),
+                "not_sure": round(_safe_float(row["not_sure"]), 4),
+                "weight": round(float(weights[idx]), 4),
+            }
+        )
     rows.sort(key=lambda r: r["date"], reverse=True)
     return rows
 
@@ -341,20 +363,23 @@ def _get_floor_poll_detail(polls_df: pd.DataFrame) -> list[dict]:
         df.get("sample_size", pd.Series(dtype=float)), errors="coerce"
     ).fillna(0)
     qualifying = df[
-        (df["_non_chow_count"] >= FULL_FIELD_THRESHOLD) & (df["_n"] >= MIN_FLOOR_SAMPLE_SIZE)
+        (df["_non_chow_count"] >= FULL_FIELD_THRESHOLD)
+        & (df["_n"] >= MIN_FLOOR_SAMPLE_SIZE)
     ]
     if qualifying.empty:
         return []
     rows = []
     for _, row in qualifying.iterrows():
-        rows.append({
-            "date": str(row.get("date_published", "")),
-            "firm": str(row.get("firm", "")),
-            "field_tested": str(row.get("field_tested", "")),
-            "chow": round(_safe_float(row["chow"]), 4),
-            "sample_size": int(row["_n"]),
-            "candidate_weight": int(row["_non_chow_count"]),
-        })
+        rows.append(
+            {
+                "date": str(row.get("date_published", "")),
+                "firm": str(row.get("firm", "")),
+                "field_tested": str(row.get("field_tested", "")),
+                "chow": round(_safe_float(row["chow"]), 4),
+                "sample_size": int(row["_n"]),
+                "candidate_weight": int(row["_non_chow_count"]),
+            }
+        )
     rows.sort(key=lambda r: r["date"], reverse=True)
     return rows
 
@@ -386,14 +411,16 @@ def _get_h2h_poll_detail(
     )
     rows = []
     for idx, row in h2h.iterrows():
-        rows.append({
-            "date": str(row.get("date_published", "")),
-            "firm": str(row.get("firm", "")),
-            "chow": round(_safe_float(row["chow"]), 4),
-            "bradford": round(_safe_float(row.get("bradford", 0.0)), 4),
-            "sample_size": int(_safe_float(row.get("sample_size", 0))),
-            "recency_weight": round(float(weights[idx]), 4),
-        })
+        rows.append(
+            {
+                "date": str(row.get("date_published", "")),
+                "firm": str(row.get("firm", "")),
+                "chow": round(_safe_float(row["chow"]), 4),
+                "bradford": round(_safe_float(row.get("bradford", 0.0)), 4),
+                "sample_size": int(_safe_float(row.get("sample_size", 0))),
+                "recency_weight": round(float(weights[idx]), 4),
+            }
+        )
     rows.sort(key=lambda r: r["date"], reverse=True)
     return rows
 
@@ -417,13 +444,15 @@ def _get_capture_poll_detail(
     )
     rows = []
     for idx, row in multi.iterrows():
-        rows.append({
-            "date": str(row.get("date_published", "")),
-            "firm": str(row.get("firm", "")),
-            "field_tested": str(row.get("field_tested", "")),
-            "bradford": round(_safe_float(row.get("bradford", 0.0)), 4),
-            "recency_weight": round(float(weights[idx]), 4),
-        })
+        rows.append(
+            {
+                "date": str(row.get("date_published", "")),
+                "firm": str(row.get("firm", "")),
+                "field_tested": str(row.get("field_tested", "")),
+                "bradford": round(_safe_float(row.get("bradford", 0.0)), 4),
+                "recency_weight": round(float(weights[idx]), 4),
+            }
+        )
     rows.sort(key=lambda r: r["date"], reverse=True)
     return rows
 
@@ -464,8 +493,17 @@ def compute_pool_model(
     else:
         full_field_count = int(
             (
-                (polls_df["field_tested"].apply(_count_non_chow_candidates) >= FULL_FIELD_THRESHOLD)
-                & (pd.to_numeric(polls_df.get("sample_size", pd.Series(dtype=float)), errors="coerce").fillna(0) >= MIN_FLOOR_SAMPLE_SIZE)
+                (
+                    polls_df["field_tested"].apply(_count_non_chow_candidates)
+                    >= FULL_FIELD_THRESHOLD
+                )
+                & (
+                    pd.to_numeric(
+                        polls_df.get("sample_size", pd.Series(dtype=float)),
+                        errors="coerce",
+                    ).fillna(0)
+                    >= MIN_FLOOR_SAMPLE_SIZE
+                )
             ).sum()
         )
 

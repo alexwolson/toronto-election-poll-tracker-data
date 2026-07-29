@@ -5,15 +5,23 @@ from pathlib import Path
 
 import pandas as pd
 
-from .aggregator import aggregate_polls, get_latest_scenario_polls, get_scenario_polls
-from .aggregator import effective_sample_size, exclude_polls_with_declined_candidates
-from .candidates import build_candidate_status, DECLINED_CANDIDATE_IDS
+from .aggregator import (
+    aggregate_polls,
+    effective_sample_size,
+    exclude_polls_with_declined_candidates,
+    get_latest_scenario_polls,
+    get_scenario_polls,
+)
+from .candidates import DECLINED_CANDIDATE_IDS, build_candidate_status
 from .phase import detect_phase
-from .simulation import WardSimulation, SAFE_DEFEATABILITY_THRESHOLD
-
+from .simulation import SAFE_DEFEATABILITY_THRESHOLD, WardSimulation
 
 SCENARIOS = {
     "chow_bradford": ["chow", "bradford"],
+    # Chris Alexander registered July 29, 2026. Defined so three-way polls can
+    # be selected once pollsters field him; not yet the default — switching
+    # DEFAULT_SCENARIO is a modelling decision, not plumbing.
+    "chow_bradford_alexander": ["chow", "bradford", "alexander"],
 }
 
 DEFAULT_SCENARIO = "chow_bradford"
@@ -212,7 +220,9 @@ def run_model() -> dict:
         },
         "phase": detect_phase(
             data["challengers"],
-            has_financials=any((_data_dir().parent / "raw" / "financial").glob("*.csv")),
+            has_financials=any(
+                (_data_dir().parent / "raw" / "financial").glob("*.csv")
+            ),
         ),
         "scenarios": SCENARIOS,
         "default_scenario": DEFAULT_SCENARIO,
