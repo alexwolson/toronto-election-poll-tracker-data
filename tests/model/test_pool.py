@@ -156,14 +156,34 @@ def test_compute_current_approval_dormant_series_tracks_fresh_reading():
     assert result["disapprove"] > 0.50, f"disapprove={result['disapprove']:.3f}"
 
 
-def test_compute_candidate_capture_rates_tracks_alexander():
-    """Alexander registered July 29, 2026. No poll has fielded him yet, so he
-    must appear with a zero share rather than be absent from the pool model."""
+def test_compute_candidate_capture_rates_zero_when_unfielded():
+    """A tracked candidate no poll has fielded yet reports zero share rather
+    than being absent from the pool model."""
     from backend.model.pool import ANTI_CHOW_CANDIDATES, compute_candidate_capture_rates
 
     assert "alexander" in ANTI_CHOW_CANDIDATES
-    result = compute_candidate_capture_rates(_load_polls(), anti_chow_pool=0.38)
+    no_alexander_polls = pd.DataFrame(
+        [
+            {
+                "date_published": "2026-06-30",
+                "field_tested": "bradford,chow,other",
+                "bradford": 0.40,
+                "sample_size": 1000,
+            }
+        ]
+    )
+    result = compute_candidate_capture_rates(no_alexander_polls, anti_chow_pool=0.38)
     assert result["alexander"] == {"share": 0.0, "capture_rate": 0.0}
+
+
+def test_compute_candidate_capture_rates_tracks_alexander_once_polled():
+    """Once a poll fields him, Alexander gets a non-zero share and capture rate."""
+    from backend.model.pool import compute_candidate_capture_rates
+
+    result = compute_candidate_capture_rates(_load_polls(), anti_chow_pool=0.38)
+    assert "alexander" in result
+    assert 0.0 < result["alexander"]["share"] <= 0.60
+    assert 0.0 < result["alexander"]["capture_rate"] <= 2.0
 
 
 def test_compute_candidate_capture_rates_has_bradford():
@@ -265,17 +285,37 @@ def test_pool_model_consolidation_trend_is_consolidating():
     assert result["consolidation_trend"] == "consolidating"
 
 
-def test_pool_model_consolidation_trend_consolidated_when_field_is_h2h():
-    """From mid-July 2026 every recent poll tests only Bradford against Chow.
+def test_consolidation_trend_consolidated_when_recent_field_is_h2h():
+    """When the recent window has an h2h Bradford-Chow poll but no
+    multi-candidate poll, the field has narrowed to head-to-head — the
+    terminal "consolidated" state, not "insufficient_data".
 
-    The field has narrowed to a single named challenger, so the trend is the
-    terminal "consolidated" state — not "insufficient_data".
+    Synthetic: this real-world condition held from mid-July 2026 but is no
+    longer reproducible from live polls.csv once a challenger who wasn't in
+    the earlier multi-candidate field (e.g. Alexander) gets polled — that
+    poll permanently reopens the "recent window has a multi-candidate poll"
+    branch for any near-term reference date, so this must be isolated from
+    the live dataset to stay meaningful.
     """
-    from backend.model.pool import compute_pool_model
+    from backend.model.pool import compute_consolidation_trend
 
+    polls = pd.DataFrame(
+        [
+            {
+                "date_published": "2025-09-04",
+                "field_tested": "bailao,bradford,chow,other,tory",
+                "bradford": 0.17,
+            },
+            {
+                "date_published": "2026-06-30",
+                "field_tested": "bradford,chow,other",
+                "bradford": 0.40,
+            },
+        ]
+    )
     ref = datetime(2026, 7, 18, tzinfo=UTC)
-    result = compute_pool_model(_load_polls(), _load_approval(), reference_date=ref)
-    assert result["consolidation_trend"] == "consolidated"
+    result = compute_consolidation_trend(polls, anti_chow_pool=0.45, reference_date=ref)
+    assert result == "consolidated"
 
 
 def test_pool_model_consolidation_trend_insufficient_without_recent_polls():
