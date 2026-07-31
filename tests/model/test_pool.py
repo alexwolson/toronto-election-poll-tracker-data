@@ -411,14 +411,15 @@ def test_poll_detail_h2h_polls_sorted_descending():
 def test_poll_detail_capture_polls_sorted_descending():
     from backend.model.pool import compute_pool_model
 
-    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
+    by_candidate = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
         "capture_polls"
     ]
-    if len(polls) > 1:
-        dates = [r["date"] for r in polls]
-        assert dates == sorted(dates, reverse=True), (
-            "capture_polls should be sorted date desc"
-        )
+    for candidate, polls in by_candidate.items():
+        if len(polls) > 1:
+            dates = [r["date"] for r in polls]
+            assert dates == sorted(dates, reverse=True), (
+                f"capture_polls[{candidate}] should be sorted date desc"
+            )
 
 
 def test_poll_detail_floor_polls_shape():
@@ -469,31 +470,46 @@ def test_poll_detail_h2h_polls_weight_normalised():
     assert polls[0]["recency_weight"] == 1.0
 
 
-def test_poll_detail_capture_polls_shape():
-    from backend.model.pool import compute_pool_model
+def test_poll_detail_capture_polls_keyed_by_candidate():
+    """capture_polls is per-candidate so Step 4 can show any tracked
+    challenger's supporting polls, not just one hardcoded name."""
+    from backend.model.pool import ANTI_CHOW_CANDIDATES, compute_pool_model
 
     detail = compute_pool_model(_load_polls(), _load_approval())["poll_detail"]
-    polls = detail["capture_polls"]
-    assert len(polls) > 0
-    for row in polls:
+    by_candidate = detail["capture_polls"]
+    assert set(by_candidate.keys()) == set(ANTI_CHOW_CANDIDATES)
+    assert len(by_candidate["bradford"]) > 0
+    for row in by_candidate["bradford"]:
         assert set(row.keys()) == {
             "date",
             "firm",
             "field_tested",
-            "bradford",
+            "share",
             "recency_weight",
         }
-        assert 0.0 <= row["bradford"] <= 1.0
+        assert 0.0 <= row["share"] <= 1.0
         assert 0.0 <= row["recency_weight"] <= 1.0
+
+
+def test_poll_detail_capture_polls_tracks_alexander_once_polled():
+    """Alexander was fielded for the first time 2026-07-29; his capture_polls
+    entry must carry that poll's row, not stay empty."""
+    from backend.model.pool import compute_pool_model
+
+    by_candidate = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
+        "capture_polls"
+    ]
+    assert len(by_candidate["alexander"]) > 0
+    assert 0.0 < by_candidate["alexander"][0]["share"] <= 1.0
 
 
 def test_poll_detail_capture_polls_weight_normalised():
     from backend.model.pool import compute_pool_model
 
-    polls = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
+    by_candidate = compute_pool_model(_load_polls(), _load_approval())["poll_detail"][
         "capture_polls"
     ]
-    assert polls[0]["recency_weight"] == 1.0
+    assert by_candidate["bradford"][0]["recency_weight"] == 1.0
 
 
 # --- phase mode is date-aware (flips when nominations close Aug 21, 2026) ---

@@ -70,11 +70,7 @@ def _decay_weights(
     weight 1.0; NaN dates receive weight 0.
     """
     parsed = pd.to_datetime(dates, utc=True, errors="coerce")
-    ref = (
-        pd.Timestamp(reference_date)
-        if reference_date
-        else pd.Timestamp.now(tz=UTC)
-    )
+    ref = pd.Timestamp(reference_date) if reference_date else pd.Timestamp.now(tz=UTC)
     if ref.tzinfo is None:
         ref = ref.tz_localize("UTC")
     age_days = ((ref - parsed).dt.total_seconds() / 86400.0).clip(lower=0.0)
@@ -427,17 +423,18 @@ def _get_h2h_poll_detail(
 
 def _get_capture_poll_detail(
     polls_df: pd.DataFrame,
+    candidate: str,
     reference_date: datetime | None = None,
 ) -> list[dict]:
     """Multi-candidate polls (2+ non-Chow challengers) with recency weights normalised to max=1.0.
 
-    Used to show Bradford's anti-Chow pool capture rate per poll.
+    Used to show one candidate's anti-Chow pool capture rate per poll.
     Sorted by date descending.
     """
     multi = polls_df[
         polls_df["field_tested"].apply(_count_non_chow_candidates) >= 2
     ].copy()
-    if multi.empty or "bradford" not in multi.columns:
+    if multi.empty or candidate not in multi.columns:
         return []
     weights = _normalise_max(
         _decay_weights(multi["date_published"], POLL_HALF_LIFE_DAYS, reference_date)
@@ -449,7 +446,7 @@ def _get_capture_poll_detail(
                 "date": str(row.get("date_published", "")),
                 "firm": str(row.get("firm", "")),
                 "field_tested": str(row.get("field_tested", "")),
-                "bradford": round(_safe_float(row.get("bradford", 0.0)), 4),
+                "share": round(_safe_float(row.get(candidate, 0.0)), 4),
                 "recency_weight": round(float(weights[idx]), 4),
             }
         )
@@ -542,6 +539,9 @@ def compute_pool_model(
             "approval_polls": _get_approval_poll_detail(approval_df, reference_date),
             "floor_polls": _get_floor_poll_detail(polls_df),
             "h2h_polls": _get_h2h_poll_detail(polls_df, reference_date),
-            "capture_polls": _get_capture_poll_detail(polls_df, reference_date),
+            "capture_polls": {
+                c: _get_capture_poll_detail(polls_df, c, reference_date)
+                for c in ANTI_CHOW_CANDIDATES
+            },
         },
     }
