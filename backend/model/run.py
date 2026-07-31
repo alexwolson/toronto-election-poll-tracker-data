@@ -18,13 +18,14 @@ from .simulation import SAFE_DEFEATABILITY_THRESHOLD, WardSimulation
 
 SCENARIOS = {
     "chow_bradford": ["chow", "bradford"],
-    # Chris Alexander registered July 29, 2026. Defined so three-way polls can
-    # be selected once pollsters field him; not yet the default — switching
-    # DEFAULT_SCENARIO is a modelling decision, not plumbing.
     "chow_bradford_alexander": ["chow", "bradford", "alexander"],
 }
 
-DEFAULT_SCENARIO = "chow_bradford"
+# Chris Alexander registered July 29, 2026; Forum Research fielded him for the
+# first time the same day (chow 47 / bradford 32 / alexander 11 / other 10).
+# Switched to the three-way scenario so mayoral_averages and the ward
+# simulation reflect the field pollsters are actually testing.
+DEFAULT_SCENARIO = "chow_bradford_alexander"
 
 
 def _data_dir() -> Path:
