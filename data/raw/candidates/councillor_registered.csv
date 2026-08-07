@@ -2,6 +2,7 @@ ward,first_name,last_name,status,date_nomination
 1,Abraham,Abbey,Active,2026-05-08
 1,Ala'a,Adib,Active,2026-05-01
 1,Saima,Babar,Active,2026-05-01
+1,Chloe,Brown,Active,2026-08-06
 1,Vincent,Crisanti,Active,2026-05-12
 1,Norman,Hamilton,Active,2026-05-12
 2,Jennifer,Alexander,Active,2026-05-01
@@ -107,6 +108,7 @@ ward,first_name,last_name,status,date_nomination
 21,Bahareh,Barahmand,Active,2026-07-31
 21,Patience,Evbagharu,Active,2026-06-24
 21,Uthish,Ganesh,Active,2026-07-31
+21,Stella,Kargiannakis,Active,2026-08-06
 21,Akina,Lalla,Active,2026-07-24
 21,Madura,Shanmugaratnam,Active,2026-05-11
 21,Michael,Thompson,Active,2026-07-22
