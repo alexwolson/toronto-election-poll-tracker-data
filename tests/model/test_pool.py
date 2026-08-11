@@ -173,7 +173,12 @@ def test_compute_candidate_capture_rates_zero_when_unfielded():
         ]
     )
     result = compute_candidate_capture_rates(no_alexander_polls, anti_chow_pool=0.38)
-    assert result["alexander"] == {"share": 0.0, "capture_rate": 0.0}
+    assert result["alexander"] == {
+        "share": 0.0,
+        "polling_share": 0.0,
+        "lane_share": 0.0,
+        "capture_rate": 0.0,
+    }
 
 
 def test_compute_candidate_capture_rates_tracks_alexander_once_polled():
@@ -183,7 +188,8 @@ def test_compute_candidate_capture_rates_tracks_alexander_once_polled():
     result = compute_candidate_capture_rates(_load_polls(), anti_chow_pool=0.38)
     assert "alexander" in result
     assert 0.0 < result["alexander"]["share"] <= 0.60
-    assert 0.0 < result["alexander"]["capture_rate"] <= 2.0
+    assert 0.0 < result["alexander"]["polling_share"] <= 0.60
+    assert 0.0 < result["alexander"]["capture_rate"] <= 1.0
 
 
 def test_compute_candidate_capture_rates_has_bradford():
@@ -192,7 +198,118 @@ def test_compute_candidate_capture_rates_has_bradford():
     result = compute_candidate_capture_rates(_load_polls(), anti_chow_pool=0.38)
     assert "bradford" in result
     assert 0.0 <= result["bradford"]["share"] <= 0.60
-    assert 0.0 <= result["bradford"]["capture_rate"] <= 2.0
+    assert 0.0 <= result["bradford"]["polling_share"] <= 0.60
+    assert 0.0 <= result["bradford"]["capture_rate"] <= 1.0
+
+
+def test_candidate_capture_uses_only_common_current_field():
+    """An omitted candidate is unmeasured, not zero support."""
+    from backend.model.pool import compute_candidate_capture_rates
+
+    polls = pd.DataFrame(
+        [
+            {
+                "date_published": "2026-07-26",
+                "field_tested": "bradford,chow,other",
+                "chow": 0.50,
+                "bradford": 0.41,
+                "alexander": None,
+            },
+            {
+                "date_published": "2026-08-05",
+                "field_tested": "alexander,bradford,chow,other",
+                "chow": 0.50,
+                "bradford": 0.40,
+                "alexander": 0.10,
+            },
+        ]
+    )
+    result = compute_candidate_capture_rates(
+        polls,
+        anti_chow_pool=0.43,
+        reference_date=datetime(2026, 8, 9, tzinfo=UTC),
+    )
+    assert result["alexander"]["polling_share"] == 0.10
+    assert result["bradford"]["polling_share"] == 0.40
+    assert sum(candidate["share"] for candidate in result.values()) <= 0.43 + 1e-6
+
+
+def test_current_field_requires_chow_exact_field_and_finite_shares():
+    from backend.model.pool import _current_field_polls
+
+    polls = pd.DataFrame(
+        [
+            {
+                "poll_id": "exact",
+                "field_tested": "alexander,bradford,chow,other",
+                "chow": 0.47,
+                "bradford": 0.40,
+                "alexander": 0.10,
+            },
+            {
+                "poll_id": "no-chow",
+                "field_tested": "alexander,bradford",
+                "chow": None,
+                "bradford": 0.55,
+                "alexander": 0.45,
+            },
+            {
+                "poll_id": "obsolete-extra",
+                "field_tested": "alexander,bradford,chow,tory",
+                "chow": 0.40,
+                "bradford": 0.30,
+                "alexander": 0.10,
+            },
+            {
+                "poll_id": "missing-share",
+                "field_tested": "alexander,bradford,chow,other",
+                "chow": 0.50,
+                "bradford": 0.40,
+                "alexander": None,
+            },
+        ]
+    )
+
+    assert _current_field_polls(polls)["poll_id"].tolist() == ["exact"]
+
+
+def test_candidate_allocation_preserves_other_opposition_responses():
+    """The structural anti-Chow pool is allocated by the full non-Chow mix,
+    leaving other/uncommitted responses uncaptured instead of forcing the two
+    named challengers to exhaust the pool."""
+    from backend.model.pool import compute_candidate_capture_rates
+
+    polls = pd.DataFrame(
+        [
+            {
+                "date_published": "2026-08-05",
+                "field_tested": "alexander,bradford,chow,other",
+                "chow": 0.50,
+                "bradford": 0.30,
+                "alexander": 0.10,
+                "other": 0.10,
+            }
+        ]
+    )
+    result = compute_candidate_capture_rates(
+        polls,
+        anti_chow_pool=0.40,
+        reference_date=datetime(2026, 8, 9, tzinfo=UTC),
+    )
+
+    assert result["bradford"] == {
+        "share": 0.24,
+        "polling_share": 0.30,
+        "lane_share": 0.75,
+        "capture_rate": 0.60,
+    }
+    assert result["alexander"] == {
+        "share": 0.08,
+        "polling_share": 0.10,
+        "lane_share": 0.25,
+        "capture_rate": 0.20,
+    }
+    assert round(0.40 - sum(candidate["share"] for candidate in result.values()), 4) == 0.08
 
 
 def test_compute_pool_model_returns_all_required_keys():
@@ -212,6 +329,7 @@ def test_compute_pool_model_returns_all_required_keys():
     assert "consolidation_trend" in result
     assert result["consolidation_trend"] in (
         "consolidating",
+        "fragmented",
         "stalling",
         "reversing",
         "consolidated",
@@ -283,6 +401,37 @@ def test_pool_model_consolidation_trend_is_consolidating():
     ref = datetime(2026, 6, 15, tzinfo=UTC)
     result = compute_pool_model(_load_polls(), _load_approval(), reference_date=ref)
     assert result["consolidation_trend"] == "consolidating"
+
+
+def test_pool_model_detects_alexander_fragmentation():
+    from backend.model.pool import compute_pool_model
+
+    ref = datetime(2026, 8, 9, tzinfo=UTC)
+    result = compute_pool_model(_load_polls(), _load_approval(), reference_date=ref)
+    assert result["consolidation_trend"] == "fragmented"
+    assert result["data_notes"]["current_field_poll_count"] >= 2
+
+
+def test_one_current_field_poll_is_fragmented_not_reversing():
+    from backend.model.pool import compute_consolidation_trend
+
+    polls = pd.DataFrame(
+        [
+            {
+                "date_published": "2026-08-05",
+                "field_tested": "alexander,bradford,chow,other",
+                "chow": 0.50,
+                "bradford": 0.40,
+                "alexander": 0.10,
+            }
+        ]
+    )
+    result = compute_consolidation_trend(
+        polls,
+        anti_chow_pool=0.43,
+        reference_date=datetime(2026, 8, 9, tzinfo=UTC),
+    )
+    assert result == "fragmented"
 
 
 def test_consolidation_trend_consolidated_when_recent_field_is_h2h():

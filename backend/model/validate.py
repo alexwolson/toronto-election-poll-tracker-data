@@ -197,6 +197,90 @@ def validate_ward_polls(df: pd.DataFrame) -> None:
         )
 
 
+def validate_ward_poll_readings(df: pd.DataFrame) -> None:
+    """Validate long-form observed ward vote-intention evidence.
+
+    A poll reading is not a win probability. Candidate shares use the stated
+    denominator and must form a complete choice set including a residual row.
+    """
+    required = [
+        "ward",
+        "poll_id",
+        "firm",
+        "date_conducted",
+        "date_published",
+        "sample_size",
+        "denominator",
+        "ballot_status",
+        "candidate_id",
+        "candidate_name",
+        "share",
+        "is_incumbent",
+        "is_residual",
+        "registration_status",
+        "undecided_share",
+    ]
+    _check_required_columns(df, required, "ward_poll_readings")
+    if df.empty:
+        return
+
+    if not df["ward"].between(1, 25).all():
+        raise ValidationError("ward_poll_readings contains a ward outside 1–25")
+    if not df["share"].between(0, 1).all():
+        raise ValidationError("ward_poll_readings share values must be in [0, 1]")
+    if not df["undecided_share"].between(0, 1).all():
+        raise ValidationError(
+            "ward_poll_readings undecided_share values must be in [0, 1]"
+        )
+    if (df["sample_size"] <= 0).any():
+        raise ValidationError("ward_poll_readings sample sizes must be positive")
+    allowed_ballots = {"current_field", "different_candidate_field", "hypothetical"}
+    if not set(df["ballot_status"]).issubset(allowed_ballots):
+        raise ValidationError("ward_poll_readings has an unknown ballot_status")
+    if df.duplicated(["ward", "poll_id", "candidate_id"]).any():
+        raise ValidationError(
+            "ward_poll_readings candidate rows must be unique within a poll"
+        )
+
+    conducted = pd.to_datetime(df["date_conducted"], errors="coerce")
+    published = pd.to_datetime(df["date_published"], errors="coerce")
+    if conducted.isna().any() or published.isna().any():
+        raise ValidationError("ward_poll_readings contains an invalid date")
+    if (conducted > published).any():
+        raise ValidationError(
+            "ward_poll_readings date_conducted must not follow date_published"
+        )
+
+    metadata = [
+        "ward",
+        "firm",
+        "date_conducted",
+        "date_published",
+        "sample_size",
+        "denominator",
+        "ballot_status",
+        "undecided_share",
+    ]
+    for poll_id, group in df.groupby("poll_id", sort=False):
+        for column in metadata:
+            if group[column].nunique(dropna=False) != 1:
+                raise ValidationError(
+                    f"ward poll {poll_id!r} has inconsistent {column} metadata"
+                )
+        if abs(float(group["share"].sum()) - 1.0) > SHARE_TOLERANCE:
+            raise ValidationError(
+                f"ward poll {poll_id!r} choice shares do not sum to one"
+            )
+        if int(group["is_incumbent"].astype(bool).sum()) != 1:
+            raise ValidationError(
+                f"ward poll {poll_id!r} must contain one incumbent row"
+            )
+        if int(group["is_residual"].astype(bool).sum()) != 1:
+            raise ValidationError(
+                f"ward poll {poll_id!r} must contain one residual row"
+            )
+
+
 def validate_council_alignment(df: pd.DataFrame) -> None:
     """Validate a council_alignment DataFrame against the council_alignment.csv schema."""
     required = [

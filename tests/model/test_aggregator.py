@@ -1,6 +1,6 @@
 """Tests for the mayoral polling aggregator."""
 import pandas as pd
-from backend.model.aggregator import compute_poll_weights
+from backend.model.aggregator import compute_poll_weights, get_scenario_polls
 
 
 def _polls_with_naive_dates() -> pd.DataFrame:
@@ -85,3 +85,23 @@ def test_effective_sample_size_missing_sample_size_contributes_zero():
         {"date_published": "2026-07-01", "sample_size": 600},
     ])
     assert abs(effective_sample_size(df, ref) - 600.0) < 1.0
+
+
+def test_get_scenario_polls_requires_an_exact_named_field():
+    polls = pd.DataFrame(
+        [
+            {"poll_id": "exact", "field_tested": "alexander,bradford,chow,other"},
+            {"poll_id": "missing", "field_tested": "bradford,chow,other"},
+            {"poll_id": "obsolete", "field_tested": "alexander,bradford,chow,tory"},
+        ]
+    )
+    result = get_scenario_polls(polls, ["chow", "bradford", "alexander"])
+    assert result["poll_id"].tolist() == ["exact"]
+
+
+def test_get_scenario_polls_does_not_fallback_to_incompatible_fields():
+    polls = pd.DataFrame(
+        [{"poll_id": "old-field", "field_tested": "bradford,chow,other"}]
+    )
+    result = get_scenario_polls(polls, ["chow", "bradford", "alexander"])
+    assert result.empty

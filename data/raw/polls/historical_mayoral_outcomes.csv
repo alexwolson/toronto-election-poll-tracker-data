@@ -1,0 +1,22 @@
+election_id,election_date,candidate_id,candidate_name,share,is_residual,source_url
+toronto_2014,2014-10-27,chow,Olivia Chow,0.2315,False,https://en.wikipedia.org/wiki/2014_Toronto_mayoral_election
+toronto_2014,2014-10-27,doug_ford,Doug Ford,0.3373,False,https://en.wikipedia.org/wiki/2014_Toronto_mayoral_election
+toronto_2014,2014-10-27,residual,Other candidates,0.0287,True,https://en.wikipedia.org/wiki/2014_Toronto_mayoral_election
+toronto_2014,2014-10-27,tory,John Tory,0.4028,False,https://en.wikipedia.org/wiki/2014_Toronto_mayoral_election
+toronto_2018,2018-10-22,keesmaat,Jennifer Keesmaat,0.2359,False,https://en.wikipedia.org/wiki/2018_Toronto_mayoral_election
+toronto_2018,2018-10-22,residual,Other candidates,0.1293,True,https://en.wikipedia.org/wiki/2018_Toronto_mayoral_election
+toronto_2018,2018-10-22,tory,John Tory (X),0.6349,False,https://en.wikipedia.org/wiki/2018_Toronto_mayoral_election
+toronto_2022,2022-10-24,acton,Blake Acton,0.0161,False,https://en.wikipedia.org/wiki/2022_Toronto_mayoral_election
+toronto_2022,2022-10-24,brown,Chloe Brown,0.0631,False,https://en.wikipedia.org/wiki/2022_Toronto_mayoral_election
+toronto_2022,2022-10-24,penalosa,Gil Penalosa,0.1785,False,https://en.wikipedia.org/wiki/2022_Toronto_mayoral_election
+toronto_2022,2022-10-24,residual,Other candidates,0.1229,True,https://en.wikipedia.org/wiki/2022_Toronto_mayoral_election
+toronto_2022,2022-10-24,tory,John Tory (X),0.62,False,https://en.wikipedia.org/wiki/2022_Toronto_mayoral_election
+toronto_2023,2023-06-26,bailao,Ana Bailão,0.3246,False,https://en.wikipedia.org/wiki/2023_Toronto_mayoral_by-election
+toronto_2023,2023-06-26,bradford,Brad Bradford,0.0128,False,https://en.wikipedia.org/wiki/2023_Toronto_mayoral_by-election
+toronto_2023,2023-06-26,brown,Chloe Brown,0.026,False,https://en.wikipedia.org/wiki/2023_Toronto_mayoral_by-election
+toronto_2023,2023-06-26,chow,Olivia Chow,0.3717,False,https://en.wikipedia.org/wiki/2023_Toronto_mayoral_by-election
+toronto_2023,2023-06-26,furey,Anthony Furey,0.0496,False,https://en.wikipedia.org/wiki/2023_Toronto_mayoral_by-election
+toronto_2023,2023-06-26,hunter,Mitzie Hunter,0.0293,False,https://en.wikipedia.org/wiki/2023_Toronto_mayoral_by-election
+toronto_2023,2023-06-26,matlow,Josh Matlow,0.0491,False,https://en.wikipedia.org/wiki/2023_Toronto_mayoral_by-election
+toronto_2023,2023-06-26,residual,Other candidates,0.0515,True,https://en.wikipedia.org/wiki/2023_Toronto_mayoral_by-election
+toronto_2023,2023-06-26,saunders,Mark Saunders,0.0858,False,https://en.wikipedia.org/wiki/2023_Toronto_mayoral_by-election

@@ -1,0 +1,5 @@
+ward,poll_id,firm,date_conducted,date_published,sample_size,methodology,denominator,ballot_status,candidate_id,candidate_name,share,is_incumbent,is_residual,registration_status,undecided_share,source_url,notes
+13,forum-ward13-2026-06-23,Forum Research,2026-06-23,2026-06-24,355,IVR,decided voters,different_candidate_field,moise,Chris Moise,0.35,True,False,registered,0.45,,Published decided-voter topline
+13,forum-ward13-2026-06-23,Forum Research,2026-06-23,2026-06-24,355,IVR,decided voters,different_candidate_field,tate,Daniel Tate,0.19,False,False,unregistered,0.45,,Published decided-voter topline; not registered when this snapshot was built
+13,forum-ward13-2026-06-23,Forum Research,2026-06-23,2026-06-24,355,IVR,decided voters,different_candidate_field,stikuts,Curran Stikuts,0.06,False,False,registered,0.45,,Published decided-voter topline
+13,forum-ward13-2026-06-23,Forum Research,2026-06-23,2026-06-24,355,IVR,decided voters,different_candidate_field,residual,Other candidates,0.4,False,True,residual,0.45,,Published aggregate for all other named or unnamed choices

@@ -79,7 +79,9 @@ _CANDIDATE_EDITORIAL: dict[str, CandidateProfile] = {
         "name": "Chris Alexander",
         "summary": (
             "Former Conservative MP for Ajax—Pickering and Harper-era minister "
-            "of citizenship and immigration; registered for mayor on July 29, 2026."
+            "of citizenship and immigration; registered July 29. His first two "
+            "polls put him at 10–11%, though 61% were still unfamiliar with him "
+            "in Liaison's August 4–5 survey."
         ),
     },
     "lyall sanders": {

@@ -22,6 +22,42 @@ FULL_FIELD_THRESHOLD = 3
 # Candidates to track in the anti-Chow pool. A candidate no poll has fielded
 # yet reports share=0.0 — absent from the numerator, still named in the output.
 ANTI_CHOW_CANDIDATES = ["bradford", "alexander"]
+CURRENT_FIELD_CANDIDATES = frozenset({"chow", *ANTI_CHOW_CANDIDATES})
+
+
+def _field_candidates(field_tested: object) -> set[str]:
+    """Return normalised candidate tokens, excluding catch-all responses."""
+    if pd.isna(field_tested):
+        return set()
+    return {
+        token.strip().lower()
+        for token in str(field_tested).split(",")
+        if token.strip() and token.strip().lower() not in ("other", "undecided")
+    }
+
+
+def _current_field_polls(polls_df: pd.DataFrame) -> pd.DataFrame:
+    """Polls that measure the exact current modelled ballot.
+
+    A candidate absent from a ballot is not a measured zero. Restricting the
+    comparison to a common field prevents pre-entry polls from diluting a new
+    candidate's support or overstating the established candidate's advantage.
+    Catch-all responses (``other`` and ``undecided``) may be present, but no
+    obsolete named candidate may be included and every modelled candidate must
+    have a finite share.
+    """
+    if polls_df.empty or "field_tested" not in polls_df.columns:
+        return polls_df.iloc[0:0].copy()
+    if not CURRENT_FIELD_CANDIDATES.issubset(polls_df.columns):
+        return polls_df.iloc[0:0].copy()
+
+    valid = polls_df["field_tested"].apply(
+        lambda field: _field_candidates(field) == CURRENT_FIELD_CANDIDATES
+    )
+    for candidate in CURRENT_FIELD_CANDIDATES:
+        shares = pd.to_numeric(polls_df[candidate], errors="coerce")
+        valid &= shares.notna() & shares.between(0.0, 1.0)
+    return polls_df[valid].copy()
 
 # Nominations close at 2 p.m. ET on August 21, 2026 (Municipal Elections Act).
 # After this moment the candidate field is final and the pool model's
@@ -210,34 +246,77 @@ def compute_candidate_capture_rates(
     anti_chow_pool: float,
     reference_date: datetime | None = None,
 ) -> dict[str, dict[str, float]]:
-    """Recency-weighted share and anti-Chow pool capture rate for tracked candidates.
+    """Allocate the anti-Chow pool using current-field polling.
 
-    Uses multi-candidate polls (2+ non-Chow candidates). Missing candidates
-    return share=0.0, capture_rate=0.0.
+    ``polling_share`` is the candidate's decided/leaning vote average in exact
+    current-field polls. ``lane_share`` is their share of combined tracked
+    challenger support. To make the structural allocation explicit, the model
+    maps the distribution of all non-Chow responses on that ballot (tracked
+    candidates plus other/uncommitted responses) onto the all-voter anti-Chow
+    pool. ``capture_rate`` is the candidate's resulting fraction of that pool;
+    ``share`` is the corresponding electorate share.
+
+    The mapping is an editorial structural assumption, not a claim that every
+    non-Chow poll respondent disapproves of Chow. Keeping the polling shares and
+    lane shares in the output makes the measured evidence separately visible.
     """
-    multi = polls_df[
-        polls_df["field_tested"].apply(_count_non_chow_candidates) >= 2
-    ].copy()
+    current_field = _current_field_polls(polls_df)
+
+    zero = {
+        "share": 0.0,
+        "polling_share": 0.0,
+        "lane_share": 0.0,
+        "capture_rate": 0.0,
+    }
+    if current_field.empty:
+        return {candidate: dict(zero) for candidate in ANTI_CHOW_CANDIDATES}
+
+    weights = _decay_weights(
+        current_field["date_published"], POLL_HALF_LIFE_DAYS, reference_date
+    )
+    total_weight = float(weights.sum())
+    if total_weight <= 0:
+        return {candidate: dict(zero) for candidate in ANTI_CHOW_CANDIDATES}
+
+    polling_shares = {
+        candidate: float(
+            (pd.to_numeric(current_field[candidate], errors="coerce") * weights).sum()
+            / total_weight
+        )
+        for candidate in ANTI_CHOW_CANDIDATES
+    }
+    chow_polling_share = float(
+        (pd.to_numeric(current_field["chow"], errors="coerce") * weights).sum()
+        / total_weight
+    )
+
+    tracked_challenger_share = sum(polling_shares.values())
+    # The complement of Chow includes named challengers plus other/uncommitted
+    # responses. Rounding can put tracked candidates fractionally above that
+    # complement, so never use a denominator smaller than the tracked total.
+    opposition_polling_share = max(
+        tracked_challenger_share,
+        max(0.0, 1.0 - chow_polling_share),
+    )
 
     result: dict[str, dict[str, float]] = {}
-    for cand in ANTI_CHOW_CANDIDATES:
-        if cand not in multi.columns or multi.empty:
-            result[cand] = {"share": 0.0, "capture_rate": 0.0}
-            continue
-
-        weights = _decay_weights(
-            multi["date_published"], POLL_HALF_LIFE_DAYS, reference_date
+    for candidate in ANTI_CHOW_CANDIDATES:
+        polling_share = polling_shares[candidate]
+        lane_share = (
+            polling_share / tracked_challenger_share
+            if tracked_challenger_share > 0
+            else 0.0
         )
-        shares = pd.to_numeric(multi[cand], errors="coerce").fillna(0.0)
-        total_w = float(weights.sum())
-        if total_w <= 0:
-            result[cand] = {"share": 0.0, "capture_rate": 0.0}
-            continue
-
-        share = float((shares * weights).sum() / total_w)
-        capture_rate = share / anti_chow_pool if anti_chow_pool > 0 else 0.0
-        result[cand] = {
-            "share": round(share, 4),
+        capture_rate = (
+            polling_share / opposition_polling_share
+            if opposition_polling_share > 0
+            else 0.0
+        )
+        allocated_share = anti_chow_pool * capture_rate
+        result[candidate] = {
+            "share": round(allocated_share, 4),
+            "polling_share": round(polling_share, 4),
+            "lane_share": round(lane_share, 4),
             "capture_rate": round(capture_rate, 4),
         }
 
@@ -249,25 +328,48 @@ def compute_consolidation_trend(
     anti_chow_pool: float,
     reference_date: datetime | None = None,
 ) -> str:
-    """Is Bradford's anti-Chow pool capture rate rising, stalling, or reversing?
+    """Is the challenger lane consolidating or fragmenting?
 
-    Compares Bradford's unweighted mean capture rate in multi-candidate polls
-    from the past 90 days vs polls older than 90 days. When the recent window
-    has polling but every poll tests Bradford as the only named challenger,
-    the field has narrowed to a head-to-head race and the trend is the
-    terminal "consolidated" state.
-    Returns: "consolidating" | "stalling" | "reversing" | "consolidated"
-             | "insufficient_data"
+    Once every tracked challenger has been tested together, the classification
+    uses their recency-weighted split directly: a second contender with at
+    least 10% of challenger support means fragmentation. Before common-field
+    polling exists, it falls back to Bradford's recent-vs-earlier capture rate;
+    a recent Bradford-only ballot is the terminal "consolidated" state.
+    Returns: "fragmented" | "consolidating" | "stalling" | "reversing"
+             | "consolidated" | "insufficient_data"
     """
     if anti_chow_pool <= 0 or "bradford" not in polls_df.columns:
         return "insufficient_data"
 
     ref = reference_date or datetime.now(UTC)
+    ref_ts = pd.Timestamp(ref)
+    if ref_ts.tzinfo is None:
+        ref_ts = ref_ts.tz_localize(UTC)
     df = polls_df.copy()
     df["_date"] = pd.to_datetime(df["date_published"], utc=True, errors="coerce")
-    df = df[df["_date"].notna()]
+    df = df[df["_date"].notna() & (df["_date"] <= ref_ts)]
     df["_non_chow"] = df["field_tested"].apply(_count_non_chow_candidates)
-    cutoff = ref - pd.Timedelta(days=90)
+    cutoff = ref_ts - pd.Timedelta(days=90)
+
+    # Once the current challenger field is tested, describe its present level
+    # of fragmentation. This is deliberately a state, not a directional trend:
+    # one common-field poll cannot establish that consolidation has reversed.
+    current_field = _current_field_polls(df)
+    recent_current = current_field[current_field["_date"] >= cutoff]
+    if not recent_current.empty:
+        weights = _decay_weights(
+            recent_current["date_published"], POLL_HALF_LIFE_DAYS, ref_ts.to_pydatetime()
+        )
+        averages = []
+        total_weight = float(weights.sum())
+        for candidate in ANTI_CHOW_CANDIDATES:
+            values = pd.to_numeric(recent_current[candidate], errors="coerce")
+            averages.append(float((values * weights).sum() / total_weight))
+        total = sum(averages)
+        if total <= 0:
+            return "insufficient_data"
+        fragmentation = 1.0 - (max(averages) / total)
+        return "fragmented" if fragmentation >= 0.10 else "consolidating"
 
     multi = df[df["_non_chow"] >= 2]
     if multi.empty:
@@ -426,14 +528,12 @@ def _get_capture_poll_detail(
     candidate: str,
     reference_date: datetime | None = None,
 ) -> list[dict]:
-    """Multi-candidate polls (2+ non-Chow challengers) with recency weights normalised to max=1.0.
+    """Common-field challenger polls with recency weights normalised to max=1.0.
 
     Used to show one candidate's anti-Chow pool capture rate per poll.
     Sorted by date descending.
     """
-    multi = polls_df[
-        polls_df["field_tested"].apply(_count_non_chow_candidates) >= 2
-    ].copy()
+    multi = _current_field_polls(polls_df)
     if multi.empty or candidate not in multi.columns:
         return []
     weights = _normalise_max(
@@ -534,6 +634,7 @@ def compute_pool_model(
             "total_polls": len(polls_df),
             "approval_data_points": len(approval_df),
             "h2h_available": chow_h2h is not None,
+            "current_field_poll_count": len(_current_field_polls(polls_df)),
         },
         "poll_detail": {
             "approval_polls": _get_approval_poll_detail(approval_df, reference_date),

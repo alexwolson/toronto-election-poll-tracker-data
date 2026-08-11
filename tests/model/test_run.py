@@ -1,7 +1,11 @@
 """Tests for run.py model pipeline."""
+import json
+from collections import Counter
+from pathlib import Path
+
 import pandas as pd
-from backend.model.run import _classify_race, _derive_endorsed_by_departing
-from backend.model.simulation import SAFE_DEFEATABILITY_THRESHOLD
+from backend.model.council import classify_race_evidence
+from backend.model.run import _derive_endorsed_by_departing
 
 
 def _ward_data(ward: int, councillor_name: str, is_running: bool) -> pd.DataFrame:
@@ -72,33 +76,47 @@ def test_derive_endorsed_by_departing_empty_endorsements():
     assert result.loc[0, "is_endorsed_by_departing"] == False
 
 
-def test_classify_race_high_defeatability_no_challengers_is_not_safe():
-    """A ward with high defeatability and no viable challengers must not be
-    classified as 'safe'. The simulation's _is_safe_incumbent requires
-    defeatability_score < SAFE_DEFEATABILITY_THRESHOLD, so _classify_race must
-    agree to avoid showing 'safe' with a simulation-derived (non-safe) win prob.
-    """
-    row = {
-        "is_running": True,
-        "defeatability_score": SAFE_DEFEATABILITY_THRESHOLD + 1,  # e.g. 31
-    }
-    challengers = []  # no challengers at all
-
-    result = _classify_race(row, challengers)
-
-    assert result != "safe", (
-        f"Ward with defeatability={row['defeatability_score']} (>= threshold "
-        f"{SAFE_DEFEATABILITY_THRESHOLD}) should not be 'safe', got '{result}'"
+def test_classify_race_high_vulnerability_is_competitive_without_challenger() -> None:
+    status, reasons = classify_race_evidence(
+        is_running=True,
+        vulnerability_score=60,
+        strongest_challenger_tier=None,
+        returning_runner_up=False,
+        prior_runner_up_share=None,
+        direct_poll_available=False,
     )
+    assert status == "competitive"
+    assert reasons == ["high_structural_vulnerability"]
 
 
-def test_classify_race_low_defeatability_no_challengers_is_safe():
-    """A ward with low defeatability and no viable challengers is 'safe'."""
-    row = {
-        "is_running": True,
-        "defeatability_score": SAFE_DEFEATABILITY_THRESHOLD - 1,  # e.g. 29
+def test_known_label_alone_does_not_make_a_low_risk_ward_competitive() -> None:
+    status, reasons = classify_race_evidence(
+        is_running=True,
+        vulnerability_score=20,
+        strongest_challenger_tier="known",
+        returning_runner_up=False,
+        prior_runner_up_share=None,
+        direct_poll_available=False,
+    )
+    assert status == "safe"
+    assert reasons == ["no_competitive_trigger"]
+
+
+def test_v3_snapshot_separates_assessment_from_unavailable_forecast() -> None:
+    snapshot = json.loads(Path("data/processed/model_snapshot.json").read_text())
+    counts = Counter(ward["race_class"] for ward in snapshot["wards"])
+    assert snapshot["schema_version"] == 3
+    assert counts == {"safe": 14, "competitive": 9, "open": 2}
+    assert sum(counts.values()) == 25
+    assert snapshot["council_model"]["assessment"]["status_counts"] == {
+        "safe": 14,
+        "competitive": 9,
+        "open": 2,
     }
-    challengers = []
-
-    result = _classify_race(row, challengers)
-    assert result == "safe"
+    assert snapshot["council_model"]["forecast"]["status"] == "insufficient_data"
+    assert snapshot["council_model"]["composition"]["status"] == "unavailable"
+    for ward in snapshot["wards"]:
+        assert "win_probability" not in ward
+        assert "candidate_win_probabilities" not in ward
+        assert "factors" not in ward
+        assert ward["forecast"]["incumbent_win_probability"] is None

@@ -158,7 +158,7 @@ def test_validate_registered_councillors_rejects_empty_status():
 
 # --- ward_polls validation ---
 
-from backend.model.validate import validate_ward_polls
+from backend.model.validate import validate_ward_poll_readings, validate_ward_polls
 
 
 def _base_ward_poll_row(**overrides) -> dict:
@@ -235,3 +235,66 @@ def test_validate_ward_polls_rejects_duplicate_ward_poll_id():
     df = pd.DataFrame([_base_ward_poll_row(), _base_ward_poll_row()])
     with pytest.raises(ValidationError, match="Duplicate"):
         validate_ward_polls(df)
+
+
+def _valid_ward_poll_readings() -> pd.DataFrame:
+    common = {
+        "ward": 13,
+        "poll_id": "ward-13-test",
+        "firm": "Test Firm",
+        "date_conducted": "2026-06-23",
+        "date_published": "2026-06-24",
+        "sample_size": 355,
+        "denominator": "decided voters",
+        "ballot_status": "different_candidate_field",
+        "undecided_share": 0.45,
+    }
+    return pd.DataFrame(
+        [
+            {
+                **common,
+                "candidate_id": "incumbent",
+                "candidate_name": "Incumbent",
+                "share": 0.35,
+                "is_incumbent": True,
+                "is_residual": False,
+                "registration_status": "registered",
+            },
+            {
+                **common,
+                "candidate_id": "challenger",
+                "candidate_name": "Challenger",
+                "share": 0.25,
+                "is_incumbent": False,
+                "is_residual": False,
+                "registration_status": "registered",
+            },
+            {
+                **common,
+                "candidate_id": "residual",
+                "candidate_name": "Other candidates",
+                "share": 0.40,
+                "is_incumbent": False,
+                "is_residual": True,
+                "registration_status": "residual",
+            },
+        ]
+    )
+
+
+def test_validate_observed_ward_poll_readings_accepts_complete_choice_set() -> None:
+    validate_ward_poll_readings(_valid_ward_poll_readings())
+
+
+def test_validate_observed_ward_poll_readings_rejects_incomplete_denominator() -> None:
+    readings = _valid_ward_poll_readings()
+    readings.loc[readings["candidate_id"] == "residual", "share"] = 0.20
+    with pytest.raises(ValidationError, match="do not sum to one"):
+        validate_ward_poll_readings(readings)
+
+
+def test_validate_observed_ward_poll_readings_requires_residual() -> None:
+    readings = _valid_ward_poll_readings()
+    readings["is_residual"] = False
+    with pytest.raises(ValidationError, match="one residual row"):
+        validate_ward_poll_readings(readings)

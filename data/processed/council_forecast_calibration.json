@@ -1,0 +1,147 @@
+{
+  "model_version": "incumbent_retention_v1",
+  "generated_at": "2026-08-11T02:28:42.035209+00:00",
+  "status": "insufficient_data",
+  "unavailable_reasons": [
+    "minimum_incumbent_losses",
+    "beats_incumbent_base_rate"
+  ],
+  "gates": {
+    "minimum_historical_cases": true,
+    "minimum_incumbent_losses": false,
+    "beats_incumbent_base_rate": false
+  },
+  "thresholds": {
+    "minimum_historical_cases": 100,
+    "minimum_incumbent_losses": 10,
+    "must_beat_incumbent_base_rate_on_brier_and_log_loss": true
+  },
+  "diagnostics": {
+    "case_count": 121,
+    "election_count": 4,
+    "incumbent_wins": 113,
+    "incumbent_losses": 8,
+    "retention_rate": 0.9338842975206612,
+    "winner_brier": 0.06726404015129875,
+    "baseline_winner_brier": 0.06425426056523659,
+    "share_log_loss": 0.28968526873304573,
+    "baseline_share_log_loss": 0.2636279927203937,
+    "beats_baseline": false,
+    "folds": [
+      {
+        "held_out_election": 2006,
+        "case_count": 33,
+        "incumbent_losses": 1
+      },
+      {
+        "held_out_election": 2010,
+        "case_count": 35,
+        "incumbent_losses": 5
+      },
+      {
+        "held_out_election": 2014,
+        "case_count": 37,
+        "incumbent_losses": 1
+      },
+      {
+        "held_out_election": 2022,
+        "case_count": 16,
+        "incumbent_losses": 1
+      }
+    ]
+  },
+  "fit": {
+    "feature_names": [
+      "intercept",
+      "prior_share",
+      "prior_margin",
+      "log_candidate_count",
+      "returning_runner_up",
+      "first_term"
+    ],
+    "coefficients": [
+      2.7540137484447555,
+      0.43362535536336116,
+      -0.016597050959401675,
+      -0.14081068848615622,
+      -0.7492371564747106,
+      0.36600857424065375
+    ],
+    "covariance": [
+      [
+        0.30089901685910614,
+        0.0006772258496929478,
+        0.007287771172362394,
+        -0.017703210297875183,
+        -0.14453440614119095,
+        -0.1965468608369124
+      ],
+      [
+        0.0006772258496928819,
+        0.30294164124532424,
+        -0.23425433644889967,
+        0.004974176480256842,
+        0.02885762639957125,
+        0.04397683036942909
+      ],
+      [
+        0.0072877711723624145,
+        -0.2342543364488997,
+        0.34076145327849683,
+        0.023671740739865332,
+        0.007571942344383426,
+        0.012945508928911722
+      ],
+      [
+        -0.017703210297875152,
+        0.004974176480256824,
+        0.02367174073986534,
+        0.1344182264042374,
+        -0.027088341396539765,
+        0.006030974668989762
+      ],
+      [
+        -0.144534406141191,
+        0.028857626399571217,
+        0.007571942344383453,
+        -0.02708834139653974,
+        0.3838117233471032,
+        0.040039956248855244
+      ],
+      [
+        -0.19654686083691247,
+        0.04397683036942903,
+        0.012945508928911758,
+        0.006030974668989816,
+        0.040039956248855285,
+        0.37315400759372613
+      ]
+    ],
+    "feature_means": {
+      "prior_share": 0.5337073436128679,
+      "prior_margin": 0.26716060910531675,
+      "log_candidate_count": 1.7144816092967
+    },
+    "feature_scales": {
+      "prior_share": 0.14903231395673844,
+      "prior_margin": 0.2112458946397843,
+      "log_candidate_count": 0.39533806889641154
+    },
+    "method": "regularized_logistic_incumbent_retention"
+  },
+  "data": {
+    "elections": [
+      2006,
+      2010,
+      2014,
+      2022
+    ],
+    "stable_boundary_pairs": [
+      "2003-2006",
+      "2006-2010",
+      "2010-2014",
+      "2018-2022"
+    ],
+    "source": "City of Toronto official councillor results"
+  }
+}

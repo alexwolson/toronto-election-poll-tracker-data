@@ -1,5 +1,10 @@
 # ward_defeatability.csv Schema
 
+> **Current use:** these fields are structural evidence for the public race
+> assessment, not calibrated win-probability inputs. Snapshot schema v3 reports
+> the resulting vulnerability score separately from Safe/Competitive/Open and
+> suppresses ward odds while the forecast publication gates fail.
+
 One row per ward where an incumbent is seeking re-election. Open seats (no incumbent) are excluded.
 
 This file is hand-maintained from publicly available data:
@@ -32,12 +37,12 @@ This file is hand-maintained from publicly available data:
 
 > **Note:** `pop_growth_pct` is not stored in this file. It is computed automatically in `process_all.py` from `data/raw/census/ward_population.csv` (2016→2021 Statistics Canada census data) and merged into the processed output.
 
-## By-election incumbents
+## By-election incumbents (historical note)
 
-Several current councillors were elected in mid-term by-elections:
-- **Ward 21** (Scarborough Centre): Parthi Kandavel, elected 2023 by-election
-- **Ward 24** (Scarborough-Guildwood): Stephanie Shan, elected 2023 by-election
-- **Ward 15** (Don Valley West): seat vacant following Jaye Robinson's death; incumbent TBD
+The `is_byelection_incumbent` field identifies any incumbent whose reference
+result came from a mid-term by-election. Treat the raw file and official source
+link as authoritative; this schema deliberately avoids a manually maintained
+list of current officeholders.
 
 For these wards, `is_byelection_incumbent` is `true`, and `vote_share`, `electorate_share`, and `pop_growth_pct` are based on the by-election figures rather than 2022 figures. By-election electorate shares are typically lower due to reduced turnout, making them noisier proxies. This is flagged in the model's output.
 

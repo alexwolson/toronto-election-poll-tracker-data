@@ -1,6 +1,7 @@
 """Tests for WardSimulation."""
 import pandas as pd
 import numpy as np
+import pytest
 from backend.model.simulation import WardSimulation, ENDORSEMENT_WEIGHT
 
 
@@ -46,6 +47,47 @@ def _empty_coattails() -> pd.DataFrame:
 
 def _empty_leans() -> pd.DataFrame:
     return pd.DataFrame(columns=["ward", "candidate", "lean"])
+
+
+def test_new_mayoral_alignment_uses_neutral_ward_lean_and_centered_mood():
+    """Alexander-aligned candidates still react to his city-wide standing.
+
+    A new mayoral candidate has no historical ward result. That should mean
+    neutral geography, not that the coattail mechanism is silently disabled.
+    """
+    sim = WardSimulation(
+        ward_data=_minimal_ward_data(3, is_running=False),
+        mayoral_averages=pd.DataFrame(
+            [
+                {"candidate": "chow", "share": 0.47},
+                {"candidate": "alexander", "share": 0.10},
+            ]
+        ),
+        coattails=_empty_coattails(),
+        challengers=_minimal_challenger(3),
+        leans=_empty_leans(),
+        n_draws=10,
+    )
+    candidate = pd.Series(
+        {
+            "name_recognition_tier": "known",
+            "mayoral_alignment": "alexander",
+            "endorsements": "",
+        }
+    )
+
+    average_strength = sim._compute_candidate_strength(
+        candidate, {"chow": 0.47, "alexander": 0.10}, 3
+    )
+    strong_draw = sim._compute_candidate_strength(
+        candidate, {"chow": 0.42, "alexander": 0.15}, 3
+    )
+    weak_draw = sim._compute_candidate_strength(
+        candidate, {"chow": 0.52, "alexander": 0.05}, 3
+    )
+    assert average_strength == 1.0
+    assert abs(strong_draw - 1.1) < 1e-9
+    assert abs(weak_draw - 0.9) < 1e-9
 
 
 def test_open_seat_does_not_crash_when_ward_absent_from_coattails():
@@ -108,7 +150,12 @@ def test_safe_incumbent_win_probability_is_not_one():
 
     sim = WardSimulation(
         ward_data=ward_data,
-        mayoral_averages=_minimal_mayoral_averages(),
+        mayoral_averages=pd.DataFrame(
+            [
+                {"candidate": "chow", "share": 0.50},
+                {"candidate": "bradford", "share": 0.50},
+            ]
+        ),
         coattails=coattails,
         challengers=challengers,
         leans=_empty_leans(),
@@ -125,6 +172,10 @@ def test_safe_incumbent_win_probability_is_not_one():
     assert abs(win_prob - SAFE_INCUMBENT_WIN_PROB) < 0.03, (
         f"Expected win probability near {SAFE_INCUMBENT_WIN_PROB}, got {win_prob:.4f}"
     )
+    assert result["incumbent_probability_interval"][ward] == {
+        "low": SAFE_INCUMBENT_WIN_PROB,
+        "high": SAFE_INCUMBENT_WIN_PROB,
+    }
 
 
 def test_incumbent_ward_simulation_produces_valid_win_probability():
@@ -169,7 +220,12 @@ def test_incumbent_ward_simulation_produces_valid_win_probability():
 
     sim = WardSimulation(
         ward_data=ward_data,
-        mayoral_averages=_minimal_mayoral_averages(),
+        mayoral_averages=pd.DataFrame(
+            [
+                {"candidate": "chow", "share": 0.50},
+                {"candidate": "bradford", "share": 0.50},
+            ]
+        ),
         coattails=coattails,
         challengers=challengers,
         leans=_empty_leans(),
@@ -184,6 +240,45 @@ def test_incumbent_ward_simulation_produces_valid_win_probability():
     )
     assert ward in result["candidate_win_probabilities"]
     assert "Incumbent" in result["candidate_win_probabilities"][ward]
+    interval = result["incumbent_probability_interval"][ward]
+    assert interval is not None
+    assert 0.0 <= interval["low"] <= interval["high"] <= 1.0
+    assert interval["high"] - interval["low"] > 0.0
+    assert interval["low"] <= win_prob <= interval["high"]
+
+
+def test_open_seat_probability_interval_is_unavailable():
+    ward = 19
+    sim = WardSimulation(
+        ward_data=_minimal_ward_data(ward, is_running=False),
+        mayoral_averages=_minimal_mayoral_averages(),
+        coattails=_empty_coattails(),
+        challengers=_minimal_challenger(ward),
+        leans=_empty_leans(),
+        n_draws=20,
+        seed=0,
+    )
+    result = sim.run()
+    assert result["incumbent_probability_interval"][ward] is None
+
+
+def test_zero_conditional_mayoral_draws_are_unavailable_not_zero_seats():
+    sim = _safe_ward_sim(
+        mayoral_eff_n=20000.0,
+        reference_date=ELECTION_DATE,
+        n_draws=100,
+    )
+    sim.mayoral_averages = pd.DataFrame(
+        [
+            {"candidate": "chow", "share": 0.999999},
+            {"candidate": "alexander", "share": 0.000001},
+        ]
+    )
+    result = sim.run()
+    conditional = result["composition_by_mayor"]["alexander"]
+    assert conditional["n_draws"] == 0
+    assert conditional["mean"] is None
+    assert conditional["std"] is None
 
 
 def test_endorsement_count_boosts_candidate_strength():
@@ -415,6 +510,29 @@ def test_results_include_mayoral_win_probabilities():
     probs = result["mayoral_win_probabilities"]
     assert set(probs) == {"chow", "bradford"}
     assert abs(sum(probs.values()) - 1.0) < 1e-9
+
+
+def test_forecast_draws_keep_residual_but_never_name_it_winner():
+    sim = _safe_ward_sim(n_draws=300)
+    sim.mayoral_candidate_ids = ["chow", "bradford", "alexander", "residual"]
+    sim.mayoral_draws = np.array(
+        [
+            [0.20, 0.18, 0.12, 0.50],
+            [0.30, 0.31, 0.09, 0.30],
+        ]
+    )
+    sim._mayoral_average_by_candidate = dict(
+        zip(sim.mayoral_candidate_ids, sim.mayoral_draws.mean(axis=0))
+    )
+    result = sim.run()
+    assert set(result["mayoral_win_probabilities"]) == {
+        "chow",
+        "bradford",
+        "alexander",
+    }
+    assert "residual" not in result["composition_by_mayor"]
+    assert sum(result["mayoral_win_probabilities"].values()) == pytest.approx(1.0)
+    assert result["mayoral_uncertainty"]["source"] == "forecast_draws"
 
 
 def test_trailing_candidate_wins_draws_with_sparse_polling():

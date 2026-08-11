@@ -12,6 +12,7 @@ from __future__ import annotations
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -21,14 +22,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from backend.model.aggregator import (
     aggregate_polls,
     exclude_polls_with_declined_candidates,
-    get_latest_scenario_polls,
-    get_scenario_polls,
 )
 from backend.model.candidates import DECLINED_CANDIDATE_IDS
 from backend.model.coattails import compute_coattail_adjustment
-from backend.model.pool import NOMINATION_CLOSE
-from backend.model.run import DEFAULT_SCENARIO, SCENARIOS
+from backend.model.council import build_historical_incumbent_cases
 from backend.model.lean import compute_ward_mayoral_lean
+from backend.model.mayoral import exact_field_polls, validate_approval_data
+from backend.model.mayoral_config import NOMINATION_CLOSE, TARGET_FIELD
 from backend.model.names import KNOWN_CANDIDATES
 from backend.model.validate import (
     ValidationError,
@@ -41,12 +41,14 @@ from backend.model.validate import (
     validate_registered_electors,
     validate_registered_mayors,
     validate_ward_polls,
+    validate_ward_poll_readings,
     validate_ward_population,
 )
 
 RAW = Path("data/raw")
 PROCESSED = Path("data/processed")
 TIMESTAMP = datetime.now(timezone.utc).isoformat()
+TORONTO_TZ = ZoneInfo("America/Toronto")
 
 
 def process_polls(input_path: Path) -> pd.DataFrame:
@@ -67,6 +69,21 @@ def process_polls(input_path: Path) -> pd.DataFrame:
     df["date_conducted"] = pd.to_datetime(df["date_conducted"]).dt.strftime("%Y-%m-%d")
     df["date_published"] = pd.to_datetime(df["date_published"]).dt.strftime("%Y-%m-%d")
 
+    return df
+
+
+def process_approval(input_path: Path) -> pd.DataFrame:
+    """Load and validate approval context without feeding it to vote modelling."""
+    if not input_path.exists():
+        print(f"ERROR: approval file not found: {input_path}", file=sys.stderr)
+        sys.exit(1)
+    df = pd.read_csv(input_path)
+    try:
+        validate_approval_data(df)
+    except ValueError as exc:
+        print(f"ERROR in {input_path}: {exc}", file=sys.stderr)
+        sys.exit(1)
+    df["date"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
     return df
 
 
@@ -114,6 +131,45 @@ def process_ward_polls(input_path: Path) -> pd.DataFrame:
     return df
 
 
+def process_ward_poll_readings(input_path: Path) -> pd.DataFrame:
+    """Load observed long-form ward vote intention without deriving win odds."""
+    if not input_path.exists():
+        print(f"ERROR: ward poll readings file not found: {input_path}", file=sys.stderr)
+        sys.exit(1)
+    df = pd.read_csv(input_path)
+    try:
+        if not df.empty:
+            df["ward"] = df["ward"].astype(int)
+        validate_ward_poll_readings(df)
+    except (ValidationError, ValueError) as exc:
+        print(f"ERROR in {input_path}: {exc}", file=sys.stderr)
+        sys.exit(1)
+    if not df.empty:
+        for column in ["date_conducted", "date_published"]:
+            df[column] = pd.to_datetime(df[column]).dt.strftime("%Y-%m-%d")
+    return df
+
+
+def process_historical_council_results(input_path: Path) -> pd.DataFrame:
+    """Validate the official historical fixture through its derived cases."""
+    if not input_path.exists():
+        print(f"ERROR: historical council results not found: {input_path}", file=sys.stderr)
+        sys.exit(1)
+    df = pd.read_csv(input_path)
+    try:
+        cases = build_historical_incumbent_cases(df)
+    except ValueError as exc:
+        print(f"ERROR in {input_path}: {exc}", file=sys.stderr)
+        sys.exit(1)
+    if len(cases) < 100:
+        print(
+            f"ERROR in {input_path}: expected at least 100 incumbent cases, got {len(cases)}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return df
+
+
 def process_council_alignment(input_path: Path) -> pd.DataFrame:
     """Load, validate, and normalise council alignment CSV."""
     if not input_path.exists():
@@ -153,6 +209,10 @@ def process_defeatability(
         rename_map = {
             "Ward": "ward",
             "Elected Councillor": "councillor_name",
+            "Runner-Up": "prior_runner_up",
+            "Votes Received": "prior_incumbent_votes",
+            "Number Voted": "prior_ballots_cast",
+            "Winning margin": "prior_margin_votes",
             "Vote Share": "vote_share",
             "Elector Share": "electorate_share",
             "Defeatability Score": "defeatability_score",
@@ -175,6 +235,15 @@ def process_defeatability(
         df["defeatability_score"] = pd.to_numeric(
             df["defeatability_score"], errors="coerce"
         )
+        for col in ["prior_incumbent_votes", "prior_ballots_cast", "prior_margin_votes"]:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+        df["prior_margin_share"] = (
+            df["prior_margin_votes"] / df["prior_ballots_cast"]
+        )
+        df["prior_runner_up_share"] = (
+            (df["prior_incumbent_votes"] - df["prior_margin_votes"])
+            / df["prior_ballots_cast"]
+        )
         df["notes"] = ""
         if "new_voter_margin" in df.columns:
             df["notes"] = "New Voter Margin: " + df["new_voter_margin"].astype(str)
@@ -195,7 +264,7 @@ def process_defeatability(
             df["election_year"] = 2022
             df["is_byelection_incumbent"] = False
             df["is_running"] = True
-            df["last_updated"] = datetime.now(timezone.utc).date().isoformat()
+            df["last_updated"] = datetime.now(TORONTO_TZ).date().isoformat()
 
         df["election_year"] = df["election_year"].fillna(2022).astype(int)
         df["is_byelection_incumbent"] = (
@@ -203,7 +272,7 @@ def process_defeatability(
         )
         df["is_running"] = df["is_running"].fillna(True).astype(bool)
         df["last_updated"] = df["last_updated"].fillna(
-            datetime.now(timezone.utc).date().isoformat()
+            datetime.now(TORONTO_TZ).date().isoformat()
         )
 
         df = df[
@@ -216,6 +285,9 @@ def process_defeatability(
                 "vote_share",
                 "electorate_share",
                 "defeatability_score",
+                "prior_runner_up",
+                "prior_margin_share",
+                "prior_runner_up_share",
                 "notes",
                 "last_updated",
             ]
@@ -391,7 +463,7 @@ def process_challengers_merged(
             + ", ".join(f"W{w} {name}" for w, name in orphans)
         )
 
-    today = datetime.now(timezone.utc).date().isoformat()
+    today = datetime.now(TORONTO_TZ).date().isoformat()
     rows = []
     for _, row in api_df.iterrows():
         key = (int(row["ward"]), row["_name_key"])
@@ -546,21 +618,35 @@ def main() -> None:
     polls = process_polls(RAW / "polls" / "polls.csv")
     write_processed(polls, PROCESSED / "polls.csv")
 
+    print("Processing approval context...")
+    approval = process_approval(RAW / "polls" / "approval_ratings.csv")
+    write_processed(approval, PROCESSED / "approval_ratings.csv")
+
     print("Processing ward polls...")
     ward_polls = process_ward_polls(RAW / "polls" / "ward_polls.csv")
     write_processed(ward_polls, PROCESSED / "ward_polls.csv")
 
+    print("Processing observed ward poll readings...")
+    ward_poll_readings = process_ward_poll_readings(
+        RAW / "polls" / "ward_poll_readings.csv"
+    )
+    write_processed(ward_poll_readings, PROCESSED / "ward_poll_readings.csv")
+
+    print("Processing historical council results...")
+    historical_council = process_historical_council_results(
+        RAW / "elections" / "historical_council_results.csv"
+    )
+    write_processed(
+        historical_council, PROCESSED / "historical_council_results.csv"
+    )
+
     print("Computing mayoral polling average...")
-    # Mirror the model's poll selection (run.py) so this artifact matches what
-    # the simulation actually uses: exclude declined candidates, filter to the
-    # default scenario, then prefer the most relevant field configuration.
-    scenario_candidates = SCENARIOS.get(DEFAULT_SCENARIO, [])
+    # Mirror the public current-field evidence. A candidate absent from a
+    # ballot is not a measured zero.
     eligible_polls = exclude_polls_with_declined_candidates(
         polls, DECLINED_CANDIDATE_IDS
     )
-    scenario_polls = get_latest_scenario_polls(
-        get_scenario_polls(eligible_polls, scenario_candidates)
-    )
+    scenario_polls = exact_field_polls(eligible_polls, TARGET_FIELD)
     avg_results = aggregate_polls(scenario_polls, KNOWN_CANDIDATES)
     avg_df = pd.DataFrame(
         [{"candidate": c, "share": s} for c, s in avg_results.items()]

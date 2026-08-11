@@ -115,6 +115,8 @@ class WardSimulation:
         ward_polls: pd.DataFrame | None = None,
         mayoral_eff_n: float | None = None,
         reference_date: datetime | None = None,
+        mayoral_draws: np.ndarray | None = None,
+        mayoral_candidate_ids: list[str] | None = None,
     ):
         """
         ward_data: [ward, councillor_name, is_running, defeatability_score, ...]
@@ -130,9 +132,53 @@ class WardSimulation:
         """
         self.ward_data = ward_data
         self.mayoral_averages = mayoral_averages
+        self.mayoral_draws = (
+            np.asarray(mayoral_draws, dtype=float)
+            if mayoral_draws is not None and np.asarray(mayoral_draws).size > 0
+            else None
+        )
+        self.mayoral_candidate_ids = list(
+            mayoral_candidate_ids
+            if mayoral_candidate_ids is not None
+            else mayoral_averages["candidate"].astype(str).tolist()
+        )
         self.coattails = coattails
         self.challengers = challengers
         self.leans = leans
+        self._mayoral_average_by_candidate = {
+            str(row["candidate"]): float(row["share"])
+            for _, row in mayoral_averages.iterrows()
+        }
+        if self.mayoral_draws is not None:
+            if self.mayoral_draws.ndim != 2:
+                raise ValueError("mayoral_draws must be a two-dimensional array")
+            if self.mayoral_draws.shape[1] != len(self.mayoral_candidate_ids):
+                raise ValueError("mayoral_draws columns must match mayoral_candidate_ids")
+            means = self.mayoral_draws.mean(axis=0)
+            self._mayoral_average_by_candidate = {
+                candidate: float(means[index])
+                for index, candidate in enumerate(self.mayoral_candidate_ids)
+            }
+        self._lean_by_ward_candidate = {
+            (int(row["ward"]), str(row["candidate"])): float(row["lean"])
+            for _, row in leans.iterrows()
+            if pd.notna(row.get("ward"))
+            and pd.notna(row.get("candidate"))
+            and pd.notna(row.get("lean"))
+        }
+        # The simulation visits every ward on every draw. Materialise immutable
+        # row records once instead of rebuilding pandas masks/Series hundreds of
+        # thousands of times during snapshot generation.
+        self._ward_by_number = {
+            int(row["ward"]): row.to_dict() for _, row in ward_data.iterrows()
+        }
+        self._challengers_by_ward = {
+            int(ward): group.to_dict(orient="records")
+            for ward, group in challengers.groupby("ward", sort=False)
+        }
+        self._coattail_by_ward = {
+            int(row["ward"]): row.to_dict() for _, row in coattails.iterrows()
+        }
         self.n_draws = n_draws
         self.mayoral_eff_n = (
             float(mayoral_eff_n)
@@ -160,7 +206,10 @@ class WardSimulation:
                 )
 
     def _compute_candidate_strength(
-        self, cand: pd.Series, mayoral_mood: dict[str, float], ward_num: int
+        self,
+        cand: pd.Series | dict[str, Any],
+        mayoral_mood: dict[str, float],
+        ward_num: int,
     ) -> float:
         """Compute mu_j (Stage 2 strength)."""
         tier_baselines = {"well-known": 2.0, "known": 1.0, "unknown": 0.0}
@@ -175,21 +224,26 @@ class WardSimulation:
         alignment = cand["mayoral_alignment"]
         boost = 0.0
         if alignment != "unaligned":
-            lean_row = self.leans[
-                (self.leans["ward"] == ward_num)
-                & (self.leans["candidate"] == alignment)
-            ]
-            if not lean_row.empty:
-                lean = lean_row.iloc[0]["lean"]
-                mood = mayoral_mood.get(alignment, 0.0)
-                boost = w_a * (lean + (mood - 0.20))
+            average_mood = self._mayoral_average_by_candidate.get(str(alignment))
+            if average_mood is not None and alignment in mayoral_mood:
+                # Ward lean is already centred on a candidate's city-wide
+                # historical result. Centre the simulated mood on the current
+                # polling average too: an average draw adds no arbitrary boost
+                # or penalty, while over/under-performance still correlates the
+                # mayoral and council simulations. A new mayoral candidate has
+                # neutral geography (lean=0) until ward evidence exists.
+                lean = self._lean_by_ward_candidate.get(
+                    (int(ward_num), str(alignment)), 0.0
+                )
+                mood_delta = float(mayoral_mood[alignment]) - average_mood
+                boost = w_a * (lean + mood_delta)
 
         return mu_tier + boost
 
     def _apply_split_penalties(
         self,
         candidate_strengths: dict[str, float],
-        ward_challengers: pd.DataFrame,
+        ward_challengers: list[dict[str, Any]],
     ) -> dict[str, float]:
         """Apply SPLIT_PENALTY to the strongest challenger in each alignment group
         that has 2 or more challengers."""
@@ -197,7 +251,7 @@ class WardSimulation:
 
         # Group challengers by alignment (exclude unaligned)
         alignment_groups: dict[str, list[str]] = {}
-        for _, row in ward_challengers.iterrows():
+        for row in ward_challengers:
             align = str(row.get("mayoral_alignment", "unaligned"))
             if align == "unaligned":
                 continue
@@ -315,7 +369,9 @@ class WardSimulation:
         return out
 
     def _is_safe_incumbent(
-        self, row: pd.Series, ward_challengers: pd.DataFrame
+        self,
+        row: pd.Series | dict[str, Any],
+        ward_challengers: list[dict[str, Any]],
     ) -> bool:
         """Return True if this ward qualifies for the safe incumbent shortcut.
 
@@ -331,7 +387,7 @@ class WardSimulation:
         viable_tiers = {"well-known", "known"}
         return not any(
             str(c.get("name_recognition_tier", "unknown")) in viable_tiers
-            for _, c in ward_challengers.iterrows()
+            for c in ward_challengers
         )
 
     def _softmax(self, strengths: list[float]) -> np.ndarray:
@@ -376,14 +432,11 @@ class WardSimulation:
         Returns (0.0, 0.0) when incumbent is absent from the polling averages;
         the caller's guard `if inc_avg > 0` handles this by defaulting mood_factor to 1.0.
         """
-        avg_series = self.mayoral_averages.loc[
-            self.mayoral_averages["candidate"] == INCUMBENT_CANDIDATE, "share"
-        ]
-        if avg_series.empty:
+        avg = self._mayoral_average_by_candidate.get(INCUMBENT_CANDIDATE)
+        if avg is None:
             return 0.0, 0.0
-        avg = float(avg_series.iloc[0])
         draw = float(mayoral_mood.get(INCUMBENT_CANDIDATE, avg))
-        return draw, avg
+        return draw, float(avg)
 
     def run(self) -> dict[str, Any]:
         """Run the Monte Carlo simulation."""
@@ -394,20 +447,31 @@ class WardSimulation:
         # so uncertainty widens when polling is sparse or election day is far.
         eff_n = max(MIN_MAYORAL_EFF_N, self.mayoral_eff_n)
         drift_sigma = _mayoral_drift_sigma(self.reference_date)
-        candidates = self.mayoral_averages["candidate"].tolist()
-        shares = self.mayoral_averages["share"].to_numpy()
-        shares = shares / shares.sum()
-        concentration = _dirichlet_concentration(
-            float(shares.max()), eff_n, drift_sigma
-        )
-        alpha = shares * concentration
+        if self.mayoral_draws is not None:
+            candidates = list(self.mayoral_candidate_ids)
+            named_candidates = [candidate for candidate in candidates if candidate != "residual"]
+            concentration = None
+            alpha = None
+        else:
+            candidates = self.mayoral_averages["candidate"].tolist()
+            named_candidates = list(candidates)
+            shares = self.mayoral_averages["share"].to_numpy()
+            shares = shares / shares.sum()
+            concentration = _dirichlet_concentration(
+                float(shares.max()), eff_n, drift_sigma
+            )
+            alpha = shares * concentration
 
         # 2. Results storage
-        ward_nums = sorted(self.ward_data["ward"].unique().tolist())
+        ward_nums = sorted(self._ward_by_number)
         n_wards = len(ward_nums)
         winner_names = np.empty((self.n_draws, n_wards), dtype=object)
         incumbent_wins_count = np.zeros(self.n_draws)
         mayor_winner_by_draw = np.empty(self.n_draws, dtype=object)
+        # Per-draw modelled incumbent probability, distinct from the binary
+        # simulated winner. Quantiles of this matrix describe uncertainty from
+        # mayoral mood and model noise; they are not Monte Carlo standard errors.
+        incumbent_probability_draws = np.full((self.n_draws, n_wards), np.nan)
 
         # Decomposed effects for explanatory factors
         # shape: (n_draws, n_wards)
@@ -417,19 +481,24 @@ class WardSimulation:
 
         # 3. Main Loop
         for i in range(self.n_draws):
-            mayoral_draw = self.rng.dirichlet(alpha)
+            if self.mayoral_draws is not None:
+                mayoral_draw = self.mayoral_draws[
+                    int(self.rng.integers(0, len(self.mayoral_draws)))
+                ]
+            else:
+                mayoral_draw = self.rng.dirichlet(alpha)
             mayoral_mood = dict(zip(candidates, mayoral_draw))
-            mayor_winner_by_draw[i] = candidates[int(np.argmax(mayoral_draw))]
+            named_values = [mayoral_mood[candidate] for candidate in named_candidates]
+            mayor_winner_by_draw[i] = named_candidates[int(np.argmax(named_values))]
             inc_draw, inc_avg = self._compute_incumbent_polling(mayoral_mood)
 
             for ward_idx, ward_num in enumerate(ward_nums):
-                row = self.ward_data[self.ward_data["ward"] == ward_num].iloc[0]
-                ward_challengers = self.challengers[
-                    self.challengers["ward"] == ward_num
-                ]
+                row = self._ward_by_number[ward_num]
+                ward_challengers = self._challengers_by_ward.get(ward_num, [])
 
                 # Safe incumbent shortcut (spec Part 5): skip simulation for uncontested wards
                 if self._is_safe_incumbent(row, ward_challengers):
+                    incumbent_probability_draws[i, ward_idx] = SAFE_INCUMBENT_WIN_PROB
                     if self.rng.random() < SAFE_INCUMBENT_WIN_PROB:
                         winner_names[i, ward_idx] = row["councillor_name"]
                         incumbent_wins_count[i] += 1
@@ -444,7 +513,7 @@ class WardSimulation:
                     c_row["candidate_name"]: self._compute_candidate_strength(
                         c_row, mayoral_mood, ward_num
                     )
-                    for _, c_row in ward_challengers.iterrows()
+                    for c_row in ward_challengers
                 }
                 adjusted_strengths = self._apply_split_penalties(
                     raw_strengths, ward_challengers
@@ -455,7 +524,7 @@ class WardSimulation:
                 if not row["is_running"]:
                     # Open seat sub-model (spec Part 5): endorsement boost + wider noise
                     open_strengths: dict[str, float] = {}
-                    for _, c_row in ward_challengers.iterrows():
+                    for c_row in ward_challengers:
                         base = self._compute_candidate_strength(
                             c_row, mayoral_mood, ward_num
                         )
@@ -479,13 +548,13 @@ class WardSimulation:
                     continue  # skip incumbent win/loss logic below
                 else:
                     # Incumbent ward: fetch coat_row only when needed
-                    coat_row = self.coattails[self.coattails["ward"] == ward_num].iloc[0]
+                    coat_row = self._coattail_by_ward[ward_num]
                     d_w = row["defeatability_score"]
                     # Per spec Part 3: P_w(draw) = lean * (draw/avg) + avg
                     # This scales the lean component by the incumbent's polling
                     # draw relative to their average, while keeping the base
                     # city-wide term fixed.
-                    lean = coat_row["lean"] if "lean" in coat_row.index else 0.0
+                    lean = coat_row.get("lean", 0.0)
                     mood_factor = (inc_draw / inc_avg) if inc_avg > 0 else 1.0
                     p_w = lean * mood_factor + inc_avg
                     c_w = coat_row["alignment_delta"] * p_w * GAMMA
@@ -514,6 +583,7 @@ class WardSimulation:
                     alpha_w, poll_p = self._compute_ward_poll_weight(ward_num)
                     if alpha_w > 0.0:
                         prob = alpha_w * poll_p + (1.0 - alpha_w) * prob
+                    incumbent_probability_draws[i, ward_idx] = prob
 
                 if self.rng.random() < prob:
                     winner_names[i, ward_idx] = row["councillor_name"]
@@ -533,37 +603,35 @@ class WardSimulation:
         win_probs = {}
         factors = {}
         candidate_win_probs: dict[int, dict[str, float]] = {}
-        incumbent_probability_interval: dict[int, dict[str, float]] = {}
+        incumbent_probability_interval: dict[int, dict[str, float] | None] = {}
         for ward_idx, ward_num in enumerate(ward_nums):
-            row = self.ward_data[self.ward_data["ward"] == ward_num].iloc[0]
+            row = self._ward_by_number[ward_num]
             counts = pd.Series(winner_names[:, ward_idx]).value_counts(normalize=True)
             candidate_win_probs[ward_num] = {
                 str(k): float(v) for k, v in counts.items()
             }
 
             if not row["is_running"]:
-                incumbent_probability_interval[ward_num] = {"low": 0.0, "high": 0.0}
+                incumbent_probability_interval[ward_num] = None
             else:
-                draw_vals = (
-                    winner_names[:, ward_idx] == row["councillor_name"]
-                ).astype(float)
-                p_hat = float(draw_vals.mean())
-                n = len(draw_vals)
-                z = 1.2815515655446004
-                se = float(np.sqrt(max(p_hat * (1.0 - p_hat), 0.0) / n))
-                low = max(0.0, p_hat - z * se)
-                high = min(1.0, p_hat + z * se)
+                probability_draws = incumbent_probability_draws[:, ward_idx]
+                probability_draws = probability_draws[~np.isnan(probability_draws)]
+                low, high = np.quantile(probability_draws, [0.10, 0.90])
                 incumbent_probability_interval[ward_num] = {
-                    "low": low,
-                    "high": high,
+                    "low": float(low),
+                    "high": float(high),
                 }
 
             if not row["is_running"]:
                 win_probs[ward_num] = 0.0
                 factors[ward_num] = {"vuln": 0.0, "coat": 0.0, "chal": 0.0}
             else:
-                win_probs[ward_num] = np.mean(
-                    winner_names[:, ward_idx] == row["councillor_name"]
+                # Average the modelled probabilities themselves rather than
+                # re-estimating the same mean from binary winner draws. The
+                # latter adds avoidable Monte Carlo noise and can fall outside
+                # the published per-draw probability interval.
+                win_probs[ward_num] = float(
+                    np.nanmean(incumbent_probability_draws[:, ward_idx])
                 )
                 factors[ward_num] = {
                     "vuln": np.mean(vuln_effects[:, ward_idx]),
@@ -571,15 +639,15 @@ class WardSimulation:
                     "chal": np.mean(chal_effects[:, ward_idx]),
                 }
 
-        composition_by_mayor: dict[str, dict[str, float | int]] = {}
-        for candidate in candidates:
+        composition_by_mayor: dict[str, dict[str, float | int | None]] = {}
+        for candidate in named_candidates:
             mask = mayor_winner_by_draw == candidate
             draws = incumbent_wins_count[mask]
             n_draws = int(draws.size)
             if n_draws == 0:
                 composition_by_mayor[candidate] = {
-                    "mean": 0.0,
-                    "std": 0.0,
+                    "mean": None,
+                    "std": None,
                     "n_draws": 0,
                 }
             else:
@@ -591,7 +659,7 @@ class WardSimulation:
 
         mayoral_win_probs = {
             candidate: float((mayor_winner_by_draw == candidate).mean())
-            for candidate in candidates
+            for candidate in named_candidates
         }
 
         return {
@@ -609,5 +677,6 @@ class WardSimulation:
                 "effective_sample_size": eff_n,
                 "drift_sigma": drift_sigma,
                 "concentration": concentration,
+                "source": "forecast_draws" if self.mayoral_draws is not None else "legacy_dirichlet",
             },
         }

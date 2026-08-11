@@ -116,6 +116,12 @@ def get_latest_scenario_polls(df: pd.DataFrame) -> pd.DataFrame:
 def get_scenario_polls(
     df: pd.DataFrame, scenario_candidates: list[str]
 ) -> pd.DataFrame:
+    """Return polls whose named candidate field exactly matches the scenario.
+
+    An empty result is meaningful: the requested matchup has not been measured.
+    Callers must surface that unavailable state instead of silently mixing in
+    incompatible ballots and treating absent candidates as zero support.
+    """
     def normalize_candidate(value: str) -> str:
         return str(value).strip().lower()
 
@@ -141,8 +147,7 @@ def get_scenario_polls(
         )
 
     mask = df["field_tested"].apply(lambda f: norm(f) == target)
-    out = df[mask]
-    return out if not out.empty else df
+    return df[mask].copy()
 
 
 def exclude_polls_with_declined_candidates(

@@ -1,0 +1,684 @@
+{
+  "status": "passed",
+  "model_version": "choice_set_v1",
+  "calibration_engine": "rolling_origin_leave_one_election_out_luce_choice_set",
+  "validation_strategy": "Each Toronto election is scored only at historical cutoffs; its final outcome is withheld from the choice-set fit. Versioned hyperparameters are frozen before held-out outcome scoring.",
+  "leave_one_election_out_folds": [
+    {
+      "held_out_election": "toronto_2014",
+      "training_elections": [
+        "toronto_2018",
+        "toronto_2022",
+        "toronto_2023"
+      ],
+      "evaluated_cutoffs_days": [
+        7,
+        14,
+        30,
+        60,
+        90,
+        120
+      ]
+    },
+    {
+      "held_out_election": "toronto_2018",
+      "training_elections": [
+        "toronto_2014",
+        "toronto_2022",
+        "toronto_2023"
+      ],
+      "evaluated_cutoffs_days": [
+        7,
+        14,
+        30,
+        60
+      ]
+    },
+    {
+      "held_out_election": "toronto_2022",
+      "training_elections": [
+        "toronto_2014",
+        "toronto_2018",
+        "toronto_2023"
+      ],
+      "evaluated_cutoffs_days": [
+        7,
+        14
+      ]
+    },
+    {
+      "held_out_election": "toronto_2023",
+      "training_elections": [
+        "toronto_2014",
+        "toronto_2018",
+        "toronto_2022"
+      ],
+      "evaluated_cutoffs_days": [
+        7,
+        14,
+        30,
+        60,
+        90,
+        120
+      ]
+    }
+  ],
+  "cutoffs_days": [
+    120,
+    90,
+    60,
+    30,
+    14,
+    7
+  ],
+  "parameters": {
+    "weekly_sigma": 0.16,
+    "house_sigma": 0.075,
+    "field_sigma": 0.12,
+    "poll_concentration": 30.0
+  },
+  "metrics": {
+    "case_count": 9,
+    "all_case_count": 18,
+    "election_count": 4,
+    "publication_scored_election_count": 3,
+    "share_mae": 0.0497,
+    "coverage_80": 0.8125,
+    "coverage_95": 0.9167,
+    "winner_brier": 0.0904,
+    "baseline_winner_brier": 0.0965,
+    "share_log_loss": 1.3833,
+    "baseline_share_log_loss": 1.4644,
+    "beats_latest_poll_baseline": true
+  },
+  "cases": [
+    {
+      "election_id": "toronto_2014",
+      "days_before_election": 120,
+      "poll_count": 46,
+      "publication_eligible": false,
+      "absolute_errors": [
+        0.029214299626183715,
+        0.1218402212980963,
+        0.18548431186450176,
+        0.1832008159376102
+      ],
+      "coverage_80": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "brier": 0.7335646250000001,
+      "baseline_brier": 0.731445125,
+      "share_log_loss": 1.4883278146800647,
+      "baseline_share_log_loss": 7.747380381845401
+    },
+    {
+      "election_id": "toronto_2014",
+      "days_before_election": 90,
+      "poll_count": 53,
+      "publication_eligible": false,
+      "absolute_errors": [
+        0.0030878870866896113,
+        0.09017155392859874,
+        0.19034687322321603,
+        0.2138974424435969
+      ],
+      "coverage_80": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "brier": 0.7604251249999999,
+      "baseline_brier": 0.5340611250000001,
+      "share_log_loss": 1.4779229550569308,
+      "baseline_share_log_loss": 7.72145769790614
+    },
+    {
+      "election_id": "toronto_2014",
+      "days_before_election": 60,
+      "poll_count": 59,
+      "publication_eligible": false,
+      "absolute_errors": [
+        0.05614309706682377,
+        0.07292092156731084,
+        0.1689634496827263,
+        0.2331495342427705
+      ],
+      "coverage_80": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "brier": 0.664103375,
+      "baseline_brier": 0.18880512500000002,
+      "share_log_loss": 1.47552669084869,
+      "baseline_share_log_loss": 7.786618041076413
+    },
+    {
+      "election_id": "toronto_2014",
+      "days_before_election": 30,
+      "poll_count": 75,
+      "publication_eligible": true,
+      "absolute_errors": [
+        0.026995223479756192,
+        0.10347200992718067,
+        0.04422978289687801,
+        0.12877584564615416
+      ],
+      "coverage_80": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "brier": 0.204018,
+      "baseline_brier": 0.09282187500000001,
+      "share_log_loss": 1.3237228188869734,
+      "baseline_share_log_loss": 1.6561191684555374
+    },
+    {
+      "election_id": "toronto_2014",
+      "days_before_election": 14,
+      "poll_count": 81,
+      "publication_eligible": true,
+      "absolute_errors": [
+        0.025475987905975883,
+        0.05637704243460945,
+        0.025832615931765,
+        0.07609977804799131
+      ],
+      "coverage_80": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "brier": 0.2061045,
+      "baseline_brier": 0.417051375,
+      "share_log_loss": 1.251640834414942,
+      "baseline_share_log_loss": 1.1770837168983792
+    },
+    {
+      "election_id": "toronto_2014",
+      "days_before_election": 7,
+      "poll_count": 85,
+      "publication_eligible": true,
+      "absolute_errors": [
+        0.0156229936708836,
+        0.04679319993714798,
+        0.015942545207944803,
+        0.05197472668956041
+      ],
+      "coverage_80": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "brier": 0.18790462500000005,
+      "baseline_brier": 0.113091125,
+      "share_log_loss": 1.2265852763934744,
+      "baseline_share_log_loss": 1.1786979114728782
+    },
+    {
+      "election_id": "toronto_2018",
+      "days_before_election": 60,
+      "poll_count": 1,
+      "publication_eligible": false,
+      "absolute_errors": [
+        0.04569515618137507,
+        0.04085815819427996,
+        0.1021205787688083
+      ],
+      "coverage_80": [
+        true,
+        true,
+        false
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true
+      ],
+      "brier": 0.03577812500000001,
+      "baseline_brier": 0.032258,
+      "share_log_loss": 1.0139867139517091,
+      "baseline_share_log_loss": 3.189669412223138
+    },
+    {
+      "election_id": "toronto_2018",
+      "days_before_election": 30,
+      "poll_count": 5,
+      "publication_eligible": true,
+      "absolute_errors": [
+        0.043098188391575504,
+        0.00331003314916678,
+        0.0548734784772944
+      ],
+      "coverage_80": [
+        true,
+        true,
+        true
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true
+      ],
+      "brier": 0.01891512499999999,
+      "baseline_brier": 0.012403124999999997,
+      "share_log_loss": 0.9288115079818788,
+      "baseline_share_log_loss": 0.8953401447902265
+    },
+    {
+      "election_id": "toronto_2018",
+      "days_before_election": 14,
+      "poll_count": 8,
+      "publication_eligible": true,
+      "absolute_errors": [
+        0.04877251804932145,
+        0.03666435959583847,
+        0.02641386016858005
+      ],
+      "coverage_80": [
+        true,
+        true,
+        true
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true
+      ],
+      "brier": 0.013777999999999995,
+      "baseline_brier": 0.018240500000000007,
+      "share_log_loss": 0.9166382390655009,
+      "baseline_share_log_loss": 0.9053484024223768
+    },
+    {
+      "election_id": "toronto_2018",
+      "days_before_election": 7,
+      "poll_count": 10,
+      "publication_eligible": true,
+      "absolute_errors": [
+        0.044176977195009764,
+        0.037794143279786474,
+        0.01850724096832801
+      ],
+      "coverage_80": [
+        true,
+        true,
+        true
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true
+      ],
+      "brier": 0.005832000000000006,
+      "baseline_brier": 0.0030031249999999962,
+      "share_log_loss": 0.9121042310899363,
+      "baseline_share_log_loss": 0.8976875377245386
+    },
+    {
+      "election_id": "toronto_2022",
+      "days_before_election": 14,
+      "poll_count": 1,
+      "publication_eligible": false,
+      "absolute_errors": [
+        0.03459506984388523,
+        0.013191055760924573,
+        0.012251601205220453,
+        0.0648442389380709,
+        0.011466702282839317
+      ],
+      "coverage_80": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "brier": 0.001314875,
+      "baseline_brier": 0.0015124999999999982,
+      "share_log_loss": 1.1673949765502516,
+      "baseline_share_log_loss": 1.129496953620525
+    },
+    {
+      "election_id": "toronto_2022",
+      "days_before_election": 7,
+      "poll_count": 1,
+      "publication_eligible": false,
+      "absolute_errors": [
+        0.036873337787230204,
+        0.01061311103843876,
+        0.012279756871658859,
+        0.0638403854688564,
+        0.010026040320247495
+      ],
+      "coverage_80": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "brier": 0.0008829999999999985,
+      "baseline_brier": 0.0005951249999999996,
+      "share_log_loss": 1.160783818240635,
+      "baseline_share_log_loss": 1.129496953620525
+    },
+    {
+      "election_id": "toronto_2023",
+      "days_before_election": 120,
+      "poll_count": 3,
+      "publication_eligible": false,
+      "absolute_errors": [
+        0.29776241123648706,
+        0.004660240937358237,
+        0.13668821482350213,
+        0.20494036698757334,
+        0.11080338052524769,
+        0.015600501999848887,
+        0.020101830989254586,
+        0.04578690052920465,
+        0.10708306836717058
+      ],
+      "coverage_80": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        false
+      ],
+      "coverage_95": [
+        false,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "brier": 0.661944375,
+      "baseline_brier": 1.2178517500000001,
+      "share_log_loss": 2.666699242054725,
+      "baseline_share_log_loss": 10.259319506233718
+    },
+    {
+      "election_id": "toronto_2023",
+      "days_before_election": 90,
+      "poll_count": 5,
+      "publication_eligible": false,
+      "absolute_errors": [
+        0.26279140437865967,
+        0.007477335584391382,
+        0.12309440340915524,
+        0.23909809456627984,
+        0.09936283474226634,
+        0.02244139370389251,
+        0.0246656097692493,
+        0.05247267450628047,
+        0.09795525607019995
+      ],
+      "coverage_80": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        false
+      ],
+      "coverage_95": [
+        false,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "brier": 0.75512075,
+      "baseline_brier": 0.39449,
+      "share_log_loss": 2.4531395645550824,
+      "baseline_share_log_loss": 3.2916536154833307
+    },
+    {
+      "election_id": "toronto_2023",
+      "days_before_election": 60,
+      "poll_count": 11,
+      "publication_eligible": false,
+      "absolute_errors": [
+        0.20890988957784168,
+        0.039572940529374996,
+        0.08277058258621615,
+        0.17602846863990845,
+        0.04191601952904403,
+        0.01712767394430955,
+        0.06839926808072352,
+        0.011527487254941765,
+        0.05733299512430715
+      ],
+      "coverage_80": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "coverage_95": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "brier": 0.414896625,
+      "baseline_brier": 0.12454562500000001,
+      "share_log_loss": 2.152556933477129,
+      "baseline_share_log_loss": 3.2111389991703088
+    },
+    {
+      "election_id": "toronto_2023",
+      "days_before_election": 30,
+      "poll_count": 24,
+      "publication_eligible": true,
+      "absolute_errors": [
+        0.22603957852986703,
+        0.047413504910269674,
+        0.009374902956202556,
+        0.08529686071840603,
+        0.006792463877202913,
+        0.0482770366452577,
+        0.05646626894660777,
+        0.03346878646209406,
+        0.02698011714728222
+      ],
+      "coverage_80": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "coverage_95": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "brier": 0.10345612499999998,
+      "baseline_brier": 0.130281,
+      "share_log_loss": 2.0143736945602737,
+      "baseline_share_log_loss": 2.4088581873704555
+    },
+    {
+      "election_id": "toronto_2023",
+      "days_before_election": 14,
+      "poll_count": 32,
+      "publication_eligible": true,
+      "absolute_errors": [
+        0.21764093450655453,
+        0.033064532316635364,
+        0.0013236666829977498,
+        0.05993233397187048,
+        0.017356221099932935,
+        0.04284069257541059,
+        0.04646614539178943,
+        0.03405861881107572,
+        0.005518884839532841
+      ],
+      "coverage_80": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "coverage_95": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "brier": 0.04596774999999999,
+      "baseline_brier": 0.06078275000000001,
+      "share_log_loss": 1.9476800298381305,
+      "baseline_share_log_loss": 1.764461565197423
+    },
+    {
+      "election_id": "toronto_2023",
+      "days_before_election": 7,
+      "poll_count": 39,
+      "publication_eligible": true,
+      "absolute_errors": [
+        0.21405841415660637,
+        0.028970164175641466,
+        0.003904285817146285,
+        0.05852126925430601,
+        0.024797630407573414,
+        0.03354232069305086,
+        0.04683411672155626,
+        0.04105461072962269,
+        0.005140858118908798
+      ],
+      "coverage_80": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "coverage_95": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "brier": 0.027394250000000005,
+      "baseline_brier": 0.020510874999999998,
+      "share_log_loss": 1.9282518164592308,
+      "baseline_share_log_loss": 2.2961934925186185
+    }
+  ]
+}
