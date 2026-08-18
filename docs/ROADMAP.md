@@ -8,7 +8,7 @@ Living plan for the from-first-principles rebuild of the Toronto election foreca
 
 - The project is being rebuilt into two statistically independent forecasts — a Mayoral Forecast and a Council Forecast (ADR 0014) — plus a shared publication layer that gates what may be shown.
 - **The rebuild is not wired to anything published.** It lives in the untracked modules `backend/model/mayoral_*.py`, `historical_mayoral*.py`, `poll_sources.py`, `polling_estimate.py`, `ward_polling.py`. The currently published model is the **legacy** tracked pipeline (`run.py` → `forecast.py` / `mayoral.py` / `council.py` / `snapshot.py`, with `simulation.py`, `coattails.py`, `pool.py`, `aggregator.py`, `lean.py`). Do not confuse the two, and do not edit the legacy model as if it were the rebuild. Nothing in the rebuild may publish until registration closes and the Final Ballot is set (ADR 0002).
-- **The rebuild sits at one milestone:** the polling-only Mayoral baseline is built, validated, and being refined. Everything richer — the incumbency-informed and dynamic mayoral models, the whole Council forecast, and the entire publication layer — is designed in the ADRs but **not built**.
+- **The rebuild sits at one milestone:** the polling-only Mayoral baseline is built and validated, and the incumbency-informed variant (rung 3) is now built and evaluated — it does not qualify, so it is retained as the Mandatory Sensitivity Variant (ADR 0013, 0039). Everything richer — the dynamic mayoral model, the whole Council forecast, and the entire publication layer — is designed in the ADRs but **not built**.
 
 ## The design is a model-selection ladder
 
@@ -34,8 +34,8 @@ Reading the ladder is essential: **a lower rung failing to beat a simpler one is
 | Comparator + firm-balanced bridge endpoints | Built | `mayoral_endpoint.py` |
 | Qualification ladder (comparator vs bridge) | Built; **result: not_qualified** | `mayoral_endpoint_qualification.py`, `scripts/evaluate_mayoral_endpoint.py` |
 | Mayoral descriptive polling estimate | Built | `polling_estimate.py` (ADR 0034) |
-| Mayoral Incumbency comparison population | **Data loader/validator only; unwired** | `mayoral_incumbency.py` |
-| Incumbency-informed endpoint variant | **Not built** | — |
+| Mayoral Incumbency comparison population | Built | `mayoral_incumbency.py` |
+| Incumbency-informed endpoint variant | Built; **Mandatory Sensitivity Variant** (does not qualify, ADR 0039) | `mayoral_incumbency_endpoint.py`, `scripts/evaluate_incumbency_endpoint.py` |
 | Dynamic / refined model | **Not built** | — |
 | Live snapshot integration | **Not built** (standalone; not authorised to publish) | — |
 
@@ -61,7 +61,7 @@ No code implements Publication Gates (ADR 0003, 0005), Probability Bands (ADR 00
 Build each item only after a short spec is approved (see Disciplines). TDD. Record the investigation as a research note and any decision as an ADR. Re-run the qualification ladder and report before/after **without tuning to it**.
 
 - **M1 — Finish the historical poll corpus.** Continue the free-source acquisition queue (Mainstreet Wayback, then restricted Forum/Borealis when access lands), extract into the canonical schema, reconstruct. Qualification numbers are provisional until this stabilises. Trackers: `historical-mayoral-public-wave-*-todo.md`.
-- **M2 — Incumbency-informed endpoint variant.** Consume the already-assembled Incumbency Prior population (`mayoral_incumbency.py`) in an endpoint variant and evaluate it against the polling-only baseline (ADR 0013, 0030). This is the natural next build — the data is done, the forecast is not. Definition of done: a variant with a qualify-or-not verdict on whole cycles, reported the way ADR 0038 was.
+- **M2 — Incumbency-informed endpoint variant. Done (ADR 0039).** Built as `mayoral_incumbency_endpoint.py` and evaluated against the bridge; does not qualify on the four-cycle corpus, so it is retained as the Mandatory Sensitivity Variant (ADR 0013). Reopen only if the corpus gains a non-landslide or incumbent-defeat cycle, or to add the incumbent's dispersion (the deferred defeat-tail widening). Evidence: [mayoral-incumbency-endpoint.md](research/mayoral-incumbency-endpoint.md).
 - **M3 — Mayoral publication layer.** Evidence Tier M0–M3 (ADR 0033), Probability Bands (ADR 0006, 0018), Frequency Statements, and the gate machinery (ADR 0003, 0005, 0032). Required before any mayoral quantity can be shown.
 - **M4 — Dynamic / refined mayoral model.** Only if it qualifies against the endpoint (ADR 0030). Future.
 - **C1 — Council Forecast.** The entire second forecast: candidate-level modelling, Officeholding-History Prior (ADR 0028), C-tier publication (ADR 0025), whole-cycle evaluation (ADR 0026). Large; mirrors the mayoral track.
@@ -72,7 +72,7 @@ Lower-priority open findings (non-blocking): the 2023 point-estimate second-plac
 ## Working disciplines (for agents)
 
 - **Spec → gate → TDD.** Before a feature or behaviour change, write a short spec (requirement, constraints, files touched, chosen design, one-line justification) and get approval. Failing test first, then implement to green.
-- **Record findings.** Investigations become dated research notes in `docs/research/`; decisions become terse, declarative ADRs in `docs/adr/` (next number **0039**). Cross-link them.
+- **Record findings.** Investigations become dated research notes in `docs/research/`; decisions become terse, declarative ADRs in `docs/adr/` (next number **0040**). Cross-link them.
 - **Report metrics, never tune to them.** Re-run `scripts/evaluate_mayoral_endpoint.py` before and after a change and report the deltas. Tail, margin, and calibration scores are reported quantities, not optimisation targets (ADR 0030).
 - **Honour the small sample.** There are four reconstructed cycles. Leave-one-cycle-out is the honest unit; row-level statistics across lead times are pseudo-replicated. Prefer robustness to anything a single cycle can swing, and state the confound.
 - **Keep the rebuild and the legacy model separate.** The legacy pipeline is live; the rebuild is not. Do not wire the rebuild to the snapshot until it qualifies and the Final Ballot is set (ADR 0002).
@@ -81,7 +81,7 @@ Lower-priority open findings (non-blocking): the 2023 point-estimate second-plac
 ## Pointers
 
 - Terminology — [CONTEXT.md](../CONTEXT.md)
-- Decisions — [docs/adr/](adr/) 0001–0038
-- Findings — [docs/research/](research/) (start with `unmeasured-candidate-tail`, `candidate-tail-choice-set-scaling`, `candidate-tail-margin-coupling`, `mayoral-concentration-overconfidence`)
-- Run mayoral qualification — `uv run scripts/evaluate_mayoral_endpoint.py`
-- Tests — `uv run pytest` (376 passing as of this writing)
+- Decisions — [docs/adr/](adr/) 0001–0039
+- Findings — [docs/research/](research/) (start with `unmeasured-candidate-tail`, `candidate-tail-choice-set-scaling`, `candidate-tail-margin-coupling`, `mayoral-concentration-overconfidence`, `mayoral-incumbency-endpoint`)
+- Run mayoral qualification — `uv run scripts/evaluate_mayoral_endpoint.py`; incumbency variant — `uv run scripts/evaluate_incumbency_endpoint.py`
+- Tests — `uv run pytest` (381 passing as of this writing)

@@ -161,31 +161,11 @@ class MayoralEndpointPredictor:
             excluded_poll_sample_ids=self.excluded_poll_sample_ids,
             excluded_pollsters=self.excluded_pollsters,
         )
-        canonical_point = tuple(
-            sorted(zip(fit.candidate_ids, fit.point_shares, strict=True))
-        )
-        seed_material = json.dumps(
-            {
-                "candidate_point": canonical_point,
-                "concentration": fit.concentration,
-            },
-            separators=(",", ":"),
-        ).encode("utf-8")
-        seed = int.from_bytes(hashlib.sha256(seed_material).digest()[:8], "big")
-        rng = np.random.default_rng(seed)
-        draw_candidate_ids = tuple(candidate_id for candidate_id, _ in canonical_point)
-        point = np.asarray(tuple(share for _, share in canonical_point), dtype=float)
-        parameters = np.maximum(point * fit.concentration, _POINT_FLOOR)
-        canonical_draws = rng.dirichlet(parameters, size=self.draw_count)
-        draw_index = {
-            candidate_id: index for index, candidate_id in enumerate(draw_candidate_ids)
-        }
-        draws = tuple(
-            tuple(
-                float(row[draw_index[candidate_id]])
-                for candidate_id in fit.candidate_ids
-            )
-            for row in canonical_draws
+        draws = draws_from_point(
+            fit.candidate_ids,
+            fit.point_shares,
+            fit.concentration,
+            self.draw_count,
         )
         return EvaluationPrediction(
             FullBallotShareDraws(
@@ -193,6 +173,43 @@ class MayoralEndpointPredictor:
                 draws=draws,
             )
         )
+
+
+def draws_from_point(
+    candidate_ids: tuple[str, ...],
+    point_shares: tuple[float, ...],
+    concentration: float,
+    draw_count: int,
+) -> tuple[tuple[float, ...], ...]:
+    """Deterministically draw full-ballot shares from a fitted point + concentration.
+
+    The seed is derived only from the canonicalized point and concentration, so a
+    given (point, concentration) always yields the same draws regardless of
+    candidate ordering.  Shared by the polling-only predictor and any predictor
+    that post-processes the point estimate (e.g. the incumbency-informed variant).
+    """
+
+    canonical_point = tuple(sorted(zip(candidate_ids, point_shares, strict=True)))
+    seed_material = json.dumps(
+        {
+            "candidate_point": canonical_point,
+            "concentration": concentration,
+        },
+        separators=(",", ":"),
+    ).encode("utf-8")
+    seed = int.from_bytes(hashlib.sha256(seed_material).digest()[:8], "big")
+    rng = np.random.default_rng(seed)
+    draw_candidate_ids = tuple(candidate_id for candidate_id, _ in canonical_point)
+    point = np.asarray(tuple(share for _, share in canonical_point), dtype=float)
+    parameters = np.maximum(point * concentration, _POINT_FLOOR)
+    canonical_draws = rng.dirichlet(parameters, size=draw_count)
+    draw_index = {
+        candidate_id: index for index, candidate_id in enumerate(draw_candidate_ids)
+    }
+    return tuple(
+        tuple(float(row[draw_index[candidate_id]]) for candidate_id in candidate_ids)
+        for row in canonical_draws
+    )
 
 
 def fit_mayoral_endpoint(
