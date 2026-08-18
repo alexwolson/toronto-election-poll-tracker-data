@@ -8,3 +8,11 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .worktrees/
+
+# Pollster source documents are retained locally for audit and reproducibility.
+# Their tracked manifests record provenance and checksums; the files themselves
+# may carry redistribution or institutional-access restrictions.
+data/source_documents/
+
+# Local scratch: downloaded PDFs and one-off builders kept out of history.
+tmp/

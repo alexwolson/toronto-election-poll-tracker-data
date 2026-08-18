@@ -1,0 +1,32 @@
+poll_sample_id,source_document_id,sample_locator,notes
+pallas-2025-06-07,pallas_2025-06-07_full,entire document,
+liaison-2025-07-06,liaison_2025-07-06_full,entire document,
+ipsos-2025-08-29,ipsos_2025-08-29_full,entire document,
+forum-2025-09-04,forum_2025-09-04_full,entire document,One physical report supports several dependent ballot readings from the same respondent sample.
+canadapulse-2025-10-06,canadapulse_2025-10-06_release,media release; About the Survey section,Media release and workbook are complementary artifacts for one respondent sample.
+canadapulse-2025-10-06,canadapulse_2025-10-06_tables,sheet Toronto Civic 10 25; mayoral block A333:C370,Media release and workbook are complementary artifacts for one respondent sample; the workbook contains a published nonvoter row omitted from release prose.
+liaison-2025-10-23,liaison_2025-10-23_full,entire document,
+liaison-2025-12-21,liaison_2025-12-21_full,entire document,
+abacus-2026-01-27,abacus_2026-01-27_article,first-party article; access-gated,Known expected source artifact; not retrieved.
+liaison-2026-02-02,liaison_2026-02-02_full,entire document,
+mainstreet-2026-02-22,mainstreet_2026-02-22_full,entire document,"Public and full editions are alternate renderings of one respondent sample, not independent evidence."
+mainstreet-2026-02-22,mainstreet_2026-02-22_public,entire document,"Public and full editions are alternate renderings of one respondent sample, not independent evidence."
+liaison-2026-03-08,liaison_2026-03-08_full,entire document,
+pallas-2026-03-08,pallas_2026-03-08_full,entire document,One physical report supports two dependent ballot readings from the same respondent sample.
+liaison-2026-04-13,liaison_2026-04-13_full,entire document,
+liaison-2026-05-11,liaison_2026-05-11_full,entire document,
+mainstreet-2026-06-18,mainstreet_2026-06-18_full,entire document,"Public and full editions are alternate renderings of one respondent sample, not independent evidence."
+mainstreet-2026-06-18,mainstreet_2026-06-18_public,entire document,"Public and full editions are alternate renderings of one respondent sample, not independent evidence."
+liaison-2026-06-30,liaison_2026-06-30_graphs,entire document,Graph and table artifacts are complementary publications for one respondent sample.
+liaison-2026-06-30,liaison_2026-06-30_tables,entire document,Graph and table artifacts are complementary publications for one respondent sample.
+liaison-2026-07-26,liaison_2026-07-26_graphs,entire document,Graph and table artifacts are complementary publications for one respondent sample.
+liaison-2026-07-26,liaison_2026-07-26_tables,entire document,Graph and table artifacts are complementary publications for one respondent sample.
+forum-2026-07-29,forum_2026-07-29_full,entire document,
+liaison-2026-08-05,liaison_2026-08-05_graphs,entire document,Graph and table artifacts are complementary publications for one respondent sample.
+liaison-2026-08-05,liaison_2026-08-05_tables,entire document,Graph and table artifacts are complementary publications for one respondent sample.
+forum_w20_20260622_23,forum_w20_20260622_23_release,entire PDF,One physical release contains every extracted dependent reading linked to this respondent sample.
+forum_w05_20260622_23,forum_w05_20260622_23_release,entire PDF,One physical release contains every extracted dependent reading linked to this respondent sample.
+forum_w13_20260622_23,forum_w13_20260622_23_release,entire PDF,One physical release contains every extracted dependent reading linked to this respondent sample.
+forum_w19_20260622_23,forum_w19_20260622_23_release,entire PDF,One physical release contains every extracted dependent reading linked to this respondent sample.
+forum_w19_20260811_12,forum_w19_20260811_12_release,entire PDF,One physical release contains every extracted dependent reading linked to this respondent sample.
+forum_w11_20260812,forum_w11_20260812_release,entire PDF,One physical release contains every extracted dependent reading linked to this respondent sample.

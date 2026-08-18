@@ -1,0 +1,87 @@
+poll_sample_id,source_document_id,sample_locator,notes
+ipsos_city_2013_11_08_12_n665,ipsos_2013-11-12_tables,physical pages 1-15,One table attachment contains four dependent ballot scenarios from one respondent sample; the publisher_url release establishes sample metadata.
+ipsos_city_2014_09_12_16_n596,ipsos_2014-09-16_tables,physical pages 1-2,The ballot table is on physical page 1; the publisher_url release establishes sample metadata and says undecided voters were screened out.
+ipsos_city_2014_09_23_26_n1252,ipsos_2014-09-26_table_excerpt,physical page 1; printed page 4 of 58,The public artifact is a one-page ballot-table excerpt rather than a complete table book; the publisher_url release establishes sample metadata.
+ipsos_city_2014_10_21_23_n1201,ipsos_2014-10-23_table_excerpt,physical pages 1-4; printed pages 1; 4; 6; and 7 of 27,The public artifact omits the B and C ballot-question pages but retains their decided-leaner result table; the publisher_url release establishes sample metadata.
+nanos_city_2014_07_02_05_n600,nanos_2014-07-05_full,entire document,One respondent sample supports raw first-choice; initially-unsure leaner; source-derived vote-profile; and decided Ballot readings.
+maple_leaf_city_2014_07_28_30_n800,maple_leaf_2014-07-30_release,entire document,One respondent sample supports dependent All Voters and Decided toplines.
+nanos_city_2014_09_16_20_n1000,nanos_2014-09_full,physical pages 2-5 and 16-19,The selected September sample appears beside August comparison data from a separate recruited sample; only September is linked to the extracted readings.
+nanos_city_2014_09_16_20_n1000,nanos_reports_archive_2021-07-30,2014-09-23 reports-index row,The archived first-party index supplies publication timing for the selected September sample.
+viewpoints_city_2023_04_29_05_02_n400,viewpoints_2023-05-02_full,page 1,The PDF supplies the selected May 2 raw-vote and decided-vote columns.
+viewpoints_city_2023_04_29_05_02_n400,viewpoints_2023-05-02_article,entire article,The first-party article supplies publication timing and sample-method metadata.
+viewpoints_city_2023_06_15_19_n1007,viewpoints_2023-06-15_19_full,"pages 1-2, June 19 columns",The PDF also prints June 2 and May 2 comparison columns from separate recruited samples; only June 19 is linked to these readings.
+dart_city_2018_10_12_15_n669,dart_2018_10_12_15_factum,pages 1 and 4,Page 1 supplies the respondent sample methodology and head-to-head outcome prose; page 4 identifies the first-party poll and points to unavailable detailed tables.
+probit_city_2018_08_20_09_05_n1635,probit_2018_08_20_09_05_all_chart,entire image,All-response chart and decided chart are dependent products from one fieldwork period and one parent sample.
+probit_city_2018_08_20_09_05_n1635,probit_2018_08_20_09_05_decided_chart,entire image,The 1152 generic chart base is a restricted reading base rather than a second recruited sample.
+viewpoints_city_2023_06_01_02_n1004,viewpoints_2023_06_01_02_marginals,June 2 column,The PDF also reproduces the separately recruited May 2 comparison wave; it is not extracted as part of this sample.
+viewpoints_city_2023_06_01_02_n1004,viewpoints_2023_06_08_article,release prose,Article supplies sample metadata and publication timing absent from the one-page marginals artifact.
+ipsos_city_2023_06_09_13_n1001,ipsos_2023_06_09_13_tables,printed pages 5-8,Four dependent vote products are retained from one recruited sample: raw first choice conditional leaner total and re-percentaged valid response.
+ipsos_city_2023_06_09_13_n1001,ipsos_2023_06_09_13_factum,pages 2 and 6,Factum supplies publication sponsor fieldwork population mode and sample metadata and corroborates the rounded re-percentaged topline.
+forum_city_2022_10_07_08_n1017,forum_2022_oct11_release,entire document,First-party release for this respondent sample.
+forum_city_2023_02_13_n1042,forum_2023_feb14_release,entire document,First-party release for this respondent sample.
+forum_city_2023_03_22_23_n1009,forum_2023_mar24_release,entire document,First-party release for this respondent sample.
+forum_city_2023_04_25_26_n1022,forum_2023_apr27_release,entire document,Current-field release from this respondent sample.
+forum_city_2023_04_25_26_n1022,forum_2023_apr27_tory_companion,entire document,Dependent hypothetical-Tory release from the same respondent sample.
+forum_city_2023_05_06_07_n2000,forum_2023_may08_release,entire document,Current-field release from this respondent sample.
+forum_city_2023_05_06_07_n2000,forum_2023_may08_tory_companion,entire document,Dependent hypothetical-Tory release from the same respondent sample.
+forum_city_2023_05_13_n1029,forum_2023_may15_release,entire document,First-party release for this respondent sample.
+forum_city_2023_05_19_n1000,forum_2023_may21_release,entire document,First-party release for this respondent sample.
+forum_city_2023_05_26_n1007,forum_2023_may28_release,entire document,First-party release for this respondent sample.
+forum_city_2023_06_02_n1032,forum_2023_jun04_release,entire document,First-party release for this respondent sample.
+forum_city_2023_06_09_n1047,forum_2023_jun11_release,entire document,First-party release for this respondent sample.
+forum_city_2023_06_23_n1037,forum_2023_jun24_release,entire document,First-party release for this respondent sample.
+liaison_city_2023_04_21_22_n1264,liaison_2023_04_21_22_release,release prose and both topline blocks,One respondent sample supports dependent all-voter and decided-voter release toplines.
+liaison_city_2023_04_28_29_n1253,liaison_2023_04_28_29_release,release prose and both topline blocks,One respondent sample supports dependent all-voter and decided-voter release toplines.
+liaison_city_2023_05_05_06_n1257,liaison_2023_05_05_06_release,release prose and both topline blocks,One respondent sample supports dependent all-voter and decided-voter release toplines.
+liaison_city_2023_05_12_13_n1318,liaison_2023_05_12_13_release,release prose and both topline blocks,One respondent sample supports dependent all-voter and decided-voter release toplines.
+liaison_city_2023_05_17_18_n1311,liaison_2023_05_17_18_release,release prose and both topline blocks,One respondent sample supports dependent all-voter and decided-voter release toplines.
+liaison_city_2023_05_26_27_n1305,liaison_2023_05_26_27_release,release prose and both topline blocks,One respondent sample supports dependent all-voter and decided-voter release toplines.
+liaison_city_2023_06_03_04_n1287,liaison_2023_06_03_04_release,release prose and both topline blocks,One respondent sample supports dependent all-voter and decided-voter release toplines.
+liaison_city_2023_06_10_11_n1197,liaison_2023_06_10_11_release,release prose and both topline blocks,One respondent sample supports dependent all-voter and decided-voter release toplines.
+liaison_city_2023_06_12_13_n1156,liaison_2023_06_12_13_release,release prose and both topline blocks,One respondent sample supports dependent all-voter and decided-voter release toplines.
+liaison_city_2023_06_17_18_n1152,liaison_2023_06_17_18_release,release prose and both topline blocks,One respondent sample supports dependent all-voter and decided-voter release toplines.
+liaison_city_2023_06_22_23_n1086,liaison_2023_06_22_23_release,release prose and both topline blocks,One respondent sample supports dependent all-voter and decided-voter release toplines.
+liaison_city_2023_04_21_22_n1264,liaison_2023_04_21_22_tables,"pages 1-3 title, methodology and sponsor; pages 4-7 voting-intent charts and tables",Preferred detailed source for one respondent sample and its dependent all-voter and decided-voter readings. Public viewer HTML is asset-dependent; the signup-gated PDF was not acquired.
+liaison_city_2023_04_28_29_n1253,liaison_2023_04_28_29_tables,"pages 1-3 title, methodology and sponsor; pages 4-7 voting-intent charts and tables",Preferred detailed source for one respondent sample and its dependent all-voter and decided-voter readings. Public viewer HTML is asset-dependent; the signup-gated PDF was not acquired.
+liaison_city_2023_05_05_06_n1257,liaison_2023_05_05_06_tables,pages 1-2 title and methodology; pages 3-6 voting-intent charts and tables,Preferred detailed source for one respondent sample and its dependent all-voter and decided-voter readings. Public viewer HTML is asset-dependent; the signup-gated PDF was not acquired.
+liaison_city_2023_05_12_13_n1318,liaison_2023_05_12_13_tables,pages 1-2 title and methodology; pages 3-6 voting-intent charts and tables,Preferred detailed source for one respondent sample and its dependent all-voter and decided-voter readings. Public viewer HTML is asset-dependent; the signup-gated PDF was not acquired.
+liaison_city_2023_05_17_18_n1311,liaison_2023_05_17_18_tables,pages 1-2 title and methodology; pages 3-6 voting-intent charts and tables,Preferred detailed source for one respondent sample and its dependent all-voter and decided-voter readings. Public viewer HTML is asset-dependent; the signup-gated PDF was not acquired.
+liaison_city_2023_05_26_27_n1305,liaison_2023_05_26_27_tables,pages 1-2 title and methodology; pages 3-6 voting-intent charts and tables,Preferred detailed source for one respondent sample and its dependent all-voter and decided-voter readings. Public viewer HTML is asset-dependent; the signup-gated PDF was not acquired.
+liaison_city_2023_06_03_04_n1287,liaison_2023_06_03_04_tables,pages 1-2 title and methodology; pages 3-6 voting-intent charts and tables,Preferred detailed source for one respondent sample and its dependent all-voter and decided-voter readings. Public viewer HTML is asset-dependent; the signup-gated PDF was not acquired.
+liaison_city_2023_06_10_11_n1197,liaison_2023_06_10_11_tables,pages 1-2 title and methodology; pages 3-6 voting-intent charts and tables,Preferred detailed source for one respondent sample and its dependent all-voter and decided-voter readings. Public viewer HTML is asset-dependent; the signup-gated PDF was not acquired.
+liaison_city_2023_06_12_13_n1156,liaison_2023_06_12_13_tables,pages 1-2 title and methodology; pages 3-6 voting-intent charts and tables,Preferred detailed source for one respondent sample and its dependent all-voter and decided-voter readings. Public viewer HTML is asset-dependent; the signup-gated PDF was not acquired.
+liaison_city_2023_06_17_18_n1152,liaison_2023_06_17_18_tables,pages 1-2 title and methodology; pages 3-6 voting-intent charts and tables,Preferred detailed source for one respondent sample and its dependent all-voter and decided-voter readings. Public viewer HTML is asset-dependent; the signup-gated PDF was not acquired.
+liaison_city_2023_06_22_23_n1086,liaison_2023_06_22_23_tables,pages 1-2 title and methodology; pages 3-6 voting-intent charts and tables,Preferred detailed source for one respondent sample and its dependent all-voter and decided-voter readings. Public viewer HTML is asset-dependent; the signup-gated PDF was not acquired.
+mainstreet_city_2023_02_13_14_n1947,mainstreet_2023-02-14_report,entire document,
+mainstreet_city_2023_02_19_n1701,mainstreet_2023-02-19_report,entire document,
+mainstreet_city_2023_03_17_19_n985,mainstreet_2023-03-19_report,entire document,
+mainstreet_city_2023_04_12_13_n785,mainstreet_2023-04-13_report,entire document,Detailed edition of the same respondent sample.
+mainstreet_city_2023_04_12_13_n785,mainstreet_2023-04-13_public,entire document,Public edition of the same respondent sample; linked for provenance but not duplicated as new readings.
+mainstreet_city_2023_04_17_19_n1082,mainstreet_2023-04-20_report,entire document,Detailed edition of the same respondent sample.
+mainstreet_city_2023_04_17_19_n1082,mainstreet_2023-04-20_public,entire document,Public edition of the same respondent sample; linked for provenance but not duplicated as new readings.
+mainstreet_city_2023_04_25_26_n996,mainstreet_2023-04-26_report,entire document,Detailed edition of the same respondent sample.
+mainstreet_city_2023_04_25_26_n996,mainstreet_2023-04-26_public,entire document,Public edition of the same respondent sample; linked for provenance but not duplicated as new readings.
+forum_city_2014_04_14_n882,forum_2014_apr15_release,entire document,First-party release for this respondent sample.
+forum_city_2014_05_01_n888,forum_2014_may02_release,entire document,First-party release for this respondent sample.
+forum_city_2014_05_21_n923,forum_2014_may21_release,entire document,First-party release for this respondent sample.
+forum_city_2014_06_23_n890,forum_2014_jun24_release,entire document,First-party release for this respondent sample.
+forum_city_2014_07_02_n1182,forum_2014_jul02_release,entire document,First-party release for this respondent sample.
+forum_city_2014_07_21_n1063,forum_2014_jul21_release,entire document,First-party release for this respondent sample.
+forum_city_2014_08_05_06_n1268,forum_2014_aug06_release,entire document,First-party release for this respondent sample.
+forum_city_2014_08_25_26_n1945,forum_2014_aug26_release,entire document,First-party release for this respondent sample.
+forum_city_2014_09_08_n1069,forum_2014_sep08_release,entire document,First-party release for this respondent sample.
+forum_city_2014_09_12_n1228,forum_2014_sep12_release,entire document,First-party release for this respondent sample.
+forum_city_2014_09_22_n1164,forum_2014_sep22_release,entire document,First-party release for this respondent sample.
+forum_city_2014_09_29_n1202,forum_2014_sep29_release,entire document,First-party release for this respondent sample.
+forum_city_2014_10_06_n1218,forum_2014_oct06_release,entire document,First-party release for this respondent sample.
+forum_city_2014_10_15_n1241,forum_2014_oct15_release,entire document,First-party release for this respondent sample.
+forum_city_2014_10_20_n852,forum_2014_oct20_release,entire document,First-party release for this respondent sample.
+forum_city_2014_10_25_n986,forum_2014_oct26_release,entire document,First-party release for this respondent sample.
+forum_city_2018_07_27_n1328,forum_2018_jul27_release,entire document,First-party release for this respondent sample.
+forum_city_2018_08_27_n1242,forum_2018_aug28_release,entire document,First-party release for this respondent sample.
+forum_city_2018_09_06_n811,forum_2018_sep07_release,entire document,First-party release for this respondent sample.
+forum_city_2018_09_20_24_n944,forum_2018_sep25_release,entire document,First-party release for this respondent sample.
+forum_city_2018_10_03_05_n987,forum_2018_oct09_horserace,entire document,First-party release for this respondent sample.
+forum_city_2018_10_09_10_n1206,forum_2018_oct15_release,entire document,First-party release for this respondent sample.
+forum_city_2014_09_22_n1164,forum_2014_sep29_release,"PDF p. 3, September 22 row of Mayoral Horserace - Trending",Later first-party trend table preserving the September 22 current-field values; its original release omits the full current-field table.
+forum_city_2018_10_03_05_n987,forum_2018_oct09_social_housing,entire document,First-party companion release explicitly reporting the same n=987 October 3-5 respondent sample; it contains no ballot reading.
