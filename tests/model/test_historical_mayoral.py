@@ -16,7 +16,6 @@ from backend.model.historical_mayoral import (
     load_historical_mayoral_corpus,
 )
 
-
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -66,25 +65,31 @@ def test_outcomes_are_complete_candidate_level_official_results() -> None:
         )
         assert "residual" not in {row.candidate_id for row in outcome}
 
-    assert next(
-        row
-        for row in corpus.outcome_universe("toronto_2014")
-        if row.candidate_name == "Doug Ford"
-    ).candidate_id == "doug-ford"
-    assert next(
-        row
-        for row in corpus.outcome_universe("toronto_2018")
-        if row.candidate_id == "tory"
-    ).candidate_name_as_reported == "Tory John"
-    assert next(
-        row
-        for row in corpus.outcome_universe("toronto_2023")
-        if row.candidate_id == "chow"
-    ).candidate_name_as_reported == "Chow Olivia"
-    assert all(
-        "_" not in row.candidate_id.split(":", 1)[-1]
-        for row in corpus.outcomes
+    assert (
+        next(
+            row
+            for row in corpus.outcome_universe("toronto_2014")
+            if row.candidate_name == "Doug Ford"
+        ).candidate_id
+        == "doug-ford"
     )
+    assert (
+        next(
+            row
+            for row in corpus.outcome_universe("toronto_2018")
+            if row.candidate_id == "tory"
+        ).candidate_name_as_reported
+        == "Tory John"
+    )
+    assert (
+        next(
+            row
+            for row in corpus.outcome_universe("toronto_2023")
+            if row.candidate_id == "chow"
+        ).candidate_name_as_reported
+        == "Chow Olivia"
+    )
+    assert all("_" not in row.candidate_id.split(":", 1)[-1] for row in corpus.outcomes)
 
 
 def test_2014_sidecar_preserves_the_verified_declaration_provenance() -> None:
@@ -109,29 +114,26 @@ def test_final_ballot_known_by_dates_are_conservative_replay_boundaries() -> Non
     assert elections["toronto_2014"].nomination_close_date == date(2014, 9, 12)
     assert elections["toronto_2014"].final_ballot_known_by_date == date(2014, 9, 15)
     assert (
-        elections["toronto_2014"].final_ballot_known_by_status
-        == "statutory_deadline"
+        elections["toronto_2014"].final_ballot_known_by_status == "statutory_deadline"
     )
     assert elections["toronto_2014"].final_ballot_evidence_available_at == (
         datetime.fromisoformat("2014-09-16T00:00:00-04:00")
     )
-    assert elections["toronto_2018"].final_ballot_known_by_date == date(
-        2018, 7, 30
-    )
+    assert elections["toronto_2018"].final_ballot_known_by_date == date(2018, 7, 30)
     assert (
         elections["toronto_2018"].final_ballot_known_by_status
         == "certification_date_reported"
     )
     assert elections["toronto_2022"].final_ballot_known_by_date == date(2022, 8, 20)
-    assert elections["toronto_2022"].final_ballot_known_by_status == "publicly_announced"
+    assert (
+        elections["toronto_2022"].final_ballot_known_by_status == "publicly_announced"
+    )
     assert elections["toronto_2022"].final_ballot_evidence_available_at == (
         datetime.fromisoformat("2022-08-21T00:00:00-04:00")
     )
     assert elections["toronto_2022"].notes is not None
     assert "publicly known by August 20" in elections["toronto_2022"].notes
-    assert elections["toronto_2023"].final_ballot_known_by_date == date(
-        2023, 5, 12
-    )
+    assert elections["toronto_2023"].final_ballot_known_by_date == date(2023, 5, 12)
 
     nanos = next(
         sample
@@ -144,12 +146,14 @@ def test_final_ballot_known_by_dates_are_conservative_replay_boundaries() -> Non
 def test_only_audited_poll_sources_enter_the_canonical_seam() -> None:
     corpus = load_historical_mayoral_corpus(ROOT)
 
-    assert len(corpus.poll_samples) == 63
-    assert len(corpus.poll_readings) == 130
-    assert len(corpus.poll_responses) == 907
-    assert len(corpus.source_documents) == 85
-    assert len(corpus.poll_sample_documents) == 86
-    assert all(sample.extraction_status == "extracted" for sample in corpus.poll_samples)
+    assert len(corpus.poll_samples) == 64
+    assert len(corpus.poll_readings) == 135
+    assert len(corpus.poll_responses) == 930
+    assert len(corpus.source_documents) == 86
+    assert len(corpus.poll_sample_documents) == 87
+    assert all(
+        sample.extraction_status == "extracted" for sample in corpus.poll_samples
+    )
     assert all(
         document.retrieval_status == "retrieved"
         and document.visual_qa_status in {"passed", "not_applicable"}
@@ -162,7 +166,7 @@ def test_only_audited_poll_sources_enter_the_canonical_seam() -> None:
         reading.poll_reading_id: reading.reading_purpose
         for reading in corpus.poll_readings
     }
-    assert sum(value == "general_vote_intention" for value in purposes.values()) == 127
+    assert sum(value == "general_vote_intention" for value in purposes.values()) == 132
     assert purposes["nanos_jul_initially_unsure_leaning"] == (
         "conditional_lean_followup"
     )
@@ -243,7 +247,9 @@ def test_viewpoints_may_sample_keeps_timing_conflict_and_reported_rounding() -> 
     decided = corpus.responses_for_reading("viewpoints_may2_decided")
     assert all(row.share is not None for row in raw + decided)
     assert sum((row.share or Decimal() for row in raw), Decimal()) == Decimal("1.002")
-    assert sum((row.share or Decimal() for row in decided), Decimal()) == Decimal("1.01")
+    assert sum((row.share or Decimal() for row in decided), Decimal()) == Decimal(
+        "1.01"
+    )
     assert "furey" not in {row.candidate_id for row in raw}
     assert "Not sure" in {row.response_label for row in raw}
 
@@ -256,14 +262,15 @@ def test_forum_and_liaison_waves_preserve_source_semantics() -> None:
         "forum_2023_may26_all",
         "forum_2023_may26_decided_leaning",
     }
-    decided = corpus.responses_for_reading(
-        "forum_2023_may26_decided_leaning"
+    decided = corpus.responses_for_reading("forum_2023_may26_decided_leaning")
+    assert (
+        sum(
+            response.candidate_observation_status
+            == "offered_not_individually_published"
+            for response in decided
+        )
+        == 5
     )
-    assert sum(
-        response.candidate_observation_status
-        == "offered_not_individually_published"
-        for response in decided
-    ) == 5
     perruzza = next(
         response
         for response in corpus.responses_for_reading("forum_2023_may26_all")
@@ -286,12 +293,8 @@ def test_forum_and_liaison_waves_preserve_source_semantics() -> None:
         "liaison_2023_05_12_13_release",
         "liaison_2023_05_12_13_tables",
     }
-    liaison_decided = corpus.responses_for_reading(
-        "liaison_2023_06_22_23_decided"
-    )
-    assert [response.option_order for response in liaison_decided] == list(
-        range(1, 10)
-    )
+    liaison_decided = corpus.responses_for_reading("liaison_2023_06_22_23_decided")
+    assert [response.option_order for response in liaison_decided] == list(range(1, 10))
     bailao = next(
         response for response in liaison_decided if response.candidate_id == "bailao"
     )
@@ -380,11 +383,9 @@ def test_audit_counts_inventory_without_calling_it_calibration_ready() -> None:
 
     assert audit.election_count == 4
     assert audit.outcome_candidate_count == 233
-    assert audit.source_verified_sample_count == 63
-    assert audit.source_verified_reading_count == 130
+    assert audit.source_verified_sample_count == 64
+    assert audit.source_verified_reading_count == 135
     assert audit.legacy_poll_id_count == 153
-    assert audit.historical_sample_inventory_count == 101
+    assert audit.historical_sample_inventory_count == 102
     assert audit.unresolved_sample_proxy_count == 38
-    assert audit.blocker_codes == (
-        "unresolved_legacy_poll_samples",
-    )
+    assert audit.blocker_codes == ("unresolved_legacy_poll_samples",)

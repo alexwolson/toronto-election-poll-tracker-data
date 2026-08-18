@@ -906,3 +906,26 @@ forum_2018_oct05_decided_leaning,another-candidate,other,,,,Another candidate,3,
 forum_2018_oct10_decided_leaning,tory,candidate,tory,John Tory,individually_published,John Tory,1,56,0.56,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
 forum_2018_oct10_decided_leaning,keesmaat,candidate,keesmaat,Jennifer Keesmaat,individually_published,Jennifer Keesmaat,2,29,0.29,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
 forum_2018_oct10_decided_leaning,another-candidate,other,,,,Another candidate,3,15,0.15,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_ford_tory,rob-ford,candidate,rob-ford,Rob Ford,individually_published,Rob Ford,1,36,0.36,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_ford_tory,tory,candidate,tory,John Tory,individually_published,John Tory,2,58,0.58,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_ford_tory,dont-know,dont_know,,,,Don't know,3,6,0.06,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_ford_tory_chow,rob-ford,candidate,rob-ford,Rob Ford,individually_published,Rob Ford,1,32,0.32,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_ford_tory_chow,tory,candidate,tory,John Tory,individually_published,John Tory,2,33,0.33,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_ford_tory_chow,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,3,32,0.32,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_ford_tory_chow,dont-know,dont_know,,,,Don't know,4,3,0.03,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_four_way_ford,rob-ford,candidate,rob-ford,Rob Ford,individually_published,Rob Ford,1,33,0.33,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_four_way_ford,tory,candidate,tory,John Tory,individually_published,John Tory,2,39,0.39,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_four_way_ford,stintz,candidate,stintz,Karen Stintz,individually_published,Karen Stintz,3,15,0.15,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_four_way_ford,soknacki,candidate,soknacki,David Soknacki,individually_published,David Soknacki,4,5,0.05,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_four_way_ford,dont-know,dont_know,,,,Don't know,5,7,0.07,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_four_way_no_ford,tory,candidate,tory,John Tory,individually_published,John Tory,1,37,0.37,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_four_way_no_ford,stintz,candidate,stintz,Karen Stintz,individually_published,Karen Stintz,2,7,0.07,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_four_way_no_ford,soknacki,candidate,soknacki,David Soknacki,individually_published,David Soknacki,3,3,0.03,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_four_way_no_ford,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,4,33,0.33,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_four_way_no_ford,dont-know,dont_know,,,,Don't know,5,20,0.2,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_five_way,rob-ford,candidate,rob-ford,Rob Ford,individually_published,Rob Ford,1,31,0.31,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_five_way,tory,candidate,tory,John Tory,individually_published,John Tory,2,27,0.27,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_five_way,stintz,candidate,stintz,Karen Stintz,individually_published,Karen Stintz,3,6,0.06,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_five_way,soknacki,candidate,soknacki,David Soknacki,individually_published,David Soknacki,4,2,0.02,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_five_way,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,5,31,0.31,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
+forum_2014_feb24_five_way,dont-know,dont_know,,,,Don't know,6,3,0.03,Source-published numeric token and label preserved exactly; no normalization or inferred remainder.
