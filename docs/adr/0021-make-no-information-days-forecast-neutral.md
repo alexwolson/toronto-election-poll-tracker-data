@@ -1,0 +1,3 @@
+# Make no-information days forecast-neutral
+
+Holding the evidence set fixed, advancing the Analysis Cutoff by itself will not mechanically narrow or move the election-day Internal Outcome Distribution. Any support movement that becomes past but remains unobserved offsets the shorter remaining horizon; only evidence freshness and Publication Gates may change. A confirmed non-occurrence may update a later forecast only when its event class has a pre-declared, reconstructible, validated occurrence process. This is a model-family and toolkit-agnostic requirement: an implementation may use a state-space model, an endpoint bridge, or another validated approach, but it must not manufacture information from wall-clock passage.

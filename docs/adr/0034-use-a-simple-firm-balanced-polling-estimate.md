@@ -1,0 +1,3 @@
+# Use a simple firm-balanced Mayoral Polling Estimate
+
+A Mayoral Polling Estimate exists only after the Final Ballot is certified and at least two pollsters have fresh direct decided-and-leaning readings with the same published named field and Poll Residual. It uses each firm's newest eligible sample within 21 days, weights firms equally, and uses neither renormalization nor sample-size weighting; an unmeasured candidate is never filled with zero. A fresh expanded field temporarily withdraws a narrower estimate until replicated, while incompatible readings remain visible—favouring an honest unavailable state over a more inclusive but ambiguous average.

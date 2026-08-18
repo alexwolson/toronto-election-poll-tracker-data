@@ -1,0 +1,3 @@
+# Omit a shared Council-cycle effect from v1
+
+The first rebuilt Council Forecast will not add a latent election-cycle term that moves incumbent performance across wards together. Only four ordinary target cycles are available, the council-wide aggregate is deferred, and the principal benefit of that term would be joint composition uncertainty rather than the race-level launch product. V1 therefore accepts conditionally separate ward uncertainty as the simpler baseline; correlated Council-cycle uncertainty must be reconsidered before any council-wide aggregate is introduced or if whole-cycle validation later demonstrates a material race-level benefit.

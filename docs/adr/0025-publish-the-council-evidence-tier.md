@@ -1,0 +1,3 @@
+# Publish the Council evidence tier
+
+Every public Council quantity will display its direct polling evidence tier separately from Forecast Available, Forecast Unavailable, Observed Evidence Only, or Not Applicable: `C0 — No Qualifying Poll`, `C1 — Unreplicated Polling` from one pollster, or `C2 — Replicated Polling` from at least two pollsters. C0 permits only structural coarse quantities, C1 may permit coarse quantities only after tier-specific validation, and C2 makes challenger Candidate Win Probability eligible for its remaining gates. Multiple samples from one pollster remain C1. A higher tier never guarantees availability and must not be presented as a confidence rating.

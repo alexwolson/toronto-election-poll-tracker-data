@@ -1,0 +1,3 @@
+# Permit licensed poll detail with safeguards
+
+Licensed Poll Detail may enter a forecast even when raw tables cannot be published openly, but only with durable archival and internal audit rights, complete provenance, sufficient public methodological disclosure, and a mandatory public-data-only sensitivity. The project must disclose which input classes are licensed and preserve an authorized reproducible artifact internally. Detailed crosstabs, ballot scenarios, or denominators from one respondent sample remain one Distinct Poll Sample. Whether any source is worth purchasing remains deferred until representative full-detail PDFs are compared against their public toplines and the incremental fields are mapped to concrete model or Publication Gate gaps.

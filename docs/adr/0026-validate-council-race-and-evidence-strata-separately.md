@@ -1,0 +1,3 @@
+# Validate Council race and evidence strata separately
+
+Council Publication Gates will be evaluated separately for incumbent and open-seat races within C0, C1, and C2 evidence tiers. Performance among incumbent races cannot authorize open-seat outputs, and performance with polling cannot authorize a structural-only forecast. Simulated data may validate software mechanics but cannot substitute for genuine historical calibration: the present archive's six one-poll wards from one firm and one election cannot unlock C1, and its lack of cross-pollster replicated ward polling cannot unlock C2, until additional historical evidence is acquired and evaluated.

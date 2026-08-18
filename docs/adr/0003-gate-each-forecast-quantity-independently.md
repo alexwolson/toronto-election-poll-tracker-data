@@ -1,0 +1,3 @@
+# Gate each forecast quantity independently
+
+Each forecast will maintain a complete Internal Outcome Distribution while applying Publication Gates separately to each public quantity in each race. This permits, for example, an Incumbent Defeat Probability to be available while named challenger probabilities remain unavailable; its mathematical complement nevertheless reveals the incumbent's win probability. Incumbent Defeat Probability is Not Applicable rather than unavailable in an open-seat race. This accepts a more explicit public contract in exchange for matching publication to what the evidence actually identifies.

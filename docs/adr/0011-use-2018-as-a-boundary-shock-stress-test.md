@@ -1,0 +1,3 @@
+# Use 2018 as a boundary-shock stress test
+
+Toronto's 2018 Council outcomes will not estimate ordinary active-service or recency relationships in the first rebuilt Council Forecast because the 44-to-25-ward change forced sitting councillors into new geographies and into 11 head-to-head contests. A candidate's 2018 Electoral Appearance may still inform forecasts at later cutoffs, where the 25-ward geography is the relevant history, and 2018 will be scored separately as a Boundary-Shock Contest. A future model version may admit it to estimation only through a pre-declared boundary-aware design that validates successfully, preserving useful candidate evidence without relabelling forced officeholder losses as ordinary incumbent defeats.

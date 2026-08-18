@@ -1,0 +1,3 @@
+# Train Council v1 on Toronto elections only
+
+The first rebuilt Council Forecast will estimate its candidate and race effects from Toronto elections only. Councillor contests outside Toronto may be researched later, but differences in party systems, offices, boundaries, and electoral structures make immediate partial pooling less defensible than it is for large Ontario mayoralties. This accepts a smaller and defeat-sparse training population in exchange for a coherent target population; scarcity must widen uncertainty or make quantities Forecast Unavailable rather than trigger convenience borrowing.
