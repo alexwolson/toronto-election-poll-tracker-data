@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Fetch Toronto mayoral polling/outcomes used for forecast backtesting.
+"""Legacy discovery fetch for historical Toronto mayoral polls and outcomes.
 
-The output is long-form and records the ballot offered by every row.  The
-Wikimedia article URL is retained as the source for each observation; the
-source tables themselves link through to the underlying pollster releases.
+This scraper's two output CSVs are staging indexes, not calibration-ready
+evidence. Wikipedia table dates are fieldwork-end proxies, sample tokens can be
+lossy, response categories are normalized, residual kinds are combined, and a
+Wikipedia page is not first-party poll provenance. Use
+``scripts/reconstruct_historical_mayoral.py`` for the isolated canonical seam;
+unresolved rows remain discoverable through its legacy crosswalk.
 """
 
 from __future__ import annotations
@@ -110,9 +113,23 @@ def _flatten(table: pd.DataFrame) -> pd.DataFrame:
 
 def _date(value: object) -> str | None:
     text = _plain(value).replace("—", "-")
-    range_match = re.match(r"^([A-Za-z]+)\s+\d+\s*[–-]\s*(\d+),\s*(\d{4})$", text)
-    if range_match:
-        text = f"{range_match.group(1)} {range_match.group(2)}, {range_match.group(3)}"
+    same_month_range = re.match(
+        r"^([A-Za-z]+)\s+\d+\s*[–-]\s*(\d+),\s*(\d{4})$", text
+    )
+    cross_month_range = re.match(
+        r"^[A-Za-z]+\s+\d+\s*[–-]\s*([A-Za-z]+)\s+(\d+),\s*(\d{4})$",
+        text,
+    )
+    if same_month_range:
+        text = (
+            f"{same_month_range.group(1)} {same_month_range.group(2)}, "
+            f"{same_month_range.group(3)}"
+        )
+    elif cross_month_range:
+        text = (
+            f"{cross_month_range.group(1)} {cross_month_range.group(2)}, "
+            f"{cross_month_range.group(3)}"
+        )
     parsed = pd.to_datetime(text, errors="coerce")
     return None if pd.isna(parsed) else parsed.date().isoformat()
 
@@ -138,8 +155,9 @@ def _outcome_share(value: object) -> float | None:
 
 
 def _sample(value: object) -> int | None:
-    text = re.sub(r"[^0-9]", "", _plain(value))
-    return int(text) if text else None
+    text = _plain(value).replace(",", "")
+    match = re.search(r"\d+(?:\.0+)?", text)
+    return int(float(match.group(0))) if match else None
 
 
 def _table_columns(table: pd.DataFrame) -> tuple[str, str | None, str | None, list[str]]:
