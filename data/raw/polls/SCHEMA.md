@@ -58,7 +58,10 @@ requires `[Content_Types].xml` plus `word/document.xml` for DOCX or
 
 The manifest records rights; it does not grant them. Restricted or licensed
 bytes remain outside git. A `corrupt` row may retain any known artifact metadata
-without pretending recovery succeeded.
+without pretending recovery succeeded. A `visual_qa_status` of `passed` requires
+that every page of the retrieved artifact was rendered and visually inspected,
+the text layer confirmed present and readable, and each extracted value matched
+against its rendered page; partial or data-page-only inspection stays `pending`.
 
 ## poll_sample_documents.csv
 
