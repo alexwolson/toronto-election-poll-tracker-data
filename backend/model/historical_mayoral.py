@@ -877,6 +877,34 @@ _LEGACY_MAPPING_NOTES: Final = {
 
 _NON_POLL_LEGACY_ID: Final = "toronto_2014-2010-10-25-6a933a5f"
 
+# Proxies with no recoverable first-party or secondary source. Documented as
+# unavailable so they do not block calibration as "unresolved" — the source was
+# searched for and does not exist publicly (see docs/research/
+# unresolved-proxy-source-hunt.md).
+_NO_PUBLIC_SOURCE_LEGACY_IDS: Final = frozenset(
+    {
+        "toronto_2014-2014-01-06-f94510f4",
+        "toronto_2023-2023-05-11-076ef4ef",
+        "toronto_2023-2023-05-25-3a934378",
+        "toronto_2023-2023-05-31-30f43af0",
+        "toronto_2023-2023-06-08-1d2a2a3e",
+        "toronto_2023-2023-06-11-2c161a34",
+        "toronto_2023-2023-06-16-e57b0970",
+        "toronto_2023-2023-06-24-7cdc9fdb",
+        "toronto_2023-2023-06-25-c32aea31",
+    }
+)
+_NO_PUBLIC_SOURCE_NOTES: Final = {
+    "toronto_2014-2014-01-06-f94510f4": (
+        "No surviving first-party release; the Jan 22 2014 Forum release only "
+        "references this early-January wave. No public source located."
+    ),
+}
+_NO_PUBLIC_SOURCE_DEFAULT_NOTE: Final = (
+    "No public first-party or secondary source located; Mainstreet's premium tier "
+    "does not include these 2023 by-election reports. Documented as unavailable."
+)
+
 
 class HistoricalMayoralDataError(ValueError):
     """Raised when historical evidence is malformed or relationally incomplete."""
@@ -931,7 +959,7 @@ class LegacyPollCrosswalk:
     legacy_sample_proxy_key: str
     poll_sample_id: str | None
     poll_reading_id: str | None
-    disposition: Literal["mapped", "non_poll", "unresolved"]
+    disposition: Literal["mapped", "non_poll", "unresolved", "no_public_source"]
     notes: str
 
 
@@ -994,6 +1022,7 @@ class HistoricalMayoralAudit:
     legacy_poll_id_count: int
     historical_sample_inventory_count: int
     unresolved_sample_proxy_count: int
+    no_public_source_proxy_count: int
     blocker_codes: tuple[str, ...]
 
 
@@ -1047,6 +1076,11 @@ def audit_historical_mayoral_corpus(
         for row in corpus.legacy_crosswalk
         if row.disposition == "unresolved" and row.poll_sample_id is not None
     }
+    no_public_source_ids = {
+        row.poll_sample_id
+        for row in corpus.legacy_crosswalk
+        if row.disposition == "no_public_source" and row.poll_sample_id is not None
+    }
     blockers: list[str] = []
     if unresolved_ids:
         blockers.append("unresolved_legacy_poll_samples")
@@ -1058,6 +1092,7 @@ def audit_historical_mayoral_corpus(
         legacy_poll_id_count=len(corpus.legacy_crosswalk),
         historical_sample_inventory_count=len(inventory_ids),
         unresolved_sample_proxy_count=len(unresolved_ids),
+        no_public_source_proxy_count=len(no_public_source_ids),
         blocker_codes=tuple(blockers),
     )
 
@@ -1232,6 +1267,13 @@ def build_legacy_crosswalk_rows(legacy_poll_path: str | Path) -> list[dict[str, 
                 legacy_id,
                 "Mapped to a visually verified first-party document extraction.",
             )
+        elif legacy_id in _NO_PUBLIC_SOURCE_LEGACY_IDS:
+            disposition = "no_public_source"
+            sample_id = staging_sample_id
+            reading_id = ""
+            notes = _NO_PUBLIC_SOURCE_NOTES.get(
+                legacy_id, _NO_PUBLIC_SOURCE_DEFAULT_NOTE
+            )
         else:
             disposition = "unresolved"
             sample_id = staging_sample_id
@@ -1338,7 +1380,7 @@ def _load_crosswalk(path: Path) -> tuple[LegacyPollCrosswalk, ...]:
     result: list[LegacyPollCrosswalk] = []
     for row in _read_csv(path, CROSSWALK_COLUMNS):
         disposition = _required(row, "disposition")
-        if disposition not in {"mapped", "non_poll", "unresolved"}:
+        if disposition not in {"mapped", "non_poll", "unresolved", "no_public_source"}:
             raise HistoricalMayoralDataError(f"invalid disposition {disposition!r}")
         result.append(
             LegacyPollCrosswalk(

@@ -22,7 +22,6 @@ def test_reconstruction_script_checks_committed_tables_and_reports_blockers() ->
     assert audit["source_verified_sample_count"] == 96
     assert audit["source_verified_reading_count"] == 234
     assert audit["historical_sample_inventory_count"] == 105
-    assert audit["unresolved_sample_proxy_count"] == 9
-    assert audit["blocker_codes"] == [
-        "unresolved_legacy_poll_samples",
-    ]
+    assert audit["unresolved_sample_proxy_count"] == 0
+    assert audit["no_public_source_proxy_count"] == 9
+    assert audit["blocker_codes"] == []
