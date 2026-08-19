@@ -148,6 +148,11 @@ _KNOWN_CANDIDATE_IDS: Final = {
     "miller david": "miller",
     "jane pitfield": "pitfield",
     "pitfield jane": "pitfield",
+    # 2003 field (open race: Miller/Tory already mapped; add the next two)
+    "barbara hall": "hall",
+    "hall barbara": "hall",
+    "john nunziata": "nunziata",
+    "nunziata john": "nunziata",
 }
 
 _KNOWN_CANDIDATE_NAMES: Final = {
@@ -171,9 +176,21 @@ _KNOWN_CANDIDATE_NAMES: Final = {
     "thomson": "Sarah Thomson",
     "miller": "David Miller",
     "pitfield": "Jane Pitfield",
+    "hall": "Barbara Hall",
+    "nunziata": "John Nunziata",
 }
 
 _ELECTION_CONFIG: Final = {
+    2003: (
+        "toronto_2003",
+        date(2003, 11, 10),
+        "general",
+        "toronto_open_data_2003_results",
+        "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/96d35404-44d9-49d8-95bb-fb1e5489240d/resource/1ed53c9d-a316-465e-96ce-e72be74f8aa9/download/2003-results.zip",
+        "2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide",
+        "",
+        "official_rows_complete_artifact_not_retained",
+    ),
     2006: (
         "toronto_2006",
         date(2006, 11, 13),
@@ -237,6 +254,12 @@ _ELECTION_CONFIG: Final = {
 }
 
 _BALLOT_TIMING: Final = {
+    2003: (
+        date(2003, 9, 26),
+        date(2003, 9, 26),
+        "statutory_deadline",
+        "https://en.wikipedia.org/wiki/2003_Toronto_municipal_election",
+    ),
     2006: (
         date(2006, 9, 29),
         date(2006, 9, 29),
@@ -276,6 +299,16 @@ _BALLOT_TIMING: Final = {
 }
 
 _BALLOT_TIMING_NOTES: Final = {
+    2003: (
+        "The November 10, 2003 election was an open race (Mel Lastman did not "
+        "seek re-election; David Miller won over John Tory). Nomination close is "
+        "the statutory nomination day (the last Friday of September under the "
+        "pre-2006 Municipal Elections Act), September 26, 2003 — consistent with "
+        "the verified September 29, 2006 boundary. Every evaluated 2003 poll is "
+        "late-campaign (October–November), so this boundary is not "
+        "scoring-relevant; it only classifies the Final Ballot as known by "
+        "nomination close."
+    ),
     2006: (
         "The nomination period for the November 13, 2006 election closed "
         "September 29, 2006, so the Final Ballot was known by nomination close. "
@@ -1266,8 +1299,17 @@ def build_mayoral_outcome_rows(
                 f"{year} candidate {name!r} does not have all 25 ward totals"
             )
 
-    expected_counts = {2006: 38, 2010: 40, 2014: 65, 2018: 35, 2022: 31, 2023: 102}
+    expected_counts = {
+        2003: 44,
+        2006: 38,
+        2010: 40,
+        2014: 65,
+        2018: 35,
+        2022: 31,
+        2023: 102,
+    }
     expected_totals = {
+        2003: 692085,
         2006: 584484,
         2010: 813984,
         2014: 981054,
@@ -1489,6 +1531,7 @@ def _load_crosswalk(path: Path) -> tuple[LegacyPollCrosswalk, ...]:
 def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) -> None:
     election_by_id = {row.election_cycle_id: row for row in corpus.elections}
     if set(election_by_id) != {
+        "toronto_2003",
         "toronto_2006",
         "toronto_2010",
         "toronto_2014",
@@ -1496,7 +1539,7 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
         "toronto_2022",
         "toronto_2023",
     }:
-        raise HistoricalMayoralDataError("canonical corpus must contain six cycles")
+        raise HistoricalMayoralDataError("canonical corpus must contain seven cycles")
     outcomes_by_cycle: dict[str, list[MayoralOutcome]] = defaultdict(list)
     canonical_names_by_id: dict[str, set[str]] = defaultdict(set)
     for outcome in corpus.outcomes:
@@ -1516,6 +1559,7 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
             "a candidate ID maps to conflicting canonical outcome names"
         )
     expected_counts = {
+        "toronto_2003": 44,
         "toronto_2006": 38,
         "toronto_2010": 40,
         "toronto_2014": 65,
@@ -1524,6 +1568,7 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
         "toronto_2023": 102,
     }
     expected_totals = {
+        "toronto_2003": 692085,
         "toronto_2006": 584484,
         "toronto_2010": 813984,
         "toronto_2014": 981054,

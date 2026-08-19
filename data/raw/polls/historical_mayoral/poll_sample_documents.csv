@@ -132,3 +132,6 @@ sc_city_2006_09_26_30_n500,sc_2006-09-30_ctv,CTV News article body,Commissioning
 decima_city_2006_10_20_26_n400,decima_2006-10-26_star,Toronto Star article body,Commissioning outlet reporting the Decima committed-voter shares.
 leger_city_2006_10_27_31,leger_2006-10-31_sun,Toronto Sun article lede/subheadline,Toronto Sun lede reporting the Léger Miller/Pitfield shares (body paywalled).
 ipsos_city_2006_11_02_05_n802,ipsos_2006-11-05_natpost,National Post / canada.com article body,Commissioning outlet reporting the Ipsos decided-voter split.
+environics_city_2003_10_17_20_n700,environics_2003-10-20_globe,Globe and Mail article body (decided-voter paragraph),Globe and Mail reporting the Environics decided-voter breakdown.
+compas_city_2003_10_27,compas_2003-10-27_globe,Globe and Mail article body (poll paragraph),Globe and Mail reporting the COMPAS decided-voter breakdown.
+ipsos_city_2003_11_02,ipsos_2003-11-02_globe_ut,reproduced Globe article text in the forum post,Forum reproduction of the Globe article reporting the Ipsos-Reid decided-voter split.
