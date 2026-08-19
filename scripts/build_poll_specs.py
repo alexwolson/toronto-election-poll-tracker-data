@@ -102,6 +102,115 @@ def _document_row(meta, retrieved_at) -> dict:
     }
 
 
+def _sample_row(sample_id, cycle, base, *, fw_start, fw_end, n):
+    """A poll_samples row for one Forum citywide sample.
+
+    ``base`` supplies the publication-level fields (publication_date,
+    collection_mode); the wave-level fieldwork window and recruited size come
+    from the explicit arguments so one document's waves can each carry their own.
+    """
+    return {
+        "poll_sample_id": sample_id,
+        "election_cycle_id": cycle,
+        "pollster": "Forum Research",
+        "sponsor": "Forum Research Inc.",
+        "geography_type": "citywide",
+        "geography_id": "toronto",
+        "fieldwork_start": fw_start or fw_end,
+        "fieldwork_end": fw_end,
+        "publication_date": base["publication_date"],
+        "publication_at": "",
+        "publication_time_precision": "date_only",
+        "evidence_available_at": _evidence_available_at(base["publication_date"]),
+        "collection_mode": base.get("collection_mode", "ivr"),
+        "recruited_sample_size": str(n),
+        "extraction_status": "extracted",
+        "notes": "Toronto voters age 18+.",
+    }
+
+
+def _emit_reading(did, r, order, sample_id, year, seen, readings, responses, problems):
+    """Append one reading + its responses to the accumulators.
+
+    Dedupes by candidate set within ``seen``; a recurring candidate set with
+    different values is flagged rather than silently kept. ``order`` supplies
+    both the unique reading-id suffix and the document display order.
+    """
+    key = _candidate_key(r["responses"])
+    values = _value_map(r["responses"])
+    if key in seen:
+        if seen[key] != values:
+            problems.append(
+                f"scenario {r['scenario_label']!r} differs across documents "
+                f"in sample {sample_id}"
+            )
+        return
+    seen[key] = values
+    rid = f"{did}__r{order}"
+    readings.append(
+        {
+            "poll_reading_id": rid,
+            "poll_sample_id": sample_id,
+            "source_document_id": did,
+            "source_locator": r["source_locator"],
+            "contest_type": "mayoral",
+            "contest_id": f"toronto-mayor-{year}",
+            "question_order_status": "not_reported",
+            "question_text_status": "reported"
+            if r.get("question_text")
+            else "not_reported",
+            "question_text": r.get("question_text", ""),
+            "scenario_label": r["scenario_label"],
+            "document_display_order": str(order),
+            "population": "Toronto voters age 18+",
+            "turnout_screen": "none",
+            "denominator_type": "all_respondents",
+            "denominator_text": "[All Respondents]",
+            "unweighted_base_status": "not_reported",
+            "weighted_base_status": "not_reported",
+            "reported_base_status": "reported",
+            "reported_base": str(r["base"]),
+            "tested_choice_set_status": "complete",
+            "response_coverage": "complete",
+            "reported_share_unit": "percent",
+            "reported_share_precision": "0",
+            "reading_purpose": "general_vote_intention",
+            "notes": "Extracted from the [All Respondents] Total column; agreed across two independent vision reads.",
+        }
+    )
+    for j, resp in enumerate(r["responses"], start=1):
+        label = str(resp["label"]).strip()
+        low = label.lower()
+        row = {
+            "poll_reading_id": rid,
+            "response_option_id": "",
+            "option_order": str(j),
+            "reported_value": str(int(resp["value"])),
+            "share": str(round(int(resp["value"]) / 100, 2)),
+            "notes": "Source-published token preserved; agreed across two reads.",
+        }
+        if resp.get("kind") == "dont_know" or low in DK:
+            row.update(
+                response_option_id="dont-know",
+                response_kind="dont_know",
+                response_label=label or "Don't know",
+            )
+        elif low in CANDIDATES:
+            cid, cname = CANDIDATES[low]
+            row.update(
+                response_option_id=cid,
+                response_kind="candidate",
+                candidate_id=cid,
+                candidate_name=cname,
+                candidate_observation_status="individually_published",
+                response_label=label,
+            )
+        else:
+            problems.append(f"unknown candidate label {label!r} (add to CANDIDATES)")
+            continue
+        responses.append(row)
+
+
 def build_spec(group, cycle, *, retrieved_at=None):
     """A group of documents sharing one sample -> (5-table spec, problems).
 
@@ -123,24 +232,9 @@ def build_spec(group, cycle, *, retrieved_at=None):
     sample_id = f"forum_city_{fw_end.replace('-', '_')}_n{n}"
     year = cycle.split("_")[1]
 
-    sample = {
-        "poll_sample_id": sample_id,
-        "election_cycle_id": cycle,
-        "pollster": "Forum Research",
-        "sponsor": "Forum Research Inc.",
-        "geography_type": "citywide",
-        "geography_id": "toronto",
-        "fieldwork_start": base.get("fieldwork_start") or fw_end,
-        "fieldwork_end": fw_end,
-        "publication_date": base["publication_date"],
-        "publication_at": "",
-        "publication_time_precision": "date_only",
-        "evidence_available_at": _evidence_available_at(base["publication_date"]),
-        "collection_mode": base.get("collection_mode", "ivr"),
-        "recruited_sample_size": str(n),
-        "extraction_status": "extracted",
-        "notes": "Toronto voters age 18+.",
-    }
+    sample = _sample_row(
+        sample_id, cycle, base, fw_start=base.get("fieldwork_start"), fw_end=fw_end, n=n
+    )
 
     docs, links, readings, responses = [], [], [], []
     seen: dict[tuple, dict] = {}
@@ -156,86 +250,84 @@ def build_spec(group, cycle, *, retrieved_at=None):
             }
         )
         for i, r in enumerate(md["readings"], start=1):
-            key = _candidate_key(r["responses"])
-            values = _value_map(r["responses"])
-            if key in seen:
-                if seen[key] != values:
-                    problems.append(
-                        f"scenario {r['scenario_label']!r} differs across documents "
-                        f"in sample {sample_id}"
-                    )
-                continue
-            seen[key] = values
-            rid = f"{did}__r{i}"
-            readings.append(
-                {
-                    "poll_reading_id": rid,
-                    "poll_sample_id": sample_id,
-                    "source_document_id": did,
-                    "source_locator": r["source_locator"],
-                    "contest_type": "mayoral",
-                    "contest_id": f"toronto-mayor-{year}",
-                    "question_order_status": "not_reported",
-                    "question_text_status": "reported"
-                    if r.get("question_text")
-                    else "not_reported",
-                    "question_text": r.get("question_text", ""),
-                    "scenario_label": r["scenario_label"],
-                    "document_display_order": str(i),
-                    "population": "Toronto voters age 18+",
-                    "turnout_screen": "none",
-                    "denominator_type": "all_respondents",
-                    "denominator_text": "[All Respondents]",
-                    "unweighted_base_status": "not_reported",
-                    "weighted_base_status": "not_reported",
-                    "reported_base_status": "reported",
-                    "reported_base": str(r["base"]),
-                    "tested_choice_set_status": "complete",
-                    "response_coverage": "complete",
-                    "reported_share_unit": "percent",
-                    "reported_share_precision": "0",
-                    "reading_purpose": "general_vote_intention",
-                    "notes": "Extracted from the [All Respondents] Total column; agreed across two independent vision reads.",
-                }
+            _emit_reading(
+                did, r, i, sample_id, year, seen, readings, responses, problems
             )
-            for j, resp in enumerate(r["responses"], start=1):
-                label = str(resp["label"]).strip()
-                low = label.lower()
-                row = {
-                    "poll_reading_id": rid,
-                    "response_option_id": "",
-                    "option_order": str(j),
-                    "reported_value": str(int(resp["value"])),
-                    "share": str(round(int(resp["value"]) / 100, 2)),
-                    "notes": "Source-published token preserved; agreed across two reads.",
-                }
-                if resp.get("kind") == "dont_know" or low in DK:
-                    row.update(
-                        response_option_id="dont-know",
-                        response_kind="dont_know",
-                        response_label=label or "Don't know",
-                    )
-                elif low in CANDIDATES:
-                    cid, cname = CANDIDATES[low]
-                    row.update(
-                        response_option_id=cid,
-                        response_kind="candidate",
-                        candidate_id=cid,
-                        candidate_name=cname,
-                        candidate_observation_status="individually_published",
-                        response_label=label,
-                    )
-                else:
-                    problems.append(
-                        f"unknown candidate label {label!r} (add to CANDIDATES)"
-                    )
-                    continue
-                responses.append(row)
 
     spec = {
         "source_documents": docs,
         "poll_sample_documents": links,
         "poll_samples": [sample],
+        "poll_readings": readings,
+        "poll_responses": responses,
+    }
+    return spec, problems
+
+
+def build_multiwave_spec(meta, merged, waves, cycle, *, retrieved_at=None):
+    """One document whose readings span several fieldwork waves -> (spec, problems).
+
+    Produces one source_document, one poll_sample per wave, one junction link per
+    wave (a document may back multiple samples), and readings partitioned by their
+    reported ``base``. ``waves`` is a list of ``{fieldwork_start, fieldwork_end,
+    n, bases}`` where ``bases`` lists the reading base values in that wave. Every
+    reading's base must match exactly one wave; a base matching none is flagged.
+    Reading ids stay unique across the split (they carry each reading's original
+    position in the document).
+    """
+    retrieved_at = retrieved_at or datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    problems: list[str] = []
+    did = meta["doc_id"]
+    year = cycle.split("_")[1]
+    docs = [_document_row(meta, retrieved_at)]
+    indexed = list(enumerate(merged["readings"], start=1))
+
+    base_to_wave: dict[int, int] = {}
+    for wi, w in enumerate(waves):
+        for b in w["bases"]:
+            base_to_wave[int(b)] = wi
+
+    samples, links, readings, responses = [], [], [], []
+    for wi, w in enumerate(waves):
+        n = w["n"]
+        fw_end = w["fieldwork_end"]
+        sample_id = f"forum_city_{fw_end.replace('-', '_')}_n{n}"
+        samples.append(
+            _sample_row(
+                sample_id,
+                cycle,
+                merged,
+                fw_start=w.get("fieldwork_start"),
+                fw_end=fw_end,
+                n=n,
+            )
+        )
+        links.append(
+            {
+                "poll_sample_id": sample_id,
+                "source_document_id": did,
+                "sample_locator": f"{fw_end} wave tables",
+                "notes": "First-party release; this document reports multiple fieldwork waves.",
+            }
+        )
+        seen: dict[tuple, dict] = {}
+        for i, r in indexed:
+            if base_to_wave.get(int(r["base"])) != wi:
+                continue
+            _emit_reading(
+                did, r, i, sample_id, year, seen, readings, responses, problems
+            )
+
+    for _, r in indexed:
+        if int(r["base"]) not in base_to_wave:
+            problems.append(
+                f"reading {r['scenario_label']!r} base {r['base']} matches no wave"
+            )
+
+    spec = {
+        "source_documents": docs,
+        "poll_sample_documents": links,
+        "poll_samples": samples,
         "poll_readings": readings,
         "poll_responses": responses,
     }

@@ -19,9 +19,9 @@ def test_reconstruction_script_checks_committed_tables_and_reports_blockers() ->
 
     audit = json.loads(result.stdout)
     assert audit["outcome_candidate_count"] == 233
-    assert audit["source_verified_sample_count"] == 70
-    assert audit["source_verified_reading_count"] == 162
-    assert audit["historical_sample_inventory_count"] == 108
+    assert audit["source_verified_sample_count"] == 75
+    assert audit["source_verified_reading_count"] == 181
+    assert audit["historical_sample_inventory_count"] == 113
     assert audit["unresolved_sample_proxy_count"] == 38
     assert audit["blocker_codes"] == [
         "unresolved_legacy_poll_samples",

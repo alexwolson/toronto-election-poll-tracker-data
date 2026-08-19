@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from build_poll_specs import build_spec, group_by_sample
+from build_poll_specs import build_multiwave_spec, build_spec, group_by_sample
 
 from backend.model.poll_ingest import ingest_poll_source
 
@@ -147,6 +147,75 @@ def test_shared_sample_value_conflict_flags() -> None:
     b = (_meta("forum_b"), _merged([_reading("Ford / Tory", conflicting)]))
     _, problems = build_spec([a, b], "toronto_2014")
     assert problems and "differ" in problems[0].lower()
+
+
+FORD_SOLO = [
+    {"label": "Rob Ford", "kind": "candidate", "value": 55},
+    {"label": "Don't know", "kind": "dont_know", "value": 45},
+]
+
+
+def test_build_multiwave_spec_splits_readings_by_base(tmp_path) -> None:
+    # one document, readings from two fieldwork waves (base 1093 x2, base 1041 x1)
+    readings = [
+        _reading("Ford / Tory", FORD_TORY, base=1093),
+        _reading("Ford / Chow", FORD_CHOW, base=1093),
+        _reading("Ford declared", FORD_SOLO, base=1041),
+    ]
+    # synthetic in-cycle dates chosen so the derived sample ids do not collide
+    # with the real bundle that _copy_bundle clones.
+    merged = _merged(readings, fieldwork="2014-01-05", n=1093)
+    merged["publication_date"] = "2014-01-07"
+    waves = [
+        {
+            "fieldwork_start": "2014-01-05",
+            "fieldwork_end": "2014-01-05",
+            "n": 1093,
+            "bases": [1093],
+        },
+        {
+            "fieldwork_start": "2014-01-06",
+            "fieldwork_end": "2014-01-06",
+            "n": 1041,
+            "bases": [1041],
+        },
+    ]
+    spec, problems = build_multiwave_spec(
+        _meta("forum_oct30"),
+        merged,
+        waves,
+        "toronto_2014",
+        retrieved_at="2026-08-19T00:00:00Z",
+    )
+    assert problems == []
+    assert len(spec["source_documents"]) == 1  # one doc backs both samples
+    assert len(spec["poll_samples"]) == 2
+    assert len(spec["poll_sample_documents"]) == 2  # doc -> two samples (junction)
+    assert len(spec["poll_readings"]) == 3
+    per_sample = {}
+    for r in spec["poll_readings"]:
+        per_sample[r["poll_sample_id"]] = per_sample.get(r["poll_sample_id"], 0) + 1
+    assert per_sample["forum_city_2014_01_05_n1093"] == 2
+    assert per_sample["forum_city_2014_01_06_n1041"] == 1
+    # reading ids stay unique across the split
+    assert len({r["poll_reading_id"] for r in spec["poll_readings"]}) == 3
+    counts = ingest_poll_source(spec, bundle_dir=_copy_bundle(tmp_path))
+    assert counts["poll_samples"] >= 2
+
+
+def test_build_multiwave_spec_flags_base_matching_no_wave() -> None:
+    readings = [_reading("X", FORD_TORY, base=999)]
+    merged = _merged(readings, fieldwork="2013-10-29", n=1093)
+    waves = [
+        {
+            "fieldwork_start": "2013-10-29",
+            "fieldwork_end": "2013-10-29",
+            "n": 1093,
+            "bases": [1093],
+        }
+    ]
+    _, problems = build_multiwave_spec(_meta(), merged, waves, "toronto_2014")
+    assert problems and "999" in problems[0]
 
 
 def test_group_by_sample_groups_same_fieldwork_and_size() -> None:
