@@ -108,6 +108,40 @@ def test_build_spec_strips_candidate_titles_but_keeps_printed_label() -> None:
     assert by_label["Councillor Adam Vaughan"]["candidate_id"] == "vaughan"
 
 
+def test_build_spec_mainstreet_firm_decimals_and_residuals(tmp_path) -> None:
+    meta = _meta("test_mainstreet")
+    meta["firm"] = "Mainstreet Research"
+    responses = [
+        {"label": "John Tory", "kind": "candidate", "value": 45.5},
+        {"label": "Jennifer Keesmat", "kind": "candidate", "value": 19},  # source typo
+        {"label": "Faith Goldy", "kind": "candidate", "value": 4.4},
+        {"label": "Another Candidate", "kind": "other", "value": 4.7},
+        {"label": "Undecided", "kind": "dont_know", "value": 26.4},
+    ]
+    merged = _merged(
+        [_reading("Tory / Keesmaat / Goldy", responses, base=777)],
+        fieldwork="2018-01-01",
+        n=777,
+    )
+    merged["publication_date"] = "2018-01-03"
+    spec, problems = build_spec([(meta, merged)], "toronto_2018")
+    assert problems == []
+    sample = spec["poll_samples"][0]
+    assert sample["poll_sample_id"] == "mainstreet_city_2018_01_01_n777"
+    assert sample["pollster"] == "Mainstreet Research"
+    assert spec["poll_readings"][0]["reported_share_precision"] == "1"
+    by_label = {r.get("response_label"): r for r in spec["poll_responses"]}
+    assert by_label["John Tory"]["reported_value"] == "45.5"  # decimal preserved
+    assert (
+        by_label["Jennifer Keesmat"]["candidate_id"] == "keesmaat"
+    )  # typo canonicalized
+    assert by_label["Another Candidate"]["response_kind"] == "other"
+    assert by_label["Another Candidate"]["response_option_id"] == "another-candidate"
+    assert by_label["Undecided"]["response_kind"] == "undecided"
+    counts = ingest_poll_source(spec, bundle_dir=_copy_bundle(tmp_path))
+    assert counts["poll_samples"] >= 1
+
+
 def test_build_spec_flags_unknown_candidate() -> None:
     responses = [
         {"label": "Some Newcomer", "kind": "candidate", "value": 50},

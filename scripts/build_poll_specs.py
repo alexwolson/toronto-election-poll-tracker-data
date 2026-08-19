@@ -50,8 +50,85 @@ CANDIDATES = {
     "adam vaughan": ("vaughan", "Adam Vaughan"),
     "shelley carroll": ("carroll", "Shelley Carroll"),
     "josé canseco": ("canseco", "José Canseco"),
+    "jennifer keesmaat": ("keesmaat", "Jennifer Keesmaat"),
+    "jennifer keesmat": ("keesmaat", "Jennifer Keesmaat"),  # source table's typo
+    "faith goldy": ("goldy", "Faith Goldy"),
+    "sarah climenhaga": ("climenhaga", "Sarah Climenhaga"),
+    "saron gebresellassi": ("gebresellassi", "Saron Gebresellassi"),
 }
 DK = {"don't know", "dont know", "dk", "undecided/don't know"}
+
+# Non-candidate residual buckets -> (response_kind, response_option_id); the
+# printed label is preserved as response_label. Option ids match those already
+# in the corpus.
+RESIDUALS = {
+    "undecided": ("undecided", "undecided"),
+    "someone else": ("other", "someone-else"),
+    "another candidate": ("other", "another-candidate"),
+    "some other candidate": ("other", "some-other-candidate"),
+    "other": ("other", "other"),
+}
+
+
+def _fmt_value(v):
+    """(reported_value string, decimal places) preserving the source's precision.
+
+    Integer percentages stay integer ("25", 0); one-decimal Mainstreet shares
+    keep their decimal ("45.5", 1) rather than being truncated by ``int()``.
+    """
+    f = float(v)
+    if f == int(f):
+        return str(int(f)), 0
+    s = f"{f:.4f}".rstrip("0").rstrip(".")
+    return s, len(s.split(".")[1])
+
+
+# Per-firm identity and provenance. Adding a firm means adding one entry here;
+# the row-building helpers are firm-agnostic. ``prefix`` seeds the poll_sample_id.
+FIRMS = {
+    "Forum Research": {
+        "pollster": "Forum Research",
+        "sponsor": "Forum Research Inc.",
+        "prefix": "forum_city",
+        "denominator_text": "[All Respondents]",
+        "doc_note": (
+            "First-party Forum PDF recovered through an archived-original Wayback replay. "
+            "All pages were rendered and visually inspected by two independent vision reads; "
+            "the text layer is present and readable, and every [All Respondents] Total column "
+            "used for extraction agreed across both reads. Public availability is not an "
+            "affirmative reuse licence, so redistribution status remains unknown."
+        ),
+        "reading_note": (
+            "Extracted from the [All Respondents] Total column; agreed across two "
+            "independent vision reads."
+        ),
+    },
+    "Mainstreet Research": {
+        "pollster": "Mainstreet Research",
+        "sponsor": "",
+        "prefix": "mainstreet_city",
+        "denominator_text": "Including Undecided Voters",
+        "doc_note": (
+            "First-party Mainstreet Research report (self-published; not third-party "
+            "sponsored). All pages were rendered and visually inspected by two independent "
+            "vision reads; the all-respondents (including-undecided) mayoral horserace agreed "
+            "across both reads. Public availability is not an affirmative reuse licence, so "
+            "redistribution status remains unknown."
+        ),
+        "reading_note": (
+            "Extracted from the all-respondents (including-undecided) mayoral table; agreed "
+            "across two independent vision reads."
+        ),
+    },
+}
+
+
+def _firm_config(meta) -> dict:
+    firm = meta["firm"]
+    if firm not in FIRMS:
+        raise IngestError(f"unknown firm {firm!r}; add it to FIRMS")
+    return FIRMS[firm]
+
 
 # Early Forum head-to-head tables prefix candidates with a role title
 # ("Mayor Rob Ford", "TTC Chair Karen Stintz"). Strip it for the canonical id
@@ -93,10 +170,10 @@ def _candidate_key(responses) -> tuple:
 
 
 def _value_map(responses) -> dict:
-    return {str(r["label"]).strip().lower(): int(r["value"]) for r in responses}
+    return {str(r["label"]).strip().lower(): float(r["value"]) for r in responses}
 
 
-def _document_row(meta, retrieved_at) -> dict:
+def _document_row(meta, retrieved_at, firm_cfg) -> dict:
     return {
         "source_document_id": meta["doc_id"],
         "document_role": "release",
@@ -115,28 +192,23 @@ def _document_row(meta, retrieved_at) -> dict:
         "access_class": "public",
         "redistribution_status": "unknown",
         "reuse_terms_url": "",
-        "notes": (
-            "First-party Forum PDF recovered through an archived-original Wayback replay. "
-            "All pages were rendered and visually inspected by two independent vision reads; "
-            "the text layer is present and readable, and every [All Respondents] Total column "
-            "used for extraction agreed across both reads. Public availability is not an "
-            "affirmative reuse licence, so redistribution status remains unknown."
-        ),
+        "notes": firm_cfg["doc_note"],
     }
 
 
-def _sample_row(sample_id, cycle, base, *, fw_start, fw_end, n):
-    """A poll_samples row for one Forum citywide sample.
+def _sample_row(sample_id, cycle, base, firm_cfg, *, fw_start, fw_end, n):
+    """A poll_samples row for one citywide sample.
 
     ``base`` supplies the publication-level fields (publication_date,
     collection_mode); the wave-level fieldwork window and recruited size come
     from the explicit arguments so one document's waves can each carry their own.
+    ``firm_cfg`` supplies the pollster and sponsor.
     """
     return {
         "poll_sample_id": sample_id,
         "election_cycle_id": cycle,
-        "pollster": "Forum Research",
-        "sponsor": "Forum Research Inc.",
+        "pollster": firm_cfg["pollster"],
+        "sponsor": firm_cfg["sponsor"],
         "geography_type": "citywide",
         "geography_id": "toronto",
         "fieldwork_start": fw_start or fw_end,
@@ -152,12 +224,16 @@ def _sample_row(sample_id, cycle, base, *, fw_start, fw_end, n):
     }
 
 
-def _emit_reading(did, r, order, sample_id, year, seen, readings, responses, problems):
+def _emit_reading(
+    did, r, order, sample_id, year, firm_cfg, seen, readings, responses, problems
+):
     """Append one reading + its responses to the accumulators.
 
     Dedupes by candidate set within ``seen``; a recurring candidate set with
     different values is flagged rather than silently kept. ``order`` supplies
-    both the unique reading-id suffix and the document display order.
+    both the unique reading-id suffix and the document display order. Reported
+    values keep the source's precision (integer Forum percentages, one-decimal
+    Mainstreet shares).
     """
     key = _candidate_key(r["responses"])
     values = _value_map(r["responses"])
@@ -170,6 +246,7 @@ def _emit_reading(did, r, order, sample_id, year, seen, readings, responses, pro
         return
     seen[key] = values
     rid = f"{did}__r{order}"
+    precision = max((_fmt_value(x["value"])[1] for x in r["responses"]), default=0)
     readings.append(
         {
             "poll_reading_id": rid,
@@ -188,7 +265,7 @@ def _emit_reading(did, r, order, sample_id, year, seen, readings, responses, pro
             "population": "Toronto voters age 18+",
             "turnout_screen": "none",
             "denominator_type": "all_respondents",
-            "denominator_text": "[All Respondents]",
+            "denominator_text": firm_cfg["denominator_text"],
             "unweighted_base_status": "not_reported",
             "weighted_base_status": "not_reported",
             "reported_base_status": "reported",
@@ -196,24 +273,32 @@ def _emit_reading(did, r, order, sample_id, year, seen, readings, responses, pro
             "tested_choice_set_status": "complete",
             "response_coverage": "complete",
             "reported_share_unit": "percent",
-            "reported_share_precision": "0",
+            "reported_share_precision": str(precision),
             "reading_purpose": "general_vote_intention",
-            "notes": "Extracted from the [All Respondents] Total column; agreed across two independent vision reads.",
+            "notes": firm_cfg["reading_note"],
         }
     )
     for j, resp in enumerate(r["responses"], start=1):
         label = str(resp["label"]).strip()
         low = label.lower()
+        reported_value, _ = _fmt_value(resp["value"])
         row = {
             "poll_reading_id": rid,
             "response_option_id": "",
             "option_order": str(j),
-            "reported_value": str(int(resp["value"])),
-            "share": str(round(int(resp["value"]) / 100, 2)),
+            "reported_value": reported_value,
+            "share": str(round(float(resp["value"]) / 100, precision + 2)),
             "notes": "Source-published token preserved; agreed across two reads.",
         }
         canon = _canonical_label(low)
-        if resp.get("kind") == "dont_know" or low in DK:
+        if low in RESIDUALS:
+            kind, option_id = RESIDUALS[low]
+            row.update(
+                response_option_id=option_id,
+                response_kind=kind,
+                response_label=label,
+            )
+        elif resp.get("kind") == "dont_know" or low in DK:
             row.update(
                 response_option_id="dont-know",
                 response_kind="dont_know",
@@ -245,7 +330,8 @@ def build_spec(group, cycle, *, retrieved_at=None):
     """
     retrieved_at = retrieved_at or datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     problems: list[str] = []
-    _, base = group[0]
+    meta0, base = group[0]
+    firm_cfg = _firm_config(meta0)
     fw_end = base["fieldwork_end"]
     n = base["recruited_sample_size"]
     for _, md in group:
@@ -253,18 +339,24 @@ def build_spec(group, cycle, *, retrieved_at=None):
             raise IngestError(
                 "build_spec group does not share a single sample identity"
             )
-    sample_id = f"forum_city_{fw_end.replace('-', '_')}_n{n}"
+    sample_id = f"{firm_cfg['prefix']}_{fw_end.replace('-', '_')}_n{n}"
     year = cycle.split("_")[1]
 
     sample = _sample_row(
-        sample_id, cycle, base, fw_start=base.get("fieldwork_start"), fw_end=fw_end, n=n
+        sample_id,
+        cycle,
+        base,
+        firm_cfg,
+        fw_start=base.get("fieldwork_start"),
+        fw_end=fw_end,
+        n=n,
     )
 
     docs, links, readings, responses = [], [], [], []
     seen: dict[tuple, dict] = {}
     for meta, md in group:
         did = meta["doc_id"]
-        docs.append(_document_row(meta, retrieved_at))
+        docs.append(_document_row(meta, retrieved_at, firm_cfg))
         links.append(
             {
                 "poll_sample_id": sample_id,
@@ -275,7 +367,16 @@ def build_spec(group, cycle, *, retrieved_at=None):
         )
         for i, r in enumerate(md["readings"], start=1):
             _emit_reading(
-                did, r, i, sample_id, year, seen, readings, responses, problems
+                did,
+                r,
+                i,
+                sample_id,
+                year,
+                firm_cfg,
+                seen,
+                readings,
+                responses,
+                problems,
             )
 
     spec = {
@@ -301,9 +402,10 @@ def build_multiwave_spec(meta, merged, waves, cycle, *, retrieved_at=None):
     """
     retrieved_at = retrieved_at or datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     problems: list[str] = []
+    firm_cfg = _firm_config(meta)
     did = meta["doc_id"]
     year = cycle.split("_")[1]
-    docs = [_document_row(meta, retrieved_at)]
+    docs = [_document_row(meta, retrieved_at, firm_cfg)]
     indexed = list(enumerate(merged["readings"], start=1))
 
     base_to_wave: dict[int, int] = {}
@@ -315,12 +417,13 @@ def build_multiwave_spec(meta, merged, waves, cycle, *, retrieved_at=None):
     for wi, w in enumerate(waves):
         n = w["n"]
         fw_end = w["fieldwork_end"]
-        sample_id = f"forum_city_{fw_end.replace('-', '_')}_n{n}"
+        sample_id = f"{firm_cfg['prefix']}_{fw_end.replace('-', '_')}_n{n}"
         samples.append(
             _sample_row(
                 sample_id,
                 cycle,
                 merged,
+                firm_cfg,
                 fw_start=w.get("fieldwork_start"),
                 fw_end=fw_end,
                 n=n,
@@ -339,7 +442,16 @@ def build_multiwave_spec(meta, merged, waves, cycle, *, retrieved_at=None):
             if base_to_wave.get(int(r["base"])) != wi:
                 continue
             _emit_reading(
-                did, r, i, sample_id, year, seen, readings, responses, problems
+                did,
+                r,
+                i,
+                sample_id,
+                year,
+                firm_cfg,
+                seen,
+                readings,
+                responses,
+                problems,
             )
 
     for _, r in indexed:
