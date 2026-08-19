@@ -16,12 +16,11 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from backend.model.historical_mayoral import (  # noqa: E402
+from backend.model.historical_mayoral import (
     CROSSWALK_COLUMNS,
     ELECTION_COLUMNS,
     OUTCOME_COLUMNS,
@@ -31,7 +30,6 @@ from backend.model.historical_mayoral import (  # noqa: E402
     build_mayoral_outcome_rows,
     load_historical_mayoral_corpus,
 )
-
 
 TABLES = (
     (
@@ -43,7 +41,10 @@ TABLES = (
         ROOT / "data/raw/elections/mayoral_outcomes.csv",
         OUTCOME_COLUMNS,
         lambda: build_mayoral_outcome_rows(
-            ROOT / "data/raw/elections/mayoral_results_2014_official.csv",
+            {
+                2010: ROOT / "data/raw/elections/mayoral_results_2010_official.csv",
+                2014: ROOT / "data/raw/elections/mayoral_results_2014_official.csv",
+            },
             ROOT / "data/raw/elections/mayoral_results.csv",
         ),
     ),

@@ -1,4 +1,44 @@
 election_cycle_id,candidate_id,candidate_name,candidate_name_as_reported,votes,valid_vote_total,share,is_winner,source_document_id,source_locator
+toronto_2010,pantalone,Joe Pantalone,PANTALONE JOE,95482,813984,0.117302059991351181,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,rob-ford,Rob Ford,FORD ROB,383501,813984,0.471140710382513661,true,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,rossi,Rocco Rossi,ROSSI ROCCO,5012,813984,0.006157369186617919,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,smitherman,George Smitherman,SMITHERMAN GEORGE,289832,813984,0.356065966898612258,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,thomson,Sarah Thomson,THOMSON SARAH,1883,813984,0.002313313283799190,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:achampong-rocco,ACHAMPONG ROCCO,ACHAMPONG ROCCO,2805,813984,0.003446013680858592,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:alexander-michael,ALEXANDER MICHAEL,ALEXANDER MICHAEL,2470,813984,0.003034457679757833,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:andrews-don,ANDREWS DON,ANDREWS DON,1032,813984,0.001267838188465621,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:babula-george,BABULA GEORGE,BABULA GEORGE,3273,813984,0.004020963557023234,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:ball-christopher,BALL CHRISTOPHER,BALL CHRISTOPHER,696,813984,0.000855053661988442,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:brausewetter-michael,BRAUSEWETTER MICHAEL,BRAUSEWETTER MICHAEL,796,813984,0.000977906199630460,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:campbell-douglas,CAMPBELL DOUGLAS,CAMPBELL DOUGLAS,1428,813984,0.001754334237528010,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:castillo-jaime,CASTILLO JAIME,CASTILLO JAIME,1874,813984,0.002302256555411409,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:clarke-kevin,CLARKE KEVIN,CLARKE KEVIN,1411,813984,0.001733449306128867,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:cole-keith,COLE KEITH,COLE KEITH,801,813984,0.000984048826512560,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:cottle-charlene,COTTLE CHARLENE,COTTLE CHARLENE,733,813984,0.000900509100915989,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:derome-gerald,DEROME GERALD,DEROME GERALD,251,813984,0.000308359869481464,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:devenyi-diane,DEVENYI DIANE,DEVENYI DIANE,629,813984,0.000772742461768290,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:di-fiore-james,DI FIORE JAMES,DI FIORE JAMES,655,813984,0.000804684121555215,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:epstein-david,EPSTEIN DAVID,EPSTEIN DAVID,1202,813984,0.001476687502457051,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:firth-selwyn,FIRTH SELWYN,FIRTH SELWYN,394,813984,0.000484038998309549,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:flie-michael,FLIE MICHAEL,FLIE MICHAEL,1190,813984,0.001461945197940009,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:ghazi-abdullah-baquie,GHAZI ABDULLAH-BAQUIE,GHAZI ABDULLAH-BAQUIE,2761,813984,0.003391958564296104,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:gomberg-howard,GOMBERG HOWARD,GOMBERG HOWARD,477,813984,0.000586006604552424,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:goodhead-barry,GOODHEAD BARRY,GOODHEAD BARRY,740,813984,0.000909108778550930,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:hossain-monowar,HOSSAIN MONOWAR,HOSSAIN MONOWAR,1194,813984,0.001466859299445689,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:lee-dewitt,LEE DEWITT,LEE DEWITT,1699,813984,0.002087264614537878,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:letonja-john,LETONJA JOHN,LETONJA JOHN,592,813984,0.000727287022840744,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:macklin-carmen,MACKLIN CARMEN,MACKLIN CARMEN,575,813984,0.000706402091441601,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:magee-colin,MAGEE COLIN,MAGEE COLIN,401,813984,0.000492638675944490,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:pampena-joseph,PAMPENA JOSEPH,PAMPENA JOSEPH,1319,813984,0.001620424971498211,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:sarma-vijay,SARMA VIJAY,SARMA VIJAY,2264,813984,0.002781381452215277,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:state-mark,STATE MARK,STATE MARK,438,813984,0.000538094114872037,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:steinberger-tibor,STEINBERGER TIBOR,STEINBERGER TIBOR,735,813984,0.000902966151668829,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:syed-himy,SYED HIMY,SYED HIMY,582,813984,0.000715001769076542,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:tang-weizhen,TANG WEIZHEN,TANG WEIZHEN,890,813984,0.001093387585013956,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:taylor-phil,TAYLOR PHIL,TAYLOR PHIL,429,813984,0.000527037386484255,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:vallance-david,VALLANCE DAVID,VALLANCE DAVID,444,813984,0.000545465267130558,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:wadhwa-ratan,WADHWA RATAN,WADHWA RATAN,290,813984,0.000356272359161851,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
+toronto_2010,toronto_2010:walker-daniel,WALKER DANIEL,WALKER DANIEL,804,813984,0.000987734402641821,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
 toronto_2014,chow,Olivia Chow,Olivia Chow,227003,981054,0.231386855361682435,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
 toronto_2014,doug-ford,Doug Ford,Doug Ford,331006,981054,0.337398349122474400,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
 toronto_2014,toronto_2014:ari-goldkind,Ari Goldkind,Ari Goldkind,3916,981054,0.003991625333569814,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)

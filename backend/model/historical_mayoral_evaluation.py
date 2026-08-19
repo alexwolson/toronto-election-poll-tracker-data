@@ -11,7 +11,7 @@ import hashlib
 import json
 from collections.abc import Sequence
 from dataclasses import dataclass, fields, is_dataclass
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
 from typing import Final
 from zoneinfo import ZoneInfo
@@ -29,10 +29,11 @@ from backend.model.mayoral_evaluation import (
     LeadTimeSnapshot,
 )
 
-
 _TORONTO: Final = ZoneInfo("America/Toronto")
 _REVISION_SCHEMA: Final = "historical-mayoral-evidence-v4"
 _INCUMBENT_BY_CYCLE: Final = {
+    # David Miller did not seek re-election; the 2010 race was open.
+    "toronto_2010": None,
     # Rob Ford withdrew before the 2014 Final Ballot was settled.
     "toronto_2014": None,
     "toronto_2018": "tory",
@@ -212,15 +213,11 @@ def _validate_and_index_relationships(
 
     return _Relationships(
         samples_by_cycle={
-            cycle_id: tuple(
-                sorted(rows, key=lambda sample: sample.poll_sample_id)
-            )
+            cycle_id: tuple(sorted(rows, key=lambda sample: sample.poll_sample_id))
             for cycle_id, rows in samples_by_cycle_lists.items()
         },
         readings_by_sample={
-            sample_id: tuple(
-                sorted(rows, key=lambda reading: reading.poll_reading_id)
-            )
+            sample_id: tuple(sorted(rows, key=lambda reading: reading.poll_reading_id))
             for sample_id, rows in readings_by_sample_lists.items()
         },
         responses_by_reading={
@@ -310,7 +307,7 @@ def _canonical_value(value: object) -> object:
     if isinstance(value, datetime):
         if value.utcoffset() is None:
             raise ValueError("cannot revise evidence containing a naive datetime")
-        return value.astimezone(timezone.utc).isoformat(timespec="microseconds")
+        return value.astimezone(UTC).isoformat(timespec="microseconds")
     if isinstance(value, date):
         return value.isoformat()
     if isinstance(value, Decimal):
@@ -319,9 +316,7 @@ def _canonical_value(value: object) -> object:
         return [_canonical_value(item) for item in value]
     if value is None or isinstance(value, (str, int, float, bool)):
         return value
-    raise TypeError(
-        f"unsupported canonical evidence value {type(value).__name__}"
-    )
+    raise TypeError(f"unsupported canonical evidence value {type(value).__name__}")
 
 
 def _unique_by_id(
@@ -354,7 +349,5 @@ def _validate_local_analysis_time(value: time) -> time:
     if not isinstance(value, time):
         raise TypeError("analysis_time_local must be a datetime.time")
     if value.tzinfo is not None:
-        raise ValueError(
-            "analysis_time_local must be a naive Toronto wall-clock time"
-        )
+        raise ValueError("analysis_time_local must be a naive Toronto wall-clock time")
     return value

@@ -30,7 +30,10 @@ def test_committed_tables_equal_a_fresh_source_reconstruction() -> None:
     )
     assert _rows("data/raw/elections/mayoral_outcomes.csv") == (
         build_mayoral_outcome_rows(
-            ROOT / "data/raw/elections/mayoral_results_2014_official.csv",
+            {
+                2010: ROOT / "data/raw/elections/mayoral_results_2010_official.csv",
+                2014: ROOT / "data/raw/elections/mayoral_results_2014_official.csv",
+            },
             ROOT / "data/raw/elections/mayoral_results.csv",
         )
     )
@@ -146,11 +149,11 @@ def test_final_ballot_known_by_dates_are_conservative_replay_boundaries() -> Non
 def test_only_audited_poll_sources_enter_the_canonical_seam() -> None:
     corpus = load_historical_mayoral_corpus(ROOT)
 
-    assert len(corpus.poll_samples) == 96
-    assert len(corpus.poll_readings) == 234
-    assert len(corpus.poll_responses) == 1368
-    assert len(corpus.source_documents) == 118
-    assert len(corpus.poll_sample_documents) == 120
+    assert len(corpus.poll_samples) == 105
+    assert len(corpus.poll_readings) == 243
+    assert len(corpus.poll_responses) == 1412
+    assert len(corpus.source_documents) == 127
+    assert len(corpus.poll_sample_documents) == 129
     assert all(
         sample.extraction_status == "extracted" for sample in corpus.poll_samples
     )
@@ -166,7 +169,7 @@ def test_only_audited_poll_sources_enter_the_canonical_seam() -> None:
         reading.poll_reading_id: reading.reading_purpose
         for reading in corpus.poll_readings
     }
-    assert sum(value == "general_vote_intention" for value in purposes.values()) == 231
+    assert sum(value == "general_vote_intention" for value in purposes.values()) == 240
     assert purposes["nanos_jul_initially_unsure_leaning"] == (
         "conditional_lean_followup"
     )
@@ -381,12 +384,12 @@ def test_legacy_sample_token_is_not_promoted_to_a_recruited_sample_size() -> Non
 def test_audit_counts_inventory_without_calling_it_calibration_ready() -> None:
     audit = audit_historical_mayoral_corpus(load_historical_mayoral_corpus(ROOT))
 
-    assert audit.election_count == 4
-    assert audit.outcome_candidate_count == 233
-    assert audit.source_verified_sample_count == 96
-    assert audit.source_verified_reading_count == 234
+    assert audit.election_count == 5
+    assert audit.outcome_candidate_count == 273
+    assert audit.source_verified_sample_count == 105
+    assert audit.source_verified_reading_count == 243
     assert audit.legacy_poll_id_count == 153
-    assert audit.historical_sample_inventory_count == 105
+    assert audit.historical_sample_inventory_count == 114
     assert audit.unresolved_sample_proxy_count == 0
     assert audit.no_public_source_proxy_count == 9
     assert audit.blocker_codes == ()

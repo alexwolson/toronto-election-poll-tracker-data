@@ -132,6 +132,17 @@ _KNOWN_CANDIDATE_IDS: Final = {
     "chow olivia": "chow",
     "anthony furey": "furey",
     "furey anthony": "furey",
+    # 2010 field (candidates who also appear in the 2010 polls)
+    "rob ford": "rob-ford",
+    "ford rob": "rob-ford",
+    "george smitherman": "smitherman",
+    "smitherman george": "smitherman",
+    "joe pantalone": "pantalone",
+    "pantalone joe": "pantalone",
+    "rocco rossi": "rossi",
+    "rossi rocco": "rossi",
+    "sarah thomson": "thomson",
+    "thomson sarah": "thomson",
 }
 
 _KNOWN_CANDIDATE_NAMES: Final = {
@@ -148,9 +159,24 @@ _KNOWN_CANDIDATE_NAMES: Final = {
     "penalosa": "Gil Peñalosa",
     "saunders": "Mark Saunders",
     "tory": "John Tory",
+    "rob-ford": "Rob Ford",
+    "smitherman": "George Smitherman",
+    "pantalone": "Joe Pantalone",
+    "rossi": "Rocco Rossi",
+    "thomson": "Sarah Thomson",
 }
 
 _ELECTION_CONFIG: Final = {
+    2010: (
+        "toronto_2010",
+        date(2010, 10, 25),
+        "general",
+        "toronto_open_data_2010_results",
+        "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/96d35404-44d9-49d8-95bb-fb1e5489240d/resource/6fbfaab0-bb84-442a-8e4b-1c14d4c10d6d/download/2010-results.zip",
+        "2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide",
+        "",
+        "official_rows_complete_artifact_not_retained",
+    ),
     2014: (
         "toronto_2014",
         date(2014, 10, 27),
@@ -194,6 +220,12 @@ _ELECTION_CONFIG: Final = {
 }
 
 _BALLOT_TIMING: Final = {
+    2010: (
+        date(2010, 9, 10),
+        date(2010, 9, 10),
+        "statutory_deadline",
+        "https://en.wikipedia.org/wiki/2010_Toronto_mayoral_election",
+    ),
     2014: (
         date(2014, 9, 12),
         date(2014, 9, 15),
@@ -221,6 +253,12 @@ _BALLOT_TIMING: Final = {
 }
 
 _BALLOT_TIMING_NOTES: Final = {
+    2010: (
+        "The nomination period closed September 10, 2010; names could not be "
+        "removed afterward (Thomson and Rossi withdrew later but stayed on the "
+        "ballot), so the Final Ballot was known by nomination close. Miller did "
+        "not seek re-election, so this was an open race."
+    ),
     2014: (
         "September 15 is the statutory certification deadline and is used only "
         "as the conservative Final Ballot classification boundary; no exact "
@@ -1139,35 +1177,46 @@ def build_mayoral_election_rows() -> list[dict[str, str]]:
 
 
 def build_mayoral_outcome_rows(
-    official_2014_path: str | Path, ward_results_path: str | Path
+    sidecar_paths: dict[int, str | Path], ward_results_path: str | Path
 ) -> list[dict[str, str]]:
-    """Build complete official candidate outcomes for all four cycles."""
-    source_2014 = _read_csv(Path(official_2014_path), _OFFICIAL_2014_COLUMNS)
-    grouped: dict[int, dict[str, int]] = {2014: {}}
-    winners_2014: set[str] = set()
-    expected_2014_source = {
-        "source_document_id": _ELECTION_CONFIG[2014][3],
-        "source_url": _ELECTION_CONFIG[2014][4],
-        "source_locator": _ELECTION_CONFIG[2014][5],
-        "source_sha256": _ELECTION_CONFIG[2014][6],
-        "source_completeness": _ELECTION_CONFIG[2014][7],
-    }
-    for row in source_2014:
-        for field, expected in expected_2014_source.items():
-            if _required(row, field) != expected:
-                raise HistoricalMayoralDataError(
-                    f"2014 sidecar has unexpected {field}={row[field]!r}"
-                )
-        name = _required(row, "candidate_name")
-        if name in grouped[2014]:
-            raise HistoricalMayoralDataError(f"duplicate 2014 candidate {name!r}")
-        grouped[2014][name] = _positive_int(row, "votes")
-        if _boolean(row, "is_winner"):
-            winners_2014.add(name)
-    if len(winners_2014) != 1:
-        raise HistoricalMayoralDataError(
-            "2014 sidecar must identify exactly one official winner"
-        )
+    """Build complete official candidate outcomes for every cycle.
+
+    Sidecar cycles carry candidate-total declarations from a per-year CSV — used
+    where the ward geography is not the current 25 (2010's 44 wards) or the source
+    is a candidate-level declaration (2014). The 25-ward cycles (2018/2022/2023)
+    are aggregated from the shared ward-results file.
+    """
+    grouped: dict[int, dict[str, int]] = {}
+    winners_by_year: dict[int, set[str]] = {}
+    for year, path in sidecar_paths.items():
+        source_rows = _read_csv(Path(path), _OFFICIAL_2014_COLUMNS)
+        expected_source = {
+            "source_document_id": _ELECTION_CONFIG[year][3],
+            "source_url": _ELECTION_CONFIG[year][4],
+            "source_locator": _ELECTION_CONFIG[year][5],
+            "source_sha256": _ELECTION_CONFIG[year][6],
+            "source_completeness": _ELECTION_CONFIG[year][7],
+        }
+        grouped[year] = {}
+        winners_by_year[year] = set()
+        for row in source_rows:
+            for field, expected in expected_source.items():
+                # Compare the raw declared value against the config; source_sha256
+                # is legitimately blank when the artifact was not retained.
+                if row.get(field, "") != expected:
+                    raise HistoricalMayoralDataError(
+                        f"{year} sidecar has unexpected {field}={row.get(field)!r}"
+                    )
+            name = _required(row, "candidate_name")
+            if name in grouped[year]:
+                raise HistoricalMayoralDataError(f"duplicate {year} candidate {name!r}")
+            grouped[year][name] = _positive_int(row, "votes")
+            if _boolean(row, "is_winner"):
+                winners_by_year[year].add(name)
+        if len(winners_by_year[year]) != 1:
+            raise HistoricalMayoralDataError(
+                f"{year} sidecar must identify exactly one official winner"
+            )
 
     ward_rows = _read_csv(Path(ward_results_path), _WARD_RESULT_COLUMNS)
     wards_by_candidate: dict[tuple[int, str], set[int]] = defaultdict(set)
@@ -1189,8 +1238,14 @@ def build_mayoral_outcome_rows(
                 f"{year} candidate {name!r} does not have all 25 ward totals"
             )
 
-    expected_counts = {2014: 65, 2018: 35, 2022: 31, 2023: 102}
-    expected_totals = {2014: 981054, 2018: 755493, 2022: 551890, 2023: 724638}
+    expected_counts = {2010: 40, 2014: 65, 2018: 35, 2022: 31, 2023: 102}
+    expected_totals = {
+        2010: 813984,
+        2014: 981054,
+        2018: 755493,
+        2022: 551890,
+        2023: 724638,
+    }
     rows: list[dict[str, str]] = []
     for year in sorted(expected_counts):
         candidates = grouped.get(year, {})
@@ -1207,7 +1262,11 @@ def build_mayoral_outcome_rows(
             candidates.items(), key=lambda item: _candidate_id(year, item[0])
         ):
             candidate_id = _candidate_id(year, name)
-            is_winner = name in winners_2014 if year == 2014 else votes == max_votes
+            is_winner = (
+                name in winners_by_year[year]
+                if year in winners_by_year
+                else votes == max_votes
+            )
             rows.append(
                 {
                     "election_cycle_id": _ELECTION_CONFIG[year][0],
@@ -1401,12 +1460,13 @@ def _load_crosswalk(path: Path) -> tuple[LegacyPollCrosswalk, ...]:
 def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) -> None:
     election_by_id = {row.election_cycle_id: row for row in corpus.elections}
     if set(election_by_id) != {
+        "toronto_2010",
         "toronto_2014",
         "toronto_2018",
         "toronto_2022",
         "toronto_2023",
     }:
-        raise HistoricalMayoralDataError("canonical corpus must contain four cycles")
+        raise HistoricalMayoralDataError("canonical corpus must contain five cycles")
     outcomes_by_cycle: dict[str, list[MayoralOutcome]] = defaultdict(list)
     canonical_names_by_id: dict[str, set[str]] = defaultdict(set)
     for outcome in corpus.outcomes:
@@ -1426,12 +1486,14 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
             "a candidate ID maps to conflicting canonical outcome names"
         )
     expected_counts = {
+        "toronto_2010": 40,
         "toronto_2014": 65,
         "toronto_2018": 35,
         "toronto_2022": 31,
         "toronto_2023": 102,
     }
     expected_totals = {
+        "toronto_2010": 813984,
         "toronto_2014": 981054,
         "toronto_2018": 755493,
         "toronto_2022": 551890,
