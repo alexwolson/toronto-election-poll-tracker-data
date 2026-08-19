@@ -498,6 +498,16 @@ def _fit_tail_mass(
     return tail_mass
 
 
+# Per-cycle (point, observed) pairs backing the concentration fit.
+_ConcentrationPairs = tuple[
+    tuple[tuple[tuple[float, ...], tuple[float, ...]], ...], ...
+]
+_CALIBRATION_DRAW_COUNT: Final = 1500
+_CALIBRATION_TARGET_PIT_DISPERSION: Final = 0.25  # mean|PIT-0.5| of a Uniform(0,1)
+_CALIBRATION_SCALE_BOUNDS: Final = (0.5, 4.0)
+_CALIBRATION_GUARD_TOLERANCE: Final = 0.02  # share-CRPS may not worsen beyond this
+
+
 def _fit_concentration(
     training_cycles: tuple[TrainingCycle, ...],
     *,
@@ -506,11 +516,42 @@ def _fit_concentration(
     excluded_poll_sample_ids: frozenset[str],
     excluded_pollsters: frozenset[str],
 ) -> float:
-    """Fit one global Dirichlet concentration with equal cycle weight."""
+    """Fit one global Dirichlet concentration: a PIT-calibrated moment anchor.
 
-    cycle_moments: list[tuple[float, float]] = []
+    The method-of-moments match sets the scale but absorbs systematic point bias
+    into variance and so over-disperses; a single calibration scale corrects it
+    so the training winning-margin PIT is uniform (ADR 0042).  Lead-time-flat by
+    construction (the fit never sees the target lead).
+    """
+
+    pairs = _concentration_training_pairs(
+        training_cycles,
+        tail_mass=tail_mass,
+        variant=variant,
+        excluded_poll_sample_ids=excluded_poll_sample_ids,
+        excluded_pollsters=excluded_pollsters,
+    )
+    anchor = _moment_from_pairs(pairs)
+    return anchor * _calibration_scale(pairs, anchor)
+
+
+def _concentration_training_pairs(
+    training_cycles: tuple[TrainingCycle, ...],
+    *,
+    tail_mass: float,
+    variant: EndpointVariant,
+    excluded_poll_sample_ids: frozenset[str],
+    excluded_pollsters: frozenset[str],
+) -> _ConcentrationPairs:
+    """Group each training cycle's (point, observed) pairs for the fit.
+
+    Grouped by cycle so the moment match and the calibration search both weight
+    every cycle equally regardless of how many snapshots it contributes.
+    """
+
+    cycles: list[tuple[tuple[tuple[float, ...], tuple[float, ...]], ...]] = []
     for cycle in training_cycles:
-        snapshot_moments: list[tuple[float, float]] = []
+        pairs: list[tuple[tuple[float, ...], tuple[float, ...]]] = []
         for snapshot in cycle.history:
             selected = _filter_selected(
                 _selected_for_cycle(
@@ -534,18 +575,29 @@ def _fit_concentration(
                 cycle.outcome.candidate_shares[candidate_id]
                 for candidate_id in cycle.outcome.candidate_ids
             )
-            numerator = 1.0 - sum(value * value for value in point)
-            squared_error = sum(
+            pairs.append((point, observed))
+        if pairs:
+            cycles.append(tuple(pairs))
+    return tuple(cycles)
+
+
+def _moment_from_pairs(cycles: _ConcentrationPairs) -> float:
+    """Method-of-moments Dirichlet concentration anchor (equal cycle weight)."""
+
+    cycle_moments: list[tuple[float, float]] = []
+    for pairs in cycles:
+        numerators = [1.0 - sum(value * value for value in point) for point, _ in pairs]
+        squared_errors = [
+            sum(
                 (actual - predicted) ** 2
                 for actual, predicted in zip(observed, point, strict=True)
             )
-            snapshot_moments.append((numerator, squared_error))
-        if not snapshot_moments:
-            continue
+            for point, observed in pairs
+        ]
         cycle_moments.append(
             (
-                sum(row[0] for row in snapshot_moments) / len(snapshot_moments),
-                sum(row[1] for row in snapshot_moments) / len(snapshot_moments),
+                sum(numerators) / len(numerators),
+                sum(squared_errors) / len(squared_errors),
             )
         )
     if not cycle_moments:
@@ -562,6 +614,117 @@ def _fit_concentration(
     if not math.isfinite(raw) or raw <= 0.0:
         raise MayoralEndpointDataError("fitted Dirichlet concentration is invalid")
     return raw
+
+
+def _margin(shares: tuple[float, ...]) -> float:
+    top = sorted(shares, reverse=True)
+    return top[0] - top[1]
+
+
+def _calibration_draws(
+    point: tuple[float, ...], concentration: float, count: int
+) -> np.ndarray:
+    """Deterministic Dirichlet draws (count x k) aligned to point order."""
+
+    canonical = tuple(sorted(point))
+    seed_material = json.dumps(
+        {"point": canonical, "concentration": concentration, "kind": "calibration"},
+        separators=(",", ":"),
+    ).encode("utf-8")
+    seed = int.from_bytes(hashlib.sha256(seed_material).digest()[:8], "big")
+    rng = np.random.default_rng(seed)
+    parameters = np.maximum(
+        np.asarray(point, dtype=float) * concentration, _POINT_FLOOR
+    )
+    return rng.dirichlet(parameters, size=count)
+
+
+def _margin_pit_dispersion(cycles: _ConcentrationPairs, concentration: float) -> float:
+    """Mean |PIT - 0.5| of the training winning margin (equal cycle weight).
+
+    A calibrated forecast scores 0.25 (uniform PIT); an over-wide forecast pushes
+    the realized margin toward the predictive centre, so the statistic falls
+    below 0.25 and tightening raises it.
+    """
+
+    cycle_means: list[float] = []
+    for pairs in cycles:
+        deviations: list[float] = []
+        for point, observed in pairs:
+            draws = _calibration_draws(point, concentration, _CALIBRATION_DRAW_COUNT)
+            top2 = np.sort(draws, axis=1)[:, -2:]
+            margins = top2[:, 1] - top2[:, 0]
+            pit = float(np.mean(margins <= _margin(observed)))
+            deviations.append(abs(pit - 0.5))
+        cycle_means.append(sum(deviations) / len(deviations))
+    return sum(cycle_means) / len(cycle_means)
+
+
+def _sample_crps(samples: np.ndarray, observed: float) -> float:
+    ordered = np.sort(samples)
+    size = ordered.size
+    mean_abs = float(np.mean(np.abs(ordered - observed)))
+    index = np.arange(1, size + 1)
+    pair_term = float(np.sum((2 * index - size - 1) * ordered) / (size * size))
+    return mean_abs - pair_term
+
+
+def _mean_candidate_crps(cycles: _ConcentrationPairs, concentration: float) -> float:
+    """Guard metric: mean per-candidate share CRPS (equal cycle weight)."""
+
+    cycle_means: list[float] = []
+    for pairs in cycles:
+        snapshot_means: list[float] = []
+        for point, observed in pairs:
+            draws = _calibration_draws(point, concentration, _CALIBRATION_DRAW_COUNT)
+            per_candidate = [
+                _sample_crps(draws[:, index], observed[index])
+                for index in range(len(observed))
+            ]
+            snapshot_means.append(sum(per_candidate) / len(per_candidate))
+        cycle_means.append(sum(snapshot_means) / len(snapshot_means))
+    return sum(cycle_means) / len(cycle_means)
+
+
+def _calibration_scale(cycles: _ConcentrationPairs, anchor: float) -> float:
+    """Scale on the moment anchor that calibrates the training margin PIT.
+
+    Picks the scale within the configured bounds whose training margin PIT
+    dispersion matches the uniform target.  The objective is self-limiting: it
+    stops at calibration and cannot over-tighten past it.  Capped back to the
+    anchor if tightening would degrade share-CRPS beyond tolerance (ADR 0042).
+    """
+
+    low, high = _CALIBRATION_SCALE_BOUNDS
+    target = _CALIBRATION_TARGET_PIT_DISPERSION
+
+    def dispersion(scale: float) -> float:
+        return _margin_pit_dispersion(cycles, anchor * scale)
+
+    if dispersion(low) >= target:
+        scale = low
+    elif dispersion(high) <= target:
+        scale = high
+    else:
+        lower, upper = low, high
+        for _ in range(24):
+            middle = (lower + upper) / 2.0
+            if dispersion(middle) < target:
+                lower = middle
+            else:
+                upper = middle
+        scale = (lower + upper) / 2.0
+    return _guarded_scale(cycles, anchor, scale)
+
+
+def _guarded_scale(cycles: _ConcentrationPairs, anchor: float, scale: float) -> float:
+    if scale <= 1.0:  # loosening cannot over-confidence the shares
+        return scale
+    baseline = _mean_candidate_crps(cycles, anchor)
+    tightened = _mean_candidate_crps(cycles, anchor * scale)
+    if tightened > baseline * (1.0 + _CALIBRATION_GUARD_TOLERANCE):
+        return 1.0
+    return scale
 
 
 def _point_estimate(

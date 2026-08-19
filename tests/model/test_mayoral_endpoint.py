@@ -14,6 +14,10 @@ from backend.model.mayoral_endpoint import (
     MAYORAL_ENDPOINT_EVALUATION_LEAD_TIMES,
     MayoralEndpointDataError,
     MayoralEndpointPredictor,
+    _calibration_scale,
+    _concentration_training_pairs,
+    _margin_pit_dispersion,
+    _moment_from_pairs,
     _reading_point,
     fit_mayoral_endpoint,
     select_mayoral_endpoint_readings,
@@ -271,6 +275,52 @@ def test_global_uncertainty_fit_does_not_change_with_target_lead_time() -> None:
             late_target,
         ).full_ballot_share_draws
     )
+
+
+def test_concentration_is_pit_calibrated_tighter_than_the_moment_match_anchor() -> None:
+    # The moment-match anchor absorbs systematic point bias into variance and so
+    # over-disperses (ADR 0042). On the real regular corpus the fitted
+    # concentration must scale the anchor UP (tighter) and pull the training
+    # margin PIT dispersion toward the uniform value 0.25.
+    training, target = _fold("toronto_2014", 7)
+    fit = fit_mayoral_endpoint(training, target, variant="firm-balanced-bridge")
+
+    pairs = _concentration_training_pairs(
+        training,
+        tail_mass=fit.tail_mass_total,
+        variant="firm-balanced-bridge",
+        excluded_poll_sample_ids=frozenset(),
+        excluded_pollsters=frozenset(),
+    )
+    anchor = _moment_from_pairs(pairs)
+    scale = _calibration_scale(pairs, anchor)
+
+    assert scale > 1.0  # the real corpus is over-wide -> tighten
+    assert fit.concentration == pytest.approx(anchor * scale)
+
+    uniform = 0.25
+    assert abs(_margin_pit_dispersion(pairs, anchor * scale) - uniform) < abs(
+        _margin_pit_dispersion(pairs, anchor) - uniform
+    )
+
+
+def test_calibration_scale_is_identity_on_an_already_calibrated_anchor() -> None:
+    # If the anchor already produces uniform-ish margin PIT dispersion, the scale
+    # must not move it (no gratuitous tightening).
+    training, target = _fold("toronto_2018", 7)
+    fit = fit_mayoral_endpoint(training, target, variant="firm-balanced-bridge")
+    pairs = _concentration_training_pairs(
+        training,
+        tail_mass=fit.tail_mass_total,
+        variant="firm-balanced-bridge",
+        excluded_poll_sample_ids=frozenset(),
+        excluded_pollsters=frozenset(),
+    )
+    anchor = _moment_from_pairs(pairs)
+    # Find the concentration that is already calibrated, then confirm the scale
+    # search leaves it (approximately) put.
+    calibrated = anchor * _calibration_scale(pairs, anchor)
+    assert _calibration_scale(pairs, calibrated) == pytest.approx(1.0, abs=0.15)
 
 
 def test_ineligible_new_evidence_does_not_change_monte_carlo_draws() -> None:

@@ -116,6 +116,10 @@ _Avoid_: Missing candidate, other
 The non-zero election-day uncertainty remaining after the latest evidence, including turnout composition, poll-to-result error, unresolved candidate-tail support, and other unobserved variation. It prevents the Internal Outcome Distribution from collapsing onto even a late Poll Reading.
 _Avoid_: Sampling error, model noise
 
+**Margin-Calibrated Dispersion**:
+The doctrine that the Mayoral Endpoint's election-day spread is scaled so the reconstructed winning-margin forecast is calibrated on Held-Out Election Cycles — its margin lands across the predictive distribution as often as claimed — rather than set to mechanically match squared point error. Matching squared error absorbs systematic poll-to-result bias into the spread and over-disperses; calibrating the margin corrects it. The scale is lead-flat, because Toronto's poll misses do not measurably shrink as the election nears (systematic error, not resolvable campaign drift, dominates).
+_Avoid_: Variance, confidence interval, concentration
+
 **Polling Estimate**:
 A current descriptive average of comparable direct Poll Readings from at least two pollsters. Its contest-specific comparability rules are stricter than the rules for displaying an individual Poll Reading; it is not an election forecast or a substitute for the underlying readings in either forecast.
 _Avoid_: Polling forecast, win probability
