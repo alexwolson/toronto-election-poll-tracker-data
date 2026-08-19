@@ -55,6 +55,9 @@ CANDIDATES = {
     "faith goldy": ("goldy", "Faith Goldy"),
     "sarah climenhaga": ("climenhaga", "Sarah Climenhaga"),
     "saron gebresellassi": ("gebresellassi", "Saron Gebresellassi"),
+    "sarah thomson": ("thomson", "Sarah Thomson"),
+    "sara thomson": ("thomson", "Sarah Thomson"),  # source spelling variant
+    "ari goldkind": ("goldkind", "Ari Goldkind"),
 }
 DK = {"don't know", "dont know", "dk", "undecided/don't know"}
 
@@ -63,6 +66,7 @@ DK = {"don't know", "dont know", "dk", "undecided/don't know"}
 # in the corpus.
 RESIDUALS = {
     "undecided": ("undecided", "undecided"),
+    "unsure": ("undecided", "unsure"),
     "someone else": ("other", "someone-else"),
     "another candidate": ("other", "another-candidate"),
     "some other candidate": ("other", "some-other-candidate"),
@@ -122,6 +126,23 @@ FIRMS = {
             "across two independent vision reads."
         ),
     },
+    "Nanos Research": {
+        "pollster": "Nanos Research",
+        "sponsor": "",
+        "prefix": "nanos_city",
+        "denominator_text": "First-ranked response including Unsure",
+        "decided_denominator_text": "Ballot (decided voters only)",
+        "doc_note": (
+            "First-party Nanos Research report supplied directly by the maintainer. All "
+            "pages were rendered and visually inspected by two independent vision reads. "
+            "Public availability is not an affirmative reuse licence, so redistribution "
+            "status remains unknown."
+        ),
+        "reading_note": (
+            "Extracted from the Nanos mayoral ballot table; agreed across two independent "
+            "vision reads."
+        ),
+    },
 }
 
 
@@ -176,11 +197,14 @@ def _value_map(responses) -> dict:
 
 
 def _document_row(meta, retrieved_at, firm_cfg) -> dict:
+    # Supplied-directly documents (Scribd, newspaper articles) have no distinct
+    # retrieval URL and their own provenance note; fall back to the publisher URL
+    # and allow the meta to override the firm's default note and document role.
     return {
         "source_document_id": meta["doc_id"],
-        "document_role": "release",
+        "document_role": meta.get("document_role", "release"),
         "publisher_url": meta["publisher_url"],
-        "retrieval_url": meta["retrieval_url"],
+        "retrieval_url": meta.get("retrieval_url") or meta["publisher_url"],
         "retrieval_status": "retrieved",
         "retrieved_at": retrieved_at,
         "media_type": "application/pdf",
@@ -194,7 +218,7 @@ def _document_row(meta, retrieved_at, firm_cfg) -> dict:
         "access_class": "public",
         "redistribution_status": "unknown",
         "reuse_terms_url": "",
-        "notes": firm_cfg["doc_note"],
+        "notes": meta.get("doc_note") or firm_cfg["doc_note"],
     }
 
 

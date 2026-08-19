@@ -372,6 +372,49 @@ _MAPPED_LEGACY_READINGS: Final = {
         "forum_city_2014_09_08_n1069",
         "forum_2014_sep08_four_way_rob",
     ),
+    # --- found-2014 batch, group 1 (first-party reports) ---
+    # Forum 2014-02-24 already in the corpus (feb25 release); map by candidate set.
+    "toronto_2014-2014-02-24-d2896f09": (
+        "forum_city_2014_02_24_n1310",
+        "forum_2014_feb24_ford_tory_chow",
+    ),
+    "toronto_2014-2014-02-24-59cb828a": (
+        "forum_city_2014_02_24_n1310",
+        "forum_2014_feb24_four_way_ford",
+    ),
+    "toronto_2014-2014-02-24-ebbbbd3a": (
+        "forum_city_2014_02_24_n1310",
+        "forum_2014_feb24_five_way",
+    ),
+    # Mainstreet 2014-10-17: all-voter -> r1, decided -> r2.
+    "toronto_2014-2014-10-17-364251db": (
+        "mainstreet_city_2014_10_16_n2265",
+        "mainstreet_2014_oct17_report__r1",
+    ),
+    "toronto_2014-2014-10-17-c139fbc5": (
+        "mainstreet_city_2014_10_16_n2265",
+        "mainstreet_2014_oct17_report__r2",
+    ),
+    # Nanos 2014-08-31: legacy used Nanos's unprompted accessible ballot; the
+    # first-party prompted first-ranked (r1) and decided (r2) readings supersede.
+    "toronto_2014-2014-08-31-615d57f4": (
+        "nanos_city_2014_08_31_n1000",
+        "nanos_2014_aug31_report__r1",
+    ),
+    "toronto_2014-2014-08-31-0ebf8dc2": (
+        "nanos_city_2014_08_31_n1000",
+        "nanos_2014_aug31_report__r2",
+    ),
+    # Forum 2014-09-22: full current field from the horserace release (companion
+    # to the Issues release already mapped). r1 = 3-way, r2 = Goldkind 4-way.
+    "toronto_2014-2014-09-22-19782e6d": (
+        "forum_city_2014_09_22_n1164",
+        "forum_2014_sep22_horserace__r1",
+    ),
+    "toronto_2014-2014-09-22-19304bb9": (
+        "forum_city_2014_09_22_n1164",
+        "forum_2014_sep22_horserace__r2",
+    ),
     "toronto_2014-2013-11-12-6a9b9d1e": (
         "ipsos_city_2013_11_08_12_n665",
         "ipsos_nov2013_scenario3",
@@ -730,6 +773,20 @@ _LEGACY_MAPPING_NOTES: Final = {
         "Mapped to the four-candidate reading (Tory 40, Rob Ford 28, Chow 21, "
         "Soknacki 6). The legacy row halved the named shares into a >0.5 residual; "
         "the first-party source values supersede that corrupted vector."
+    ),
+    "toronto_2014-2014-08-31-615d57f4": (
+        "Nanos Aug 31 sample. The legacy row is Nanos's unprompted accessible-ballot "
+        "question (a large 'unsure' residual); it is superseded by the first-party "
+        "prompted first-ranked ballot (including Unsure) extracted from the report."
+    ),
+    "toronto_2014-2014-08-31-0ebf8dc2": (
+        "Nanos Aug 31 sample, decided-voter reading. Legacy is the unprompted "
+        "accessible ballot; the first-party decided-voter ballot supersedes it."
+    ),
+    "toronto_2014-2014-09-22-19782e6d": (
+        "Mapped to the full three-way current field (Tory 38, Doug Ford 31, Chow 25) "
+        "recovered from the Sep 22 horserace release. The legacy row halved the shares "
+        "into a >0.5 residual; the first-party values supersede it."
     ),
     "toronto_2014-2014-07-05-8095cb7d": (
         "Mapped to the visually verified Nanos Ballot reading. The legacy "

@@ -91,9 +91,9 @@ def test_selector_uses_one_post_final_reading_per_respondent_sample() -> None:
         >= cycle.snapshots[0].evidence.final_ballot_evidence_available_at.date()
         for row in selected
     )
-    assert "forum_2014_sep22_current_field_trend" in {
-        row.poll_reading_id for row in selected
-    }
+    # The Sep 22 horserace release supplies the full all-respondents current field,
+    # which the selector now prefers over the trend-row proxy for that sample.
+    assert "forum_2014_sep22_horserace__r1" in {row.poll_reading_id for row in selected}
     assert "forum_2014_sep12_three_way_doug" not in {
         row.poll_reading_id for row in selected
     }
