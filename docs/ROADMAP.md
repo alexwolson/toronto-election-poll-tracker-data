@@ -2,7 +2,7 @@
 
 Living plan for the from-first-principles rebuild of the Toronto election forecasting model. Unlike the ADRs (frozen decisions) and the research notes (dated findings), this file is updated as work lands. It orients an agent picking up the work: what exists, what the design is, what to build next, and the disciplines to follow. Terminology is defined in [CONTEXT.md](../CONTEXT.md); decisions in [docs/adr/](adr/); evidence in [docs/research/](research/).
 
-**Status as of 2026-08-18.**
+**Status as of 2026-08-19.**
 
 ## Orientation — read first
 
@@ -21,14 +21,14 @@ The Mayoral Forecast is a ladder of specifications, each of which must earn its 
 
 Reading the ladder is essential: **a lower rung failing to beat a simpler one is the ladder working (ADR 0030: "the simpler specification remains authoritative"), not a defect.** This is the correct reading of today's `not_qualified` status — see below.
 
-## Current state (OBSERVED, 2026-08-18)
+## Current state (OBSERVED, 2026-08-19)
 
 ### Mayoral track
 
 | Component | Status | File(s) |
 |---|---|---|
 | Poll evidence schema (sample → reading → response) | Built | `poll_sources.py` |
-| Historical corpus + reconstruction | Built; **data incomplete** | `historical_mayoral.py`, `scripts/reconstruct_historical_mayoral.py` |
+| Historical corpus + reconstruction | Built; 2014–2023 complete (proxies resolved, blocker cleared); **2000–2010 pending** | `historical_mayoral.py`, `scripts/reconstruct_historical_mayoral.py` |
 | Evaluation-cycle construction | Built | `historical_mayoral_evaluation.py` |
 | LOOCV scoring (margin CRPS, Brier, log score, close-result, incumbent-defeat) | Built | `mayoral_evaluation.py` |
 | Comparator + firm-balanced bridge endpoints | Built | `mayoral_endpoint.py` |
@@ -39,9 +39,9 @@ Reading the ladder is essential: **a lower rung failing to beat a simpler one is
 | Dynamic / refined model | **Not built** | — |
 | Live snapshot integration | **Not built** (standalone; not authorised to publish) | — |
 
-The corpus currently holds four reconstructed cycles (2014, 2018, 2022, 2023), 63 samples / 130 readings. Acquisition is ongoing — restricted Forum/Borealis material is pending and dozens of legacy sample proxies remain unresolved (see the `historical-mayoral-*` research notes).
+The corpus holds four reconstructed cycles (2014, 2018, 2022, 2023), **96 samples / 234 readings**. The 2014–2023 legacy-proxy backlog is **fully resolved** (2026-08-19): every proxy is `mapped` (143) or `no_public_source` (9, documented-unavailable), zero `unresolved`, and the `unresolved_legacy_poll_samples` calibration blocker is **cleared** (`blocker_codes == ()`). Sources span Forum, Mainstreet, and Nanos first-party reports plus, where no first-party PDF survives, newspaper/CP24 toplines (denominator `not_reported`, `response_coverage` partial, `document_role` article). What remains for M1 is the **older cycles 2000–2010** (not the 2014–2023 backlog). Restricted Forum/Borealis material is optional. See [unresolved-proxy-source-hunt.md](research/unresolved-proxy-source-hunt.md) and the `historical-mayoral-*` notes.
 
-**Qualification status: `not_qualified`.** The firm-balanced bridge does not beat the latest-sample comparator on the primary winning-margin CRPS. Per ADR 0030 this keeps the comparator authoritative — the ladder working, not a broken model — and it is computed on an incomplete corpus. **Do not treat it as a bug to chase.**
+**Qualification status: `not_qualified`** (re-run 2026-08-19 on the completed 2014–2023 corpus). The firm-balanced bridge still does not qualify over the latest-sample comparator on primary winning-margin CRPS. The fuller corpus did shift the direction: on **regular elections (3 cycles)** the bridge now beats the comparator *in aggregate* (0.0406 vs 0.0432), but only 1/3 cycles improve, so it fails ADR 0030's majority-of-cycles rule; on **all 4 cycles** the bridge is worse (0.0588 vs 0.0471), dragged by the 2023 by-election outlier (CRPS 0.099). Per ADR 0030 the comparator stays authoritative — the ladder working, not a broken model, and still an n=4 result. **Do not treat it as a bug to chase.** More whole cycles (2000–2010) is the lever on the majority-of-cycles criterion.
 
 ### Council track
 
@@ -60,7 +60,7 @@ No code implements Publication Gates (ADR 0003, 0005), Probability Bands (ADR 00
 
 Build each item only after a short spec is approved (see Disciplines). TDD. Record the investigation as a research note and any decision as an ADR. Re-run the qualification ladder and report before/after **without tuning to it**.
 
-- **M1 — Finish the historical poll corpus** (in progress; target cycles 2000–2023, 1997 excluded). Qualification numbers are provisional until this stabilises.
+- **M1 — Finish the historical poll corpus** (target cycles 2000–2023, 1997 excluded). **2014–2023 done** (2026-08-19): backlog resolved, blocker cleared, qualification re-run. **Remaining: older cycles 2000–2010.**
   - **The free/public queue is not exhausted** — the prior "Borealis-only" verdict was a `WebFetch`-can't-reach-`web.archive.org` artifact; `curl` + the Wayback CDX/`id_` API recover most pre-2019 Forum and Mainstreet releases (following Forum `PollsDownload.asp?docid=` redirects). Borealis is optional, for the few genuinely-missing items.
   - **Method (one-time, historical):** per-document extraction is **LLM-driven, not a parser** — read the PDF's `[All Respondents]` crosstab Totals (the admissibility source; full demographic crosstabs are not required — acquisition plan line 22). Then ingest via the thin `scripts/ingest_poll_source.py` (core `backend/model/poll_ingest.py`), which appends schema-exact rows and validates the audited contract all-or-nothing. Visual QA is **full-document** (SCHEMA `visual_qa_status`): render and inspect every page.
   - **Retiring the legacy backlog** (`unresolved` crosswalk rows) is a *separate* step: add `legacy_id → (sample, reading)` entries to `_MAPPED_LEGACY_READINGS` in `historical_mayoral.py` (matched via the discovery CSV's fields), then `reconstruct --write`. Adding a sample alone does not retire its proxies.
@@ -88,4 +88,4 @@ Lower-priority open findings (non-blocking): the 2023 point-estimate second-plac
 - Decisions — [docs/adr/](adr/) 0001–0039
 - Findings — [docs/research/](research/) (start with `unmeasured-candidate-tail`, `candidate-tail-choice-set-scaling`, `candidate-tail-margin-coupling`, `mayoral-concentration-overconfidence`, `mayoral-incumbency-endpoint`)
 - Run mayoral qualification — `uv run scripts/evaluate_mayoral_endpoint.py`; incumbency variant — `uv run scripts/evaluate_incumbency_endpoint.py`
-- Tests — `uv run pytest` (381 passing as of this writing)
+- Tests — `uv run pytest` (395 passing as of this writing)
