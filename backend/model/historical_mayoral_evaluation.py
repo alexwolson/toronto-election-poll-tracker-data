@@ -32,6 +32,8 @@ from backend.model.mayoral_evaluation import (
 _TORONTO: Final = ZoneInfo("America/Toronto")
 _REVISION_SCHEMA: Final = "historical-mayoral-evidence-v4"
 _INCUMBENT_BY_CYCLE: Final = {
+    # David Miller sought and won re-election in 2006.
+    "toronto_2006": "miller",
     # David Miller did not seek re-election; the 2010 race was open.
     "toronto_2010": None,
     # Rob Ford withdrew before the 2014 Final Ballot was settled.

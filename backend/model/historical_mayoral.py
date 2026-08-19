@@ -143,6 +143,11 @@ _KNOWN_CANDIDATE_IDS: Final = {
     "rossi rocco": "rossi",
     "sarah thomson": "thomson",
     "thomson sarah": "thomson",
+    # 2006 field (incumbent David Miller vs Jane Pitfield)
+    "david miller": "miller",
+    "miller david": "miller",
+    "jane pitfield": "pitfield",
+    "pitfield jane": "pitfield",
 }
 
 _KNOWN_CANDIDATE_NAMES: Final = {
@@ -164,9 +169,21 @@ _KNOWN_CANDIDATE_NAMES: Final = {
     "pantalone": "Joe Pantalone",
     "rossi": "Rocco Rossi",
     "thomson": "Sarah Thomson",
+    "miller": "David Miller",
+    "pitfield": "Jane Pitfield",
 }
 
 _ELECTION_CONFIG: Final = {
+    2006: (
+        "toronto_2006",
+        date(2006, 11, 13),
+        "general",
+        "toronto_open_data_2006_results",
+        "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/96d35404-44d9-49d8-95bb-fb1e5489240d/resource/3fb1227c-a279-4523-a1aa-f00190ba717f/download/2006-results.zip",
+        "2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide",
+        "",
+        "official_rows_complete_artifact_not_retained",
+    ),
     2010: (
         "toronto_2010",
         date(2010, 10, 25),
@@ -220,6 +237,12 @@ _ELECTION_CONFIG: Final = {
 }
 
 _BALLOT_TIMING: Final = {
+    2006: (
+        date(2006, 9, 29),
+        date(2006, 9, 29),
+        "statutory_deadline",
+        "https://en.wikipedia.org/wiki/2006_Toronto_municipal_election",
+    ),
     2010: (
         date(2010, 9, 10),
         date(2010, 9, 10),
@@ -253,6 +276,11 @@ _BALLOT_TIMING: Final = {
 }
 
 _BALLOT_TIMING_NOTES: Final = {
+    2006: (
+        "The nomination period for the November 13, 2006 election closed "
+        "September 29, 2006, so the Final Ballot was known by nomination close. "
+        "Incumbent David Miller sought and won re-election against Jane Pitfield."
+    ),
     2010: (
         "The nomination period closed September 10, 2010; names could not be "
         "removed afterward (Thomson and Rossi withdrew later but stayed on the "
@@ -1238,8 +1266,9 @@ def build_mayoral_outcome_rows(
                 f"{year} candidate {name!r} does not have all 25 ward totals"
             )
 
-    expected_counts = {2010: 40, 2014: 65, 2018: 35, 2022: 31, 2023: 102}
+    expected_counts = {2006: 38, 2010: 40, 2014: 65, 2018: 35, 2022: 31, 2023: 102}
     expected_totals = {
+        2006: 584484,
         2010: 813984,
         2014: 981054,
         2018: 755493,
@@ -1460,13 +1489,14 @@ def _load_crosswalk(path: Path) -> tuple[LegacyPollCrosswalk, ...]:
 def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) -> None:
     election_by_id = {row.election_cycle_id: row for row in corpus.elections}
     if set(election_by_id) != {
+        "toronto_2006",
         "toronto_2010",
         "toronto_2014",
         "toronto_2018",
         "toronto_2022",
         "toronto_2023",
     }:
-        raise HistoricalMayoralDataError("canonical corpus must contain five cycles")
+        raise HistoricalMayoralDataError("canonical corpus must contain six cycles")
     outcomes_by_cycle: dict[str, list[MayoralOutcome]] = defaultdict(list)
     canonical_names_by_id: dict[str, set[str]] = defaultdict(set)
     for outcome in corpus.outcomes:
@@ -1486,6 +1516,7 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
             "a candidate ID maps to conflicting canonical outcome names"
         )
     expected_counts = {
+        "toronto_2006": 38,
         "toronto_2010": 40,
         "toronto_2014": 65,
         "toronto_2018": 35,
@@ -1493,6 +1524,7 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
         "toronto_2023": 102,
     }
     expected_totals = {
+        "toronto_2006": 584484,
         "toronto_2010": 813984,
         "toronto_2014": 981054,
         "toronto_2018": 755493,

@@ -40,6 +40,7 @@ def test_adapter_builds_complete_outcomes_and_source_backed_incumbents() -> None
     assert {
         cycle_id: len(cycle.outcome.candidate_ids) for cycle_id, cycle in cycles.items()
     } == {
+        "toronto_2006": 38,
         "toronto_2010": 40,
         "toronto_2014": 65,
         "toronto_2018": 35,
@@ -50,6 +51,7 @@ def test_adapter_builds_complete_outcomes_and_source_backed_incumbents() -> None
         cycle_id: cycle.outcome.incumbent_candidate_id
         for cycle_id, cycle in cycles.items()
     } == {
+        "toronto_2006": "miller",
         "toronto_2010": None,
         "toronto_2014": None,
         "toronto_2018": "tory",
