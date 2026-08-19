@@ -40,6 +40,7 @@ CANDIDATES = {
     "karen stintz": ("stintz", "Karen Stintz"),
     "david soknacki": ("soknacki", "David Soknacki"),
     "denzil minnan-wong": ("minnan-wong", "Denzil Minnan-Wong"),
+    "adam giambrone": ("giambrone", "Adam Giambrone"),
 }
 DK = {"don't know", "dont know", "dk", "undecided/don't know"}
 

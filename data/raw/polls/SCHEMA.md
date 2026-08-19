@@ -308,8 +308,8 @@ generated tables without changing the live model or snapshots:
 The canonical loader consumes a separate instance of the five-table source
 contract under `data/raw/polls/historical_mayoral/`; it does not mix historical
 rows into the current-cycle inventory above. The tracked historical bundle now
-contains 89 source documents, 90 document/sample links, 67 respondent samples,
-149 dependent readings, and 991 response rows from visually checked first-party
+contains 92 source documents, 93 document/sample links, 70 respondent samples,
+162 dependent readings, and 1040 response rows from visually checked first-party
 or archived sources. Sample, reading, and response identities remain separate,
 and dependent scenarios never become additional polls.
 
