@@ -5,13 +5,13 @@ from backend.model.mayoral_endpoint import MAYORAL_ENDPOINT_EVALUATION_LEAD_TIME
 from backend.model.mayoral_endpoint_qualification import (
     MAYORAL_ENDPOINT_ABSOLUTE_MAXIMUM_SCORES,
     MAYORAL_ENDPOINT_EVALUATION_DRAW_COUNT,
+    MayoralEndpointQualification,
     evaluate_mayoral_endpoint_qualification,
 )
 from backend.model.mayoral_evaluation import (
     MAYORAL_MODEL_FAMILY_LOG_GUARD,
     MAYORAL_MODEL_FAMILY_PRIMARY,
 )
-
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -41,3 +41,30 @@ def test_endpoint_qualification_run_is_frozen_and_fail_closed() -> None:
     assert not result.all_elections.endpoint_reliability.configured
     assert not result.regular_elections_only.endpoint_reliability.configured
     assert not result.qualifies
+
+
+class _StubDecision:
+    """Minimal stand-in exposing only endpoint_qualifies for the gate test."""
+
+    def __init__(self, qualifies: bool) -> None:
+        self.endpoint_qualifies = qualifies
+
+
+def _qualification(*, all_elections: bool, regular: bool):
+    return MayoralEndpointQualification(
+        comparator=None,  # type: ignore[arg-type]
+        bridge=None,  # type: ignore[arg-type]
+        all_elections=_StubDecision(all_elections),  # type: ignore[arg-type]
+        regular_elections_only=_StubDecision(regular),  # type: ignore[arg-type]
+    )
+
+
+def test_qualification_gate_excludes_by_elections() -> None:
+    # ADR 0040: by-elections (2023) are structurally unlike general elections, so
+    # the regular-elections-only population is authoritative and all_elections is
+    # report-only. The gate must track regular_elections_only regardless of the
+    # all_elections outcome.
+    assert _qualification(all_elections=False, regular=True).qualifies is True
+    assert _qualification(all_elections=True, regular=False).qualifies is False
+    assert _qualification(all_elections=True, regular=True).qualifies is True
+    assert _qualification(all_elections=False, regular=False).qualifies is False

@@ -8,8 +8,9 @@ deferred.  It has no live snapshot or publication side effects.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Final, Mapping
+from typing import Final
 
 from backend.model.historical_mayoral import HistoricalMayoralCorpus
 from backend.model.historical_mayoral_evaluation import (
@@ -29,7 +30,6 @@ from backend.model.mayoral_evaluation import (
     qualify_model_ladder,
 )
 
-
 MAYORAL_ENDPOINT_EVALUATION_DRAW_COUNT: Final = 4096
 MAYORAL_ENDPOINT_ABSOLUTE_MAXIMUM_SCORES: Final[Mapping[str, float] | None] = None
 
@@ -45,10 +45,12 @@ class MayoralEndpointQualification:
 
     @property
     def qualifies(self) -> bool:
-        return (
-            self.all_elections.endpoint_qualifies
-            and self.regular_elections_only.endpoint_qualifies
-        )
+        # ADR 0040: by-elections are excluded from the qualification gate. The
+        # 2023 mayoral by-election is structurally unlike a general election
+        # (open field on a resignation, 102 candidates, compressed timeline), so
+        # the regular-elections-only population is authoritative; the
+        # all_elections decision is retained and reported but is report-only.
+        return self.regular_elections_only.endpoint_qualifies
 
 
 def evaluate_mayoral_endpoint_qualification(
