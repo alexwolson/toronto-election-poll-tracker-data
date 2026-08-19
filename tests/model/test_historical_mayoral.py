@@ -341,7 +341,7 @@ def test_legacy_discovery_data_stays_explicitly_unresolved() -> None:
     corpus = load_historical_mayoral_corpus(ROOT)
     dispositions = Counter(row.disposition for row in corpus.legacy_crosswalk)
 
-    assert dispositions == {"unresolved": 50, "mapped": 102, "non_poll": 1}
+    assert dispositions == {"unresolved": 37, "mapped": 115, "non_poll": 1}
     false_poll = next(
         row
         for row in corpus.legacy_crosswalk
@@ -386,6 +386,6 @@ def test_audit_counts_inventory_without_calling_it_calibration_ready() -> None:
     assert audit.source_verified_sample_count == 83
     assert audit.source_verified_reading_count == 202
     assert audit.legacy_poll_id_count == 153
-    assert audit.historical_sample_inventory_count == 112
-    assert audit.unresolved_sample_proxy_count == 29
+    assert audit.historical_sample_inventory_count == 107
+    assert audit.unresolved_sample_proxy_count == 24
     assert audit.blocker_codes == ("unresolved_legacy_poll_samples",)

@@ -317,6 +317,61 @@ _MAPPED_LEGACY_READINGS: Final = {
         "mainstreet_city_2018_09_25_n966",
         "mainstreet_2018_sep25_report__r2",
     ),
+    # --- Pre-existing Forum backlog: audited samples that predate this session
+    #     but were never retired. Matched by candidate set (09-22 stays
+    #     unresolved: its two proxies are ambiguous/not source-equivalent). ---
+    "toronto_2014-2013-08-29-10ac3a3c": (
+        "forum_city_2013_08_29_n848",
+        "forum_2013_aug29_release__r1",
+    ),
+    "toronto_2014-2013-08-29-056a657f": (
+        "forum_city_2013_08_29_n848",
+        "forum_2013_aug29_release__r2",
+    ),
+    "toronto_2014-2013-08-29-4d46f0e0": (
+        "forum_city_2013_08_29_n848",
+        "forum_2013_aug29_release__r3",
+    ),
+    "toronto_2014-2013-08-29-dcebef42": (
+        "forum_city_2013_08_29_n848",
+        "forum_2013_aug29_release__r4",
+    ),
+    "toronto_2014-2013-08-29-127e27bb": (
+        "forum_city_2013_08_29_n848",
+        "forum_2013_aug29_release__r5",
+    ),
+    "toronto_2014-2013-11-04-f846e0fb": (
+        "forum_city_2013_11_04_n1393",
+        "forum_2013_nov04_release__r1",
+    ),
+    "toronto_2014-2013-11-04-b90dc200": (
+        "forum_city_2013_11_04_n1393",
+        "forum_2013_nov04_release__r2",
+    ),
+    "toronto_2014-2013-11-04-ef100e47": (
+        "forum_city_2013_11_04_n1393",
+        "forum_2013_nov04_release__r3",
+    ),
+    "toronto_2014-2013-11-04-d0e9e15c": (
+        "forum_city_2013_11_04_n1393",
+        "forum_2013_nov04_release__r4",
+    ),
+    "toronto_2014-2014-01-22-17ee9410": (
+        "forum_city_2014_01_22_n1063",
+        "forum_2014_jan22_release__r7",
+    ),
+    "toronto_2014-2014-03-27-da2b1b5d": (
+        "forum_city_2014_03_27_n634",
+        "forum_2014_mar27_release__r1",
+    ),
+    "toronto_2014-2014-03-27-2d4bc707": (
+        "forum_city_2014_03_27_n634",
+        "forum_2014_mar27_release__r2",
+    ),
+    "toronto_2014-2014-09-08-dd81d126": (
+        "forum_city_2014_09_08_n1069",
+        "forum_2014_sep08_four_way_rob",
+    ),
     "toronto_2014-2013-11-12-6a9b9d1e": (
         "ipsos_city_2013_11_08_12_n665",
         "ipsos_nov2013_scenario3",
@@ -665,6 +720,16 @@ _LEGACY_MAPPING_NOTES: Final = {
         "Mapped to the decided-voter reading. Mainstreet's 2018 legacy proxy "
         "recorded only the decided-voter field (Tory/Keesmaat), folding the minor "
         "candidates into a residual; the all-respondents field is a separate reading."
+    ),
+    "toronto_2014-2013-08-29-dcebef42": (
+        "Mapped to the Ford / Minnan-Wong head-to-head; the legacy row kept only "
+        "Rob Ford (0.39) and folded Denzil Minnan-Wong and Don't Know into a 0.61 "
+        "residual. The first-party extraction supersedes that combined vector."
+    ),
+    "toronto_2014-2014-09-08-dd81d126": (
+        "Mapped to the four-candidate reading (Tory 40, Rob Ford 28, Chow 21, "
+        "Soknacki 6). The legacy row halved the named shares into a >0.5 residual; "
+        "the first-party source values supersede that corrupted vector."
     ),
     "toronto_2014-2014-07-05-8095cb7d": (
         "Mapped to the visually verified Nanos Ballot reading. The legacy "
