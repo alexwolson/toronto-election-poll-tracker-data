@@ -58,6 +58,16 @@ CANDIDATES = {
     "sarah thomson": ("thomson", "Sarah Thomson"),
     "sara thomson": ("thomson", "Sarah Thomson"),  # source spelling variant
     "ari goldkind": ("goldkind", "Ari Goldkind"),
+    # 2023 by-election field
+    "ana bailão": ("bailao", "Ana Bailão"),
+    "ana bailao": ("bailao", "Ana Bailão"),  # source spelling without accent
+    "mark saunders": ("saunders", "Mark Saunders"),
+    "josh matlow": ("matlow", "Josh Matlow"),
+    "brad bradford": ("bradford", "Brad Bradford"),
+    "mitzie hunter": ("hunter", "Mitzie Hunter"),
+    "anthony furey": ("furey", "Anthony Furey"),
+    "chloe brown": ("brown", "Chloe Brown"),
+    "gil penalosa": ("penalosa", "Gil Peñalosa"),
 }
 DK = {"don't know", "dont know", "dk", "undecided/don't know"}
 

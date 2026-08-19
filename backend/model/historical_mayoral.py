@@ -469,6 +469,31 @@ _MAPPED_LEGACY_READINGS: Final = {
         "mainstreet_city_2018_09_05_n1178",
         "mainstreet_2018_sep06_report__r2",
     ),
+    # --- 2023 by-election Mainstreet toplines (CP24 articles + public narratives) ---
+    "toronto_2023-2023-04-03-c3a0fb42": (
+        "mainstreet_city_2023_04_03_n1306",
+        "mainstreet_2023_cp24_a__r1",
+    ),
+    "toronto_2023-2023-05-03-ce518d01": (
+        "mainstreet_city_2023_05_03_n1056",
+        "mainstreet_2023_may03_report__r1",
+    ),
+    "toronto_2023-2023-05-17-40ce4bce": (
+        "mainstreet_city_2023_05_17_n1125",
+        "mainstreet_2023_may19_report__r1",
+    ),
+    "toronto_2023-2023-06-15-d7599146": (
+        "mainstreet_city_2023_06_15_n899",
+        "mainstreet_2023_cp24_c__r1",
+    ),
+    "toronto_2023-2023-06-19-1629c424": (
+        "mainstreet_city_2023_06_19_n552",
+        "mainstreet_2023_jun20_report__r1",
+    ),
+    "toronto_2023-2023-06-22-40f3d792": (
+        "mainstreet_city_2023_06_22_n1481",
+        "mainstreet_2023_cp24_b__r1",
+    ),
     "toronto_2014-2013-11-12-6a9b9d1e": (
         "ipsos_city_2013_11_08_12_n665",
         "ipsos_nov2013_scenario3",
