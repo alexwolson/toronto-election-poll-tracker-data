@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from build_poll_specs import build_spec
+from build_poll_specs import build_spec, group_by_sample
 
 from backend.model.poll_ingest import ingest_poll_source
 
@@ -25,37 +25,47 @@ def _meta(doc_id="test_forum_doc"):
         "firm": "Forum Research",
         "publisher_url": "https://example.org/x.pdf",
         "retrieval_url": "https://web.archive.org/web/2014id_/https://example.org/x.pdf",
-        "local_path": "data/source_documents/historical_mayoral/test/x.pdf",
+        "local_path": f"data/source_documents/historical_mayoral/test/{doc_id}.pdf",
         "sha256": "b" * 64,
         "byte_size": 2000,
         "page_count": 3,
     }
 
 
-def _merged(candidate_label="John Tory"):
+def _reading(scenario, responses, base=900, loc="p.4 [All Respondents] Total column"):
+    return {
+        "scenario_label": scenario,
+        "question_text": "If a mayoral election were held today ...?",
+        "denominator": "all_respondents",
+        "base": base,
+        "source_locator": loc,
+        "responses": responses,
+    }
+
+
+def _merged(readings, fieldwork="2014-01-05", n=900):
     return {
         "pollster": "Forum Research",
-        "fieldwork_start": "2014-01-05",
-        "fieldwork_end": "2014-01-05",
+        "fieldwork_start": fieldwork,
+        "fieldwork_end": fieldwork,
         "publication_date": "2014-01-06",
         "collection_mode": "ivr",
-        "recruited_sample_size": 900,
-        "readings": [
-            {
-                "scenario_label": "Ford / Tory",
-                "question_text": "If a mayoral election were held today ...?",
-                "denominator": "all_respondents",
-                "base": 900,
-                "source_locator": "p.4 [All Respondents] Total column",
-                "responses": [
-                    {"label": "Rob Ford", "kind": "candidate", "value": 40},
-                    {"label": candidate_label, "kind": "candidate", "value": 50},
-                    {"label": "Don't know", "kind": "dont_know", "value": 10},
-                ],
-            }
-        ],
+        "recruited_sample_size": n,
+        "readings": readings,
         "trending": [],
     }
+
+
+FORD_TORY = [
+    {"label": "Rob Ford", "kind": "candidate", "value": 40},
+    {"label": "John Tory", "kind": "candidate", "value": 50},
+    {"label": "Don't know", "kind": "dont_know", "value": 10},
+]
+FORD_CHOW = [
+    {"label": "Rob Ford", "kind": "candidate", "value": 42},
+    {"label": "Olivia Chow", "kind": "candidate", "value": 48},
+    {"label": "Don't know", "kind": "dont_know", "value": 10},
+]
 
 
 def _copy_bundle(tmp_path: Path) -> Path:
@@ -69,28 +79,97 @@ def _copy_bundle(tmp_path: Path) -> Path:
     return dest
 
 
-def test_build_spec_produces_an_ingestible_spec(tmp_path) -> None:
+def test_single_document_group_produces_an_ingestible_spec(tmp_path) -> None:
+    group = [(_meta(), _merged([_reading("Ford / Tory", FORD_TORY)]))]
     spec, problems = build_spec(
-        _meta(), _merged(), "toronto_2014", retrieved_at="2026-08-18T00:00:00Z"
+        group, "toronto_2014", retrieved_at="2026-08-19T00:00:00Z"
     )
     assert problems == []
     assert set(spec) == set(TABLES)
-    ids = {
-        r["candidate_id"]
-        for r in spec["poll_responses"]
-        if r["response_kind"] == "candidate"
-    }
-    assert ids == {"rob-ford", "tory"}
-    # the spec passes the audited contract when ingested into a copy of the bundle
-    bundle = _copy_bundle(tmp_path)
-    counts = ingest_poll_source(spec, bundle_dir=bundle)
+    assert len(spec["poll_samples"]) == 1
+    assert len(spec["source_documents"]) == 1
+    counts = ingest_poll_source(spec, bundle_dir=_copy_bundle(tmp_path))
     assert counts["poll_samples"] >= 1
 
 
 def test_build_spec_flags_unknown_candidate() -> None:
+    responses = [
+        {"label": "Some Newcomer", "kind": "candidate", "value": 50},
+        {"label": "Rob Ford", "kind": "candidate", "value": 40},
+        {"label": "Don't know", "kind": "dont_know", "value": 10},
+    ]
     spec, problems = build_spec(
-        _meta(), _merged(candidate_label="Some Newcomer"), "toronto_2014"
+        [(_meta(), _merged([_reading("X", responses)]))], "toronto_2014"
     )
     assert problems and "Some Newcomer" in problems[0]
-    labels = {r.get("candidate_name") for r in spec["poll_responses"]}
-    assert "Some Newcomer" not in labels  # never silently minted
+    assert "Some Newcomer" not in {
+        r.get("candidate_name") for r in spec["poll_responses"]
+    }
+
+
+def test_shared_sample_two_docs_distinct_scenarios(tmp_path) -> None:
+    # two documents, same fieldwork+n, different ballot scenarios -> one sample, two docs
+    a = (_meta("forum_a"), _merged([_reading("Ford / Tory", FORD_TORY)]))
+    b = (_meta("forum_b"), _merged([_reading("Ford / Chow", FORD_CHOW)]))
+    spec, problems = build_spec([a, b], "toronto_2014")
+    assert problems == []
+    assert len(spec["poll_samples"]) == 1
+    assert len(spec["source_documents"]) == 2
+    assert len(spec["poll_sample_documents"]) == 2
+    assert len(spec["poll_readings"]) == 2  # one per distinct scenario
+    counts = ingest_poll_source(spec, bundle_dir=_copy_bundle(tmp_path))
+    assert counts["source_documents"] >= 2
+
+
+def test_shared_sample_duplicate_scenario_is_deduped() -> None:
+    a = (_meta("forum_a"), _merged([_reading("Ford / Tory", FORD_TORY)]))
+    b = (
+        _meta("forum_b"),
+        _merged([_reading("Ford / Tory", FORD_TORY)]),
+    )  # same scenario+values
+    spec, problems = build_spec([a, b], "toronto_2014")
+    assert problems == []
+    assert len(spec["source_documents"]) == 2
+    assert len(spec["poll_readings"]) == 1  # scenario kept once
+
+
+def test_shared_sample_value_conflict_flags() -> None:
+    conflicting = [
+        {
+            "label": "Rob Ford",
+            "kind": "candidate",
+            "value": 44,
+        },  # differs from FORD_TORY
+        {"label": "John Tory", "kind": "candidate", "value": 46},
+        {"label": "Don't know", "kind": "dont_know", "value": 10},
+    ]
+    a = (_meta("forum_a"), _merged([_reading("Ford / Tory", FORD_TORY)]))
+    b = (_meta("forum_b"), _merged([_reading("Ford / Tory", conflicting)]))
+    _, problems = build_spec([a, b], "toronto_2014")
+    assert problems and "differ" in problems[0].lower()
+
+
+def test_group_by_sample_groups_same_fieldwork_and_size() -> None:
+    items = [
+        (
+            _meta("a"),
+            _merged(
+                [_reading("Ford / Tory", FORD_TORY)], fieldwork="2014-01-05", n=900
+            ),
+        ),
+        (
+            _meta("b"),
+            _merged(
+                [_reading("Ford / Chow", FORD_CHOW)], fieldwork="2014-01-05", n=900
+            ),
+        ),
+        (
+            _meta("c"),
+            _merged(
+                [_reading("Ford / Tory", FORD_TORY)], fieldwork="2014-02-02", n=800
+            ),
+        ),
+    ]
+    groups = group_by_sample(items)
+    sizes = sorted(len(g) for g in groups)
+    assert sizes == [1, 2]
