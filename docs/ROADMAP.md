@@ -66,9 +66,11 @@ Per-cycle winning-margin CRPS (all-elections fit): bridge beats comparator on **
 
 The Council Forecast is fully designed in the ADRs (0009, 0012, 0016, 0019, 0020, 0025–0028, 0036, 0037) but only its descriptive polling estimate exists.
 
-### Publication layer (shared) — not built
+### Publication layer (shared) — core built; track wiring pending
 
-No code implements Publication Gates (ADR 0003, 0005), Probability Bands (ADR 0006, 0018), Frequency Statements (CONTEXT.md), the Mayoral/Council Evidence Tiers as a shared mechanism (M0–M3 / C0–C2; ADR 0025, 0033), Candidate Win Probability gating, or Close-Result / Incumbent-Defeat publication. Until this exists, **nothing can be published even if a forecast qualifies.**
+The **shared publication core is built** (`backend/model/publication.py`, 2026-08-19): the frozen Probability Band grid + Frequency Statements (ADR 0006, verbatim), and the Band Stability Gate (ADR 0018) — every Mandatory Sensitivity Variant in the same half-open band with its two-sided 99% error interval wholly inside, fail-closed on any inter-band boundary touch or unrunnable variant, outer probability limits (0/1) exempt. It is pure and track-agnostic: it consumes probabilities and returns a published band or Forecast Unavailable; it computes no forecast, assigns no evidence tier, and publishes nothing.
+
+Still **not built**: the Mayoral/Council Evidence Tiers as a shared mechanism (M0–M3 / C0–C2; ADR 0025, 0033), the per-quantity gate composition that *calls* this core with a forecast's real variants (Candidate Win / Close-Result / Incumbent-Defeat publication), and the frozen-by-version gate registry (ADR 0005). Until those exist and the Final Ballot is set (ADR 0002), **nothing can be published even though the mayoral endpoint qualifies.**
 
 ## Remaining work (dependency order)
 
@@ -80,7 +82,7 @@ Build each item only after a short spec is approved (see Disciplines). TDD. Reco
   - **Retiring the legacy backlog** (`unresolved` crosswalk rows) is a *separate* step: add `legacy_id → (sample, reading)` entries to `_MAPPED_LEGACY_READINGS` in `historical_mayoral.py` (matched via the discovery CSV's fields), then `reconstruct --write`. Adding a sample alone does not retire its proxies.
   - Trackers/queue: [historical-mayoral-poll-acquisition-plan.md](research/historical-mayoral-poll-acquisition-plan.md); 2006 turnkey (official results + Wikipedia poll tables), 2003 partial (news-archive dig), 2000 results-only. **Method note from 2010:** for older cycles the endpoint only scores polls fielded after the Final Ballot is set (nomination close), so prioritise the post-nomination window; first-party pollster PDFs mostly survive only for EKOS (ekospolitics.com) and via Wayback, with newspaper toplines as the admissible fallback.
 - **M2 — Incumbency-informed endpoint variant. Done (ADR 0039).** Built as `mayoral_incumbency_endpoint.py` and evaluated against the bridge; does not qualify on the four-cycle corpus, so it is retained as the Mandatory Sensitivity Variant (ADR 0013). Reopen only if the corpus gains a non-landslide or incumbent-defeat cycle, or to add the incumbent's dispersion (the deferred defeat-tail widening). Evidence: [mayoral-incumbency-endpoint.md](research/mayoral-incumbency-endpoint.md).
-- **M3 — Mayoral publication layer.** Evidence Tier M0–M3 (ADR 0033), Probability Bands (ADR 0006, 0018), Frequency Statements, and the gate machinery (ADR 0003, 0005, 0032). Required before any mayoral quantity can be shown.
+- **M3 — Mayoral publication layer.** **Shared core done** (`publication.py`: Probability Bands + Frequency Statements ADR 0006, Band Stability Gate ADR 0018). **Remaining:** Evidence Tier M0–M3 (ADR 0033), the per-quantity gate composition that feeds real Mayoral variants (Mandatory Sensitivity Variants: prior-strength, low/base/high tail, leave-one-sample/pollster-out, the regular-only fit, every qualified family + its baseline) through the stability gate, and the frozen-by-version gate registry (ADR 0003, 0005, 0032). Required before any mayoral quantity can be shown.
 - **M4 — Dynamic / refined mayoral model.** Only if it qualifies against the endpoint (ADR 0030). Future.
 - **C1 — Council Forecast.** The entire second forecast: candidate-level modelling, Officeholding-History Prior (ADR 0028), C-tier publication (ADR 0025), whole-cycle evaluation (ADR 0026). Large; mirrors the mayoral track.
 - **INT — Snapshot integration.** Wire a qualified forecast into the build/snapshot pipeline behind the Final-Ballot gate (ADR 0002), replacing the legacy model. Not before qualification.
@@ -102,4 +104,4 @@ Lower-priority open findings (non-blocking): the 2023 point-estimate second-plac
 - Decisions — [docs/adr/](adr/) 0001–0041
 - Findings — [docs/research/](research/) (start with `unmeasured-candidate-tail`, `candidate-tail-choice-set-scaling`, `candidate-tail-margin-coupling`, `mayoral-concentration-overconfidence`, `mayoral-incumbency-endpoint`)
 - Run mayoral qualification — `uv run scripts/evaluate_mayoral_endpoint.py`; incumbency variant — `uv run scripts/evaluate_incumbency_endpoint.py`
-- Tests — `uv run pytest` (396 passing as of this writing)
+- Tests — `uv run pytest` (408 passing as of this writing)
