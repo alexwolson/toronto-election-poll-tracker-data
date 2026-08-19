@@ -84,7 +84,9 @@ function extractPrompt(m) {
 Document ${m.doc_id} (cycle ${m.cycle}). Page images (Read each):
 ${m.page_images.join('\n')}
 
-1. DETAILED readings: find EVERY general vote-intention "trial heat / horserace" table shown for [All Respondents] (labels like "N-Way Mayoral Trial Heats" above a question "If a mayoral election were held today, who would you vote for if the candidates were ...?"). For each ballot scenario read ONLY the Total / [All Respondents] column: the percent for every named candidate AND the "Don't know" row. IGNORE demographic breakdown columns (Age, Region, Income, Property, Children, Past Vote, etc.) and IGNORE approval and candidate-attribute tables. Record scenario_label (the field, e.g. "Ford / Tory / Stintz / Soknacki"), exact question_text, denominator "all_respondents", base (the Sample n), source_locator (e.g. "p.9 [All Respondents] Total column"), and responses (each candidate + Don't know, kind "candidate" or "dont_know", exact printed integer percent).
+1. DETAILED readings: find EVERY general vote-intention "trial heat / horserace" table shown for ALL RESPONDENTS / INCLUDING UNDECIDED (labels like "N-Way Mayoral Trial Heats" or "Mayoral Poll — Including Undecided Voters", above a question like "If a mayoral election were held today, who would you vote for ...?"). For each ballot scenario read ONLY the Total / [All Respondents] / Including-Undecided column: the percent for every named candidate AND the residual row ("Don't know" / "Undecided" / "Someone else"). IGNORE demographic breakdown columns (Age, Region, Income, Property, Children, Past Vote, etc.) and IGNORE approval and candidate-attribute tables. Record scenario_label (the field, e.g. "Ford / Tory / Stintz / Soknacki"), exact question_text, denominator "all_respondents", base (the Sample n), source_locator (e.g. "p.9 [All Respondents] Total column"), and responses (each candidate + residual, kind "candidate" / "dont_know" / "other", exact printed percent — KEEP any decimal, e.g. 45.5).
+
+1b. DECIDED-VOTER readings: if the SAME race is ALSO reported among DECIDED VOTERS (a separate table/column excluding the undecided, e.g. "Mayoral Poll — Among Decided Voters" or a "[DECIDED/LEANING]" column), record it as a SEPARATE reading with denominator "decided_voters": same scenario_label, its own responses (candidates only, no undecided), base (the decided n if printed, else -1), and source_locator naming the decided table. Do not invent a decided reading if none is shown.
 
 2. TRENDING cross-check: also read the "N-Way Mayoral Trial Heats Trending" SUMMARY tables if present. For each trended scenario record ONLY the CURRENT wave's row (the row dated this release) as {scenario_label, responses:[{label, value}]} in "trending". If there is no trending summary, return an empty trending array.
 
@@ -107,6 +109,12 @@ function valMap(responses) {
   return out
 }
 
+// a reading is identified by its candidate set AND its denominator, so the
+// all-respondents and decided-voter tables of the same race stay distinct.
+function readingKey(r) {
+  return candKey(r.responses) + '|' + (r.denominator || 'all_respondents')
+}
+
 function reconcile(m, a, b) {
   if (!a || !b) return { doc_id: m.doc_id, clean: false, flags: ['an extraction returned null'], a, b }
   const flags = []
@@ -115,11 +123,11 @@ function reconcile(m, a, b) {
   }
   // (1)+(2) detailed reads must agree value-by-value; (2) sum gate
   const bByKey = {}
-  for (const r of b.readings || []) bByKey[candKey(r.responses)] = r
+  for (const r of b.readings || []) bByKey[readingKey(r)] = r
   const matched = []
   const unmatchedA = []
   for (const ra of a.readings || []) {
-    const key = candKey(ra.responses)
+    const key = readingKey(ra)
     const rb = bByKey[key]
     if (!rb) { unmatchedA.push(ra.scenario_label); continue }
     delete bByKey[key]
@@ -142,7 +150,9 @@ function reconcile(m, a, b) {
 
   // (3) trending cross-check: every trended scenario must appear in detailed with matching values
   const detailByKey = {}
-  for (const r of a.readings || []) detailByKey[candKey(r.responses)] = r
+  for (const r of a.readings || []) {
+    if ((r.denominator || 'all_respondents') === 'all_respondents') detailByKey[candKey(r.responses)] = r
+  }
   for (const t of a.trending || []) {
     const key = candKey(t.responses)
     const detail = detailByKey[key]

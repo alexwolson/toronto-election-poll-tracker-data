@@ -91,6 +91,7 @@ FIRMS = {
         "sponsor": "Forum Research Inc.",
         "prefix": "forum_city",
         "denominator_text": "[All Respondents]",
+        "decided_denominator_text": "[DECIDED/LEANING]",
         "doc_note": (
             "First-party Forum PDF recovered through an archived-original Wayback replay. "
             "All pages were rendered and visually inspected by two independent vision reads; "
@@ -108,6 +109,7 @@ FIRMS = {
         "sponsor": "",
         "prefix": "mainstreet_city",
         "denominator_text": "Including Undecided Voters",
+        "decided_denominator_text": "Among Decided Voters",
         "doc_note": (
             "First-party Mainstreet Research report (self-published; not third-party "
             "sponsored). All pages were rendered and visually inspected by two independent "
@@ -235,7 +237,10 @@ def _emit_reading(
     values keep the source's precision (integer Forum percentages, one-decimal
     Mainstreet shares).
     """
-    key = _candidate_key(r["responses"])
+    denom = r.get("denominator", "all_respondents")
+    # A reading is identified by its candidate set AND denominator, so a race's
+    # all-respondents and decided-voter tables coexist under one sample.
+    key = (_candidate_key(r["responses"]), denom)
     values = _value_map(r["responses"])
     if key in seen:
         if seen[key] != values:
@@ -247,6 +252,17 @@ def _emit_reading(
     seen[key] = values
     rid = f"{did}__r{order}"
     precision = max((_fmt_value(x["value"])[1] for x in r["responses"]), default=0)
+    if denom == "decided_voters":
+        denom_type = "decided_respondents"
+        denom_text = firm_cfg.get("decided_denominator_text", "Among Decided Voters")
+    else:
+        denom_type = "all_respondents"
+        denom_text = firm_cfg["denominator_text"]
+    base_val = r.get("base")
+    if base_val is not None and float(base_val) > 0:
+        base_status, base_str = "reported", str(int(base_val))
+    else:
+        base_status, base_str = "not_reported", ""
     readings.append(
         {
             "poll_reading_id": rid,
@@ -264,12 +280,12 @@ def _emit_reading(
             "document_display_order": str(order),
             "population": "Toronto voters age 18+",
             "turnout_screen": "none",
-            "denominator_type": "all_respondents",
-            "denominator_text": firm_cfg["denominator_text"],
+            "denominator_type": denom_type,
+            "denominator_text": denom_text,
             "unweighted_base_status": "not_reported",
             "weighted_base_status": "not_reported",
-            "reported_base_status": "reported",
-            "reported_base": str(r["base"]),
+            "reported_base_status": base_status,
+            "reported_base": base_str,
             "tested_choice_set_status": "complete",
             "response_coverage": "complete",
             "reported_share_unit": "percent",

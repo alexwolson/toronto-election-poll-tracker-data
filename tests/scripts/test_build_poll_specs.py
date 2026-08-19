@@ -142,6 +142,44 @@ def test_build_spec_mainstreet_firm_decimals_and_residuals(tmp_path) -> None:
     assert counts["poll_samples"] >= 1
 
 
+def test_build_spec_keeps_all_and_decided_readings_of_same_race(tmp_path) -> None:
+    meta = _meta("test_ms_decided")
+    meta["firm"] = "Mainstreet Research"
+    allv = [
+        {"label": "Olivia Chow", "kind": "candidate", "value": 27},
+        {"label": "Doug Ford", "kind": "candidate", "value": 16},
+        {"label": "John Tory", "kind": "candidate", "value": 45},
+        {"label": "Undecided", "kind": "dont_know", "value": 12},
+    ]
+    decided = [
+        {"label": "Olivia Chow", "kind": "candidate", "value": 30},
+        {"label": "Doug Ford", "kind": "candidate", "value": 18},
+        {"label": "John Tory", "kind": "candidate", "value": 51},
+    ]
+    r_all = _reading("Chow / Ford / Tory", allv, base=1055)
+    r_dec = _reading("Chow / Ford / Tory", decided, base=-1, loc="p.2 decided")
+    r_dec["denominator"] = "decided_voters"
+    merged = _merged([r_all, r_dec], fieldwork="2014-09-11", n=1055)
+    merged["publication_date"] = "2014-09-12"
+    spec, problems = build_spec([(meta, merged)], "toronto_2014")
+    assert problems == []
+    # same candidate set, two denominators -> two distinct readings
+    assert len(spec["poll_readings"]) == 2
+    assert sorted(r["denominator_type"] for r in spec["poll_readings"]) == [
+        "all_respondents",
+        "decided_respondents",
+    ]
+    dec = next(
+        r
+        for r in spec["poll_readings"]
+        if r["denominator_type"] == "decided_respondents"
+    )
+    assert dec["reported_base_status"] == "not_reported"  # base -1 -> unreported
+    assert dec["denominator_text"] == "Among Decided Voters"
+    counts = ingest_poll_source(spec, bundle_dir=_copy_bundle(tmp_path))
+    assert counts["poll_readings"] >= 2
+
+
 def test_build_spec_flags_unknown_candidate() -> None:
     responses = [
         {"label": "Some Newcomer", "kind": "candidate", "value": 50},

@@ -22,13 +22,18 @@ from zoneinfo import ZoneInfo
 
 from backend.model.poll_sources import (
     PollReading as HistoricalPollReading,
+)
+from backend.model.poll_sources import (
     PollResponse as HistoricalPollResponse,
+)
+from backend.model.poll_sources import (
     PollSample as HistoricalPollSample,
+)
+from backend.model.poll_sources import (
     PollSampleDocument,
     SourceDocument,
     load_poll_source_bundle,
 )
-
 
 _TORONTO: Final = ZoneInfo("America/Toronto")
 
@@ -231,12 +236,87 @@ _BALLOT_TIMING_NOTES: Final = {
         "by August 20; the internal Clerk action date is not modelled."
     ),
     2023: (
-        "The May 12 certification date establishes the Final Ballot known-by "
-        "boundary."
+        "The May 12 certification date establishes the Final Ballot known-by boundary."
     ),
 }
 
 _MAPPED_LEGACY_READINGS: Final = {
+    # --- Forum 2013-01-25 head-to-heads (jan25 double-read extraction) ---
+    "toronto_2014-2013-01-25-d2df21f9": (
+        "forum_city_2013_01_25_n1099",
+        "forum_2013_jan25_release__r1",
+    ),
+    "toronto_2014-2013-01-25-7682463f": (
+        "forum_city_2013_01_25_n1099",
+        "forum_2013_jan25_release__r3",
+    ),
+    "toronto_2014-2013-01-25-a556e530": (
+        "forum_city_2013_01_25_n1099",
+        "forum_2013_jan25_release__r6",
+    ),
+    "toronto_2014-2013-01-25-b9d08ec1": (
+        "forum_city_2013_01_25_n1099",
+        "forum_2013_jan25_release__r7",
+    ),
+    # --- Forum 2014-03-13 (mar13 double-read extraction) ---
+    "toronto_2014-2014-03-13-b2122bbc": (
+        "forum_city_2014_03_13_n1271",
+        "forum_2014_mar13_release__r3",
+    ),
+    "toronto_2014-2014-03-13-cd5b72f3": (
+        "forum_city_2014_03_13_n1271",
+        "forum_2014_mar13_release__r1",
+    ),
+    # --- Mainstreet 2014: all-voter proxy -> r1, decided-voter proxy -> r2 ---
+    "toronto_2014-2014-09-12-97920e4e": (
+        "mainstreet_city_2014_09_12_n1054",
+        "mainstreet_2014_sep13_report__r1",
+    ),
+    "toronto_2014-2014-09-12-0f52b317": (
+        "mainstreet_city_2014_09_12_n1054",
+        "mainstreet_2014_sep13_report__r2",
+    ),
+    "toronto_2014-2014-09-21-0b625aeb": (
+        "mainstreet_city_2014_09_21_n2469",
+        "mainstreet_2014_sep21_report__r1",
+    ),
+    "toronto_2014-2014-09-21-fc3831be": (
+        "mainstreet_city_2014_09_21_n2469",
+        "mainstreet_2014_sep21_report__r2",
+    ),
+    "toronto_2014-2014-09-28-03741d5a": (
+        "mainstreet_city_2014_09_28_n2409",
+        "mainstreet_2014_sep28_report__r1",
+    ),
+    "toronto_2014-2014-09-28-3ea61f3e": (
+        "mainstreet_city_2014_09_28_n2409",
+        "mainstreet_2014_sep28_report__r2",
+    ),
+    "toronto_2014-2014-10-05-b15e7c6a": (
+        "mainstreet_city_2014_10_05_n2379",
+        "mainstreet_2014_oct05_report__r1",
+    ),
+    "toronto_2014-2014-10-05-4e73e0b7": (
+        "mainstreet_city_2014_10_05_n2379",
+        "mainstreet_2014_oct05_report__r2",
+    ),
+    "toronto_2014-2014-10-23-402c55fc": (
+        "mainstreet_city_2014_10_23_n3569",
+        "mainstreet_2014_oct23_report__r1",
+    ),
+    "toronto_2014-2014-10-23-5e3b3a4f": (
+        "mainstreet_city_2014_10_23_n3569",
+        "mainstreet_2014_oct23_report__r2",
+    ),
+    # --- Mainstreet 2018: legacy recorded only the decided-voter field -> r2 ---
+    "toronto_2018-2018-09-16-8259f99e": (
+        "mainstreet_city_2018_09_16_n802",
+        "mainstreet_2018_sep16_report__r2",
+    ),
+    "toronto_2018-2018-09-25-bd8a7f23": (
+        "mainstreet_city_2018_09_25_n966",
+        "mainstreet_2018_sep25_report__r2",
+    ),
     "toronto_2014-2013-11-12-6a9b9d1e": (
         "ipsos_city_2013_11_08_12_n665",
         "ipsos_nov2013_scenario3",
@@ -576,6 +656,16 @@ _MAPPED_LEGACY_READINGS: Final = {
 }
 
 _LEGACY_MAPPING_NOTES: Final = {
+    "toronto_2014-2013-01-25-b9d08ec1": (
+        "Mapped to the Ford / Carroll head-to-head; the legacy row kept only "
+        "Rob Ford (0.45) and folded Shelley Carroll and Don't Know into a single "
+        "0.55 residual. The first-party extraction supersedes that combined vector."
+    ),
+    "toronto_2018-2018-09-16-8259f99e": (
+        "Mapped to the decided-voter reading. Mainstreet's 2018 legacy proxy "
+        "recorded only the decided-voter field (Tory/Keesmaat), folding the minor "
+        "candidates into a residual; the all-respondents field is a separate reading."
+    ),
     "toronto_2014-2014-07-05-8095cb7d": (
         "Mapped to the visually verified Nanos Ballot reading. The legacy "
         "scraper treated the source's 1.0% Soknacki value as 100% before "
@@ -733,9 +823,7 @@ def load_historical_mayoral_corpus(project_root: str | Path) -> HistoricalMayora
         source_documents=poll_sources.source_documents,
         poll_sample_documents=poll_sources.poll_sample_documents,
     )
-    _validate_corpus(
-        corpus, root / "data/raw/polls/historical_mayoral_polls.csv"
-    )
+    _validate_corpus(corpus, root / "data/raw/polls/historical_mayoral_polls.csv")
     return corpus
 
 
@@ -855,9 +943,9 @@ def build_mayoral_outcome_rows(
         if not 1 <= ward <= 25:
             raise HistoricalMayoralDataError(f"invalid ward {ward} for {year}")
         name = _required(row, "candidate")
-        grouped.setdefault(year, {})[name] = (
-            grouped.setdefault(year, {}).get(name, 0) + _nonnegative_int(row, "votes")
-        )
+        grouped.setdefault(year, {})[name] = grouped.setdefault(year, {}).get(
+            name, 0
+        ) + _nonnegative_int(row, "votes")
         wards_by_candidate[(year, name)].add(ward)
     for (year, name), wards in wards_by_candidate.items():
         if wards != set(range(1, 26)):
@@ -990,11 +1078,8 @@ def _load_elections(path: Path) -> tuple[MayoralElection, ...]:
                 "nomination close date/status must be reported together"
             )
         election_date = _date(row, "election_date")
-        if (
-            nomination_close_date is not None
-            and not (
-                nomination_close_date <= final_ballot_known_by <= election_date
-            )
+        if nomination_close_date is not None and not (
+            nomination_close_date <= final_ballot_known_by <= election_date
         ):
             raise HistoricalMayoralDataError(
                 "Final Ballot known-by date must fall between nomination close "
@@ -1034,9 +1119,7 @@ def _load_outcomes(path: Path) -> tuple[MayoralOutcome, ...]:
                 election_cycle_id=_required(row, "election_cycle_id"),
                 candidate_id=_required(row, "candidate_id"),
                 candidate_name=_required(row, "candidate_name"),
-                candidate_name_as_reported=_required(
-                    row, "candidate_name_as_reported"
-                ),
+                candidate_name_as_reported=_required(row, "candidate_name_as_reported"),
                 votes=_positive_int(row, "votes"),
                 valid_vote_total=_positive_int(row, "valid_vote_total"),
                 share=_share(row, "share"),
@@ -1045,7 +1128,9 @@ def _load_outcomes(path: Path) -> tuple[MayoralOutcome, ...]:
                 source_locator=_required(row, "source_locator"),
             )
         )
-    return tuple(sorted(result, key=lambda row: (row.election_cycle_id, row.candidate_id)))
+    return tuple(
+        sorted(result, key=lambda row: (row.election_cycle_id, row.candidate_id))
+    )
 
 
 def _load_crosswalk(path: Path) -> tuple[LegacyPollCrosswalk, ...]:
@@ -1117,7 +1202,9 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
             raise HistoricalMayoralDataError(f"duplicate candidate ID for {cycle}")
         total = expected_totals[cycle]
         if {row.valid_vote_total for row in rows} != {total}:
-            raise HistoricalMayoralDataError(f"wrong valid-vote denominator for {cycle}")
+            raise HistoricalMayoralDataError(
+                f"wrong valid-vote denominator for {cycle}"
+            )
         if sum(row.votes for row in rows) != total:
             raise HistoricalMayoralDataError(f"votes do not sum for {cycle}")
         winners = [row for row in rows if row.is_winner]
@@ -1126,7 +1213,9 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
         for row in rows:
             exact = Decimal(row.votes) / Decimal(total)
             if abs(row.share - exact) > Decimal("0.000000000000000001"):
-                raise HistoricalMayoralDataError(f"incorrect share for {cycle}/{row.candidate_id}")
+                raise HistoricalMayoralDataError(
+                    f"incorrect share for {cycle}/{row.candidate_id}"
+                )
 
     samples = {row.poll_sample_id: row for row in corpus.poll_samples}
     readings = {row.poll_reading_id: row for row in corpus.poll_readings}
@@ -1148,7 +1237,10 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
         expected_contest_id = sample.election_cycle_id.replace(
             "toronto_", "toronto-mayor-"
         )
-        if reading.contest_type != "mayoral" or reading.contest_id != expected_contest_id:
+        if (
+            reading.contest_type != "mayoral"
+            or reading.contest_id != expected_contest_id
+        ):
             raise HistoricalMayoralDataError(
                 "historical mayoral reading identifies the wrong contest"
             )
@@ -1169,23 +1261,30 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
                 "mapped crosswalk sample belongs to another election"
             )
         if crosswalk.disposition == "non_poll" and (
-            crosswalk.poll_sample_id is not None or crosswalk.poll_reading_id is not None
+            crosswalk.poll_sample_id is not None
+            or crosswalk.poll_reading_id is not None
         ):
             raise HistoricalMayoralDataError("non-poll crosswalk row has canonical IDs")
 
     legacy_rows = _read_csv(legacy_poll_path, _LEGACY_POLL_COLUMNS)
     legacy_ids = {row["poll_id"] for row in legacy_rows}
     if legacy_ids != {row.legacy_poll_id for row in corpus.legacy_crosswalk}:
-        raise HistoricalMayoralDataError("legacy crosswalk does not cover every poll ID")
+        raise HistoricalMayoralDataError(
+            "legacy crosswalk does not cover every poll ID"
+        )
 
 
 def _candidate_id(year: int, candidate_name: str) -> str:
     known = _KNOWN_CANDIDATE_IDS.get(_normalized_name(candidate_name))
-    return known or f"toronto_{year}:{_normalized_name(candidate_name).replace(' ', '-')}"
+    return (
+        known or f"toronto_{year}:{_normalized_name(candidate_name).replace(' ', '-')}"
+    )
 
 
 def _normalized_name(value: str) -> str:
-    ascii_value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
+    ascii_value = (
+        unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
+    )
     return re.sub(r"[^a-z0-9]+", " ", ascii_value.casefold()).strip()
 
 
@@ -1216,9 +1315,13 @@ def _read_dict_rows(path: Path) -> list[dict[str, str]]:
         rows: list[dict[str, str]] = []
         for row_number, row in enumerate(reader, start=2):
             if None in row:
-                raise HistoricalMayoralDataError(f"{path.name} row {row_number} is ragged")
+                raise HistoricalMayoralDataError(
+                    f"{path.name} row {row_number} is ragged"
+                )
             if all(value == "" for value in row.values()):
-                raise HistoricalMayoralDataError(f"{path.name} row {row_number} is blank")
+                raise HistoricalMayoralDataError(
+                    f"{path.name} row {row_number} is blank"
+                )
             rows.append(row)
         return rows
 
