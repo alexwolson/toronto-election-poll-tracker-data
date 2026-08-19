@@ -115,8 +115,23 @@ function readingKey(r) {
   return candKey(r.responses) + '|' + (r.denominator || 'all_respondents')
 }
 
+// Some Mainstreet reports (May/June 2023 onward) add a third horserace table,
+// "(Decided and Undecided)", whose candidate set + all_respondents denominator
+// collide with the standard "(All voters)" table in readingKey. We ingest only
+// the "(All voters)" [all_respondents] and "(Decided voters)" [decided] tables to
+// match the corpus, so drop the middle table before reconciling and merging.
+function isMidTable(r) {
+  const s = (String(r.question_text || '') + ' ' + String(r.scenario_label || '')).toLowerCase()
+  return s.includes('decided and undecided')
+}
+function dropMidTables(x) {
+  return x && x.readings ? { ...x, readings: x.readings.filter((r) => !isMidTable(r)) } : x
+}
+
 function reconcile(m, a, b) {
   if (!a || !b) return { doc_id: m.doc_id, clean: false, flags: ['an extraction returned null'], a, b }
+  a = dropMidTables(a)
+  b = dropMidTables(b)
   const flags = []
   for (const f of ['pollster', 'fieldwork_end', 'publication_date', 'recruited_sample_size']) {
     if (String(a[f]) !== String(b[f])) flags.push(`sample.${f}: A=${a[f]} B=${b[f]}`)

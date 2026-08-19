@@ -929,7 +929,36 @@ _MAPPED_LEGACY_READINGS: Final = {
         "mainstreet_city_2023_04_25_26_n996",
         "mainstreet_2023_apr26_decided",
     ),
+    # --- Found 2023 Mainstreet reports (Matt Elliott archive); previously
+    # no_public_source, now double-read extracted (two agents, human-adjudicated) ---
+    "toronto_2023-2023-05-11-076ef4ef": (
+        "mainstreet_city_2023_05_11_n1205",
+        "mainstreet_2023-05-11_report__r2",
+    ),
+    "toronto_2023-2023-05-25-3a934378": (
+        "mainstreet_city_2023_05_25_n838",
+        "mainstreet_2023-05-25_report__r2",
+    ),
+    "toronto_2023-2023-05-31-30f43af0": (
+        "mainstreet_city_2023_05_31_n1100",
+        "mainstreet_2023-05-31_report__r2",
+    ),
+    "toronto_2023-2023-06-08-1d2a2a3e": (
+        "mainstreet_city_2023_06_08_n706",
+        "mainstreet_2023-06-08_report__r2",
+    ),
+    "toronto_2023-2023-06-25-c32aea31": (
+        "mainstreet_city_2023_06_25_n1030",
+        "mainstreet_2023-06-25_report__r2",
+    ),
 }
+
+_FOUND_MAINSTREET_2023_NOTE: Final = (
+    "Mapped to the decided-voter reading of a first-party Mainstreet report "
+    "supplied directly by the maintainer (Matt Elliott / City Hall Watcher). "
+    "Previously no_public_source; the report was extracted by two independent "
+    "vision reads and the decided-voter Total column was human-adjudicated."
+)
 
 _LEGACY_MAPPING_NOTES: Final = {
     "toronto_2014-2013-01-25-b9d08ec1": (
@@ -972,6 +1001,15 @@ _LEGACY_MAPPING_NOTES: Final = {
         "normalizing the row; the canonical source values supersede that "
         "corrupted vector."
     ),
+    "toronto_2023-2023-05-11-076ef4ef": _FOUND_MAINSTREET_2023_NOTE,
+    "toronto_2023-2023-05-25-3a934378": _FOUND_MAINSTREET_2023_NOTE,
+    "toronto_2023-2023-05-31-30f43af0": (
+        _FOUND_MAINSTREET_2023_NOTE
+        + " This report published only rounded donut-chart values (no precise "
+        "crosstab), so the decided reading is at integer precision."
+    ),
+    "toronto_2023-2023-06-08-1d2a2a3e": _FOUND_MAINSTREET_2023_NOTE,
+    "toronto_2023-2023-06-25-c32aea31": _FOUND_MAINSTREET_2023_NOTE,
 }
 
 _NON_POLL_LEGACY_ID: Final = "toronto_2014-2010-10-25-6a933a5f"
@@ -983,14 +1021,10 @@ _NON_POLL_LEGACY_ID: Final = "toronto_2014-2010-10-25-6a933a5f"
 _NO_PUBLIC_SOURCE_LEGACY_IDS: Final = frozenset(
     {
         "toronto_2014-2014-01-06-f94510f4",
-        "toronto_2023-2023-05-11-076ef4ef",
-        "toronto_2023-2023-05-25-3a934378",
-        "toronto_2023-2023-05-31-30f43af0",
-        "toronto_2023-2023-06-08-1d2a2a3e",
+        # 2023 Mainstreet waves not in the maintainer's found archive:
         "toronto_2023-2023-06-11-2c161a34",
         "toronto_2023-2023-06-16-e57b0970",
         "toronto_2023-2023-06-24-7cdc9fdb",
-        "toronto_2023-2023-06-25-c32aea31",
     }
 )
 _NO_PUBLIC_SOURCE_NOTES: Final = {

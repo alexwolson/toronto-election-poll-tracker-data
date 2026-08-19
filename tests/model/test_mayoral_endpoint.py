@@ -362,8 +362,8 @@ def test_fit_distinguishes_eligible_history_from_effective_poll_inputs() -> None
         variant="firm-balanced-bridge",
     )
 
-    assert len(fit.eligible_poll_sample_ids) == 17
-    assert len(fit.effective_poll_sample_ids) == 4
+    assert len(fit.eligible_poll_sample_ids) == 20
+    assert len(fit.effective_poll_sample_ids) == 5
     assert set(fit.effective_poll_sample_ids) < set(fit.eligible_poll_sample_ids)
 
 
