@@ -464,6 +464,11 @@ _MAPPED_LEGACY_READINGS: Final = {
         "forum_city_2014_02_06_n769",
         "forum_2014_feb09_sun__r4",
     ),
+    # Mainstreet 2018-09-05: legacy recorded only the decided field -> r2.
+    "toronto_2018-2018-09-05-7c405033": (
+        "mainstreet_city_2018_09_05_n1178",
+        "mainstreet_2018_sep06_report__r2",
+    ),
     "toronto_2014-2013-11-12-6a9b9d1e": (
         "ipsos_city_2013_11_08_12_n665",
         "ipsos_nov2013_scenario3",

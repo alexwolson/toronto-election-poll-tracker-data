@@ -146,11 +146,11 @@ def test_final_ballot_known_by_dates_are_conservative_replay_boundaries() -> Non
 def test_only_audited_poll_sources_enter_the_canonical_seam() -> None:
     corpus = load_historical_mayoral_corpus(ROOT)
 
-    assert len(corpus.poll_samples) == 89
-    assert len(corpus.poll_readings) == 226
-    assert len(corpus.poll_responses) == 1320
-    assert len(corpus.source_documents) == 111
-    assert len(corpus.poll_sample_documents) == 113
+    assert len(corpus.poll_samples) == 90
+    assert len(corpus.poll_readings) == 228
+    assert len(corpus.poll_responses) == 1327
+    assert len(corpus.source_documents) == 112
+    assert len(corpus.poll_sample_documents) == 114
     assert all(
         sample.extraction_status == "extracted" for sample in corpus.poll_samples
     )
@@ -166,7 +166,7 @@ def test_only_audited_poll_sources_enter_the_canonical_seam() -> None:
         reading.poll_reading_id: reading.reading_purpose
         for reading in corpus.poll_readings
     }
-    assert sum(value == "general_vote_intention" for value in purposes.values()) == 223
+    assert sum(value == "general_vote_intention" for value in purposes.values()) == 225
     assert purposes["nanos_jul_initially_unsure_leaning"] == (
         "conditional_lean_followup"
     )
@@ -341,7 +341,7 @@ def test_legacy_discovery_data_stays_explicitly_unresolved() -> None:
     corpus = load_historical_mayoral_corpus(ROOT)
     dispositions = Counter(row.disposition for row in corpus.legacy_crosswalk)
 
-    assert dispositions == {"unresolved": 16, "mapped": 136, "non_poll": 1}
+    assert dispositions == {"unresolved": 15, "mapped": 137, "non_poll": 1}
     false_poll = next(
         row
         for row in corpus.legacy_crosswalk
@@ -383,9 +383,9 @@ def test_audit_counts_inventory_without_calling_it_calibration_ready() -> None:
 
     assert audit.election_count == 4
     assert audit.outcome_candidate_count == 233
-    assert audit.source_verified_sample_count == 89
-    assert audit.source_verified_reading_count == 226
+    assert audit.source_verified_sample_count == 90
+    assert audit.source_verified_reading_count == 228
     assert audit.legacy_poll_id_count == 153
     assert audit.historical_sample_inventory_count == 105
-    assert audit.unresolved_sample_proxy_count == 16
+    assert audit.unresolved_sample_proxy_count == 15
     assert audit.blocker_codes == ("unresolved_legacy_poll_samples",)
