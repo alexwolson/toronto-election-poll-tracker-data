@@ -180,6 +180,33 @@ def test_build_spec_keeps_all_and_decided_readings_of_same_race(tmp_path) -> Non
     assert counts["poll_readings"] >= 2
 
 
+def test_build_spec_news_topline_reading_is_not_reported_and_partial(tmp_path) -> None:
+    responses = [
+        {"label": "Olivia Chow", "kind": "candidate", "value": 43},
+        {"label": "Rob Ford", "kind": "candidate", "value": 32},
+    ]
+    r = _reading("Chow / Ford", responses, base=1045, loc="p.1 prose")
+    r["denominator"] = "not_reported"
+    r["question_text"] = ""
+    r["response_coverage"] = "partial"
+    r["tested_choice_set_status"] = "unknown"
+    meta = _meta("forum_news")
+    meta["document_role"] = "article"
+    merged = _merged([r], fieldwork="2013-03-18", n=1046)
+    merged["publication_date"] = "2013-03-20"
+    spec, problems = build_spec([(meta, merged)], "toronto_2014")
+    assert problems == []
+    reading = spec["poll_readings"][0]
+    assert reading["denominator_type"] == "not_reported"
+    assert reading["denominator_text"] == ""
+    assert reading["response_coverage"] == "partial"
+    assert reading["tested_choice_set_status"] == "unknown"
+    assert reading["question_text_status"] == "not_reported"
+    assert spec["source_documents"][0]["document_role"] == "article"
+    counts = ingest_poll_source(spec, bundle_dir=_copy_bundle(tmp_path))
+    assert counts["poll_readings"] >= 1
+
+
 def test_build_spec_flags_unknown_candidate() -> None:
     responses = [
         {"label": "Some Newcomer", "kind": "candidate", "value": 50},

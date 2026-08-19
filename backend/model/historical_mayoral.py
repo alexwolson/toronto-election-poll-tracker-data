@@ -415,6 +415,55 @@ _MAPPED_LEGACY_READINGS: Final = {
         "forum_city_2014_09_22_n1164",
         "forum_2014_sep22_horserace__r2",
     ),
+    # --- found-2014 batch, group 2 (news toplines; matched by candidate values) ---
+    "toronto_2014-2013-03-21-fa96205a": (
+        "forum_city_2013_03_19_n1045",
+        "forum_2013_mar21_star__r1",
+    ),
+    "toronto_2014-2013-03-21-1d85c80b": (
+        "forum_city_2013_03_19_n1045",
+        "forum_2013_mar21_star__r2",
+    ),
+    "toronto_2014-2013-03-21-47574b99": (
+        "forum_city_2013_03_19_n1045",
+        "forum_2013_mar21_star__r3",
+    ),
+    "toronto_2014-2013-05-13-dc2249d8": (
+        "forum_city_2013_05_10_n974",
+        "forum_2013_may13_star__r1",
+    ),
+    "toronto_2014-2013-05-13-d3c182cc": (
+        "forum_city_2013_05_10_n974",
+        "forum_2013_may13_star__r2",
+    ),
+    "toronto_2014-2013-05-13-9b716dba": (
+        "forum_city_2013_05_10_n974",
+        "forum_2013_may13_star__r3",
+    ),
+    "toronto_2014-2013-05-13-586501f0": (
+        "forum_city_2013_05_10_n974",
+        "forum_2013_may13_star__r4",
+    ),
+    "toronto_2014-2013-11-24-3ace1d90": (
+        "forum_city_2013_11_24_n1049",
+        "forum_2013_nov24_sun__r1",
+    ),
+    "toronto_2014-2013-11-24-28fc3455": (
+        "forum_city_2013_11_24_n1049",
+        "forum_2013_nov24_sun__r5",
+    ),
+    "toronto_2014-2013-11-24-0434843b": (
+        "forum_city_2013_11_24_n1049",
+        "forum_2013_nov24_sun__r6",
+    ),
+    "toronto_2014-2014-02-09-dd29b723": (
+        "forum_city_2014_02_06_n769",
+        "forum_2014_feb09_sun__r1",
+    ),
+    "toronto_2014-2014-02-09-ad636993": (
+        "forum_city_2014_02_06_n769",
+        "forum_2014_feb09_sun__r4",
+    ),
     "toronto_2014-2013-11-12-6a9b9d1e": (
         "ipsos_city_2013_11_08_12_n665",
         "ipsos_nov2013_scenario3",

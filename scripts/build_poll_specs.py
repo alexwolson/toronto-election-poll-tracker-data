@@ -279,6 +279,10 @@ def _emit_reading(
     if denom == "decided_voters":
         denom_type = "decided_respondents"
         denom_text = firm_cfg.get("decided_denominator_text", "Among Decided Voters")
+    elif denom == "not_reported":
+        # news-topline reading: the article prints numbers but not the crosstab.
+        denom_type = "not_reported"
+        denom_text = ""
     else:
         denom_type = "all_respondents"
         denom_text = firm_cfg["denominator_text"]
@@ -310,8 +314,8 @@ def _emit_reading(
             "weighted_base_status": "not_reported",
             "reported_base_status": base_status,
             "reported_base": base_str,
-            "tested_choice_set_status": "complete",
-            "response_coverage": "complete",
+            "tested_choice_set_status": r.get("tested_choice_set_status", "complete"),
+            "response_coverage": r.get("response_coverage", "complete"),
             "reported_share_unit": "percent",
             "reported_share_precision": str(precision),
             "reading_purpose": "general_vote_intention",
