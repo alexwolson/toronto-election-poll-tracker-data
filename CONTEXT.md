@@ -96,6 +96,10 @@ _Avoid_: Current model, naive benchmark
 The initial polling-only Qualification Baseline for the Mayoral Forecast. It translates eligible Poll Readings at their historical lead times into a joint election-day vote-share distribution using empirically reconstructed Toronto poll-to-result uncertainty, without requiring a latent day-by-day campaign path. It must itself clear frozen reliability checks against a pre-declared simple polling comparator before any Mayoral predictive quantity may publish. A dynamic specification may replace it only by qualifying on whole Held-Out Election Cycles.
 _Avoid_: Polling average, current support model, trajectory model
 
+**Absolute Reliability Check**:
+The absolute arm of Mayoral Endpoint qualification: frozen proper-score maxima the endpoint must clear on the authoritative regular-elections population, additional to relatively beating the pre-declared simple polling comparator. Each maximum is the comparator's own score on that metric plus a one-sided noise allowance, so the endpoint fails only when it is worse than the comparator by more than cycle-to-cycle noise can explain. It is a conservative governance bar, not a claim of independently measured calibration or per-band coverage — quantities Toronto's small number of elections cannot demonstrate.
+_Avoid_: Calibration test, coverage test, significance test
+
 **Poll Reading**:
 The reported result of one poll, retaining its tested ballot, population, denominator, fieldwork period, and undecided or residual responses. One eligible Poll Reading updates the Internal Outcome Distribution, but does not by itself make any forecast quantity available or satisfy the Candidate Win Probability gates.
 _Avoid_: Polling average, forecast

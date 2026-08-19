@@ -16,13 +16,19 @@ from backend.model.mayoral_evaluation import (
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_endpoint_qualification_run_is_frozen_and_fail_closed() -> None:
+def test_endpoint_reliability_gate_is_configured_and_the_bridge_qualifies() -> None:
     result = evaluate_mayoral_endpoint_qualification(
         load_historical_mayoral_corpus(ROOT)
     )
 
     assert MAYORAL_ENDPOINT_EVALUATION_DRAW_COUNT == 4096
-    assert MAYORAL_ENDPOINT_ABSOLUTE_MAXIMUM_SCORES is None
+    # ADR 0041: the absolute reliability gate is configured with comparator-anchored,
+    # noise-aware maxima on the broad-reliability metric set.
+    assert set(MAYORAL_ENDPOINT_ABSOLUTE_MAXIMUM_SCORES) == {
+        "winner:log_score",
+        "binary:close_result:brier",
+        "shares:mean_candidate_crps",
+    }
     assert result.comparator.all_elections.lead_times == (
         MAYORAL_ENDPOINT_EVALUATION_LEAD_TIMES
     )
@@ -38,9 +44,11 @@ def test_endpoint_qualification_run_is_frozen_and_fail_closed() -> None:
     assert result.all_elections.endpoint_relative.log_loss_guard == (
         MAYORAL_MODEL_FAMILY_LOG_GUARD
     )
-    assert not result.all_elections.endpoint_reliability.configured
-    assert not result.regular_elections_only.endpoint_reliability.configured
-    assert not result.qualifies
+    # On the authoritative regular-elections population (ADR 0040) the bridge clears
+    # every comparator-anchored maximum, so the endpoint qualifies.
+    assert result.regular_elections_only.endpoint_reliability.configured
+    assert result.regular_elections_only.endpoint_reliability.passed
+    assert result.qualifies
 
 
 class _StubDecision:

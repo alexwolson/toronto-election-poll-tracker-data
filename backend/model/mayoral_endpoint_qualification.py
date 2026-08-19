@@ -31,7 +31,24 @@ from backend.model.mayoral_evaluation import (
 )
 
 MAYORAL_ENDPOINT_EVALUATION_DRAW_COUNT: Final = 4096
-MAYORAL_ENDPOINT_ABSOLUTE_MAXIMUM_SCORES: Final[Mapping[str, float] | None] = None
+# ADR 0041: absolute reliability gate — comparator-anchored, noise-aware maxima
+# frozen on the six-cycle regular-elections corpus. For each broad-reliability
+# metric, maximum = comparator_regular_aggregate + t(0.95, df=5) * SE(paired
+# per-cycle bridge-minus-comparator difference); the endpoint fails a metric only
+# if it is worse than the pre-declared simple polling comparator by more than a
+# one-sided 95% t-bound on cycle-to-cycle noise. Frozen numbers (2026-08-19), not
+# recomputed, per ADR 0005; derivation reproducible from the per-cycle scores:
+#   winner:log_score            = 0.187679 + 2.015048 * 0.026463 = 0.241002
+#   binary:close_result:brier   = 0.055497 + 2.015048 * 0.009497 = 0.074634
+#   shares:mean_candidate_crps  = 0.004428 + 2.015048 * 0.000291 = 0.005014
+# winner:log_score is the overconfidence guard; the other two are the broad
+# reliability of the remaining published quantities. Incumbent-defeat is excluded
+# (Not Applicable in open races; base-rate-dominated across three incumbent cycles).
+MAYORAL_ENDPOINT_ABSOLUTE_MAXIMUM_SCORES: Final[Mapping[str, float] | None] = {
+    "winner:log_score": 0.241002,
+    "binary:close_result:brier": 0.074634,
+    "shares:mean_candidate_crps": 0.005014,
+}
 
 
 @dataclass(frozen=True, slots=True)
