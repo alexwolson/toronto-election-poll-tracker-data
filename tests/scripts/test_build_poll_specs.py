@@ -92,6 +92,22 @@ def test_single_document_group_produces_an_ingestible_spec(tmp_path) -> None:
     assert counts["poll_samples"] >= 1
 
 
+def test_build_spec_strips_candidate_titles_but_keeps_printed_label() -> None:
+    # Early Forum head-to-heads label candidates with titles ("Mayor Rob Ford").
+    # The canonical id lookup must strip the title; response_label keeps the print.
+    titled = [
+        {"label": "Mayor Rob Ford", "kind": "candidate", "value": 45},
+        {"label": "Councillor Adam Vaughan", "kind": "candidate", "value": 43},
+        {"label": "Don't know", "kind": "dont_know", "value": 12},
+    ]
+    group = [(_meta(), _merged([_reading("Ford / Vaughan", titled)]))]
+    spec, problems = build_spec(group, "toronto_2014")
+    assert problems == []
+    by_label = {r.get("response_label"): r for r in spec["poll_responses"]}
+    assert by_label["Mayor Rob Ford"]["candidate_id"] == "rob-ford"
+    assert by_label["Councillor Adam Vaughan"]["candidate_id"] == "vaughan"
+
+
 def test_build_spec_flags_unknown_candidate() -> None:
     responses = [
         {"label": "Some Newcomer", "kind": "candidate", "value": 50},

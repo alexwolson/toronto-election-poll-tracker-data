@@ -47,8 +47,31 @@ CANDIDATES = {
     "david soknacki": ("soknacki", "David Soknacki"),
     "denzil minnan-wong": ("minnan-wong", "Denzil Minnan-Wong"),
     "adam giambrone": ("giambrone", "Adam Giambrone"),
+    "adam vaughan": ("vaughan", "Adam Vaughan"),
+    "shelley carroll": ("carroll", "Shelley Carroll"),
+    "josé canseco": ("canseco", "José Canseco"),
 }
 DK = {"don't know", "dont know", "dk", "undecided/don't know"}
+
+# Early Forum head-to-head tables prefix candidates with a role title
+# ("Mayor Rob Ford", "TTC Chair Karen Stintz"). Strip it for the canonical id
+# lookup only; the printed label is preserved as response_label.
+_TITLE_PREFIXES = (
+    "mayor ",
+    "councillor ",
+    "radio host ",
+    "federal mp ",
+    "ttc chair ",
+    "former blue jay slugger ",
+    "former blue jay ",
+)
+
+
+def _canonical_label(low: str) -> str:
+    for prefix in _TITLE_PREFIXES:
+        if low.startswith(prefix):
+            return low[len(prefix) :]
+    return low
 
 
 def _evidence_available_at(pub_date: str) -> str:
@@ -189,14 +212,15 @@ def _emit_reading(did, r, order, sample_id, year, seen, readings, responses, pro
             "share": str(round(int(resp["value"]) / 100, 2)),
             "notes": "Source-published token preserved; agreed across two reads.",
         }
+        canon = _canonical_label(low)
         if resp.get("kind") == "dont_know" or low in DK:
             row.update(
                 response_option_id="dont-know",
                 response_kind="dont_know",
                 response_label=label or "Don't know",
             )
-        elif low in CANDIDATES:
-            cid, cname = CANDIDATES[low]
+        elif canon in CANDIDATES:
+            cid, cname = CANDIDATES[canon]
             row.update(
                 response_option_id=cid,
                 response_kind="candidate",
