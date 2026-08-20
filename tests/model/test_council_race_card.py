@@ -18,7 +18,7 @@ from backend.model.council_race_card import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-RESULTS = ROOT / "data/raw/canonical/toronto_election_results.csv"
+RESULTS = ROOT / "data/raw/canonical/election_results.csv"
 INCUMBENCY = ROOT / "data/raw/defeatability/ward_defeatability.csv"
 FIELD = ROOT / "data/raw/candidates/councillor_registered.csv"
 

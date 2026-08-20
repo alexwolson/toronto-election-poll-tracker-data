@@ -30,7 +30,7 @@ def main() -> None:
     snapshot = build_council_snapshot(
         load_ward_incumbency(RAW / "defeatability" / "ward_defeatability.csv"),
         load_registered_field(RAW / "candidates" / "councillor_registered.csv"),
-        load_council_results(RAW / "canonical" / "toronto_election_results.csv"),
+        load_council_results(RAW / "canonical" / "election_results.csv"),
         load_ward_poll_readings(RAW / "polls" / "ward_poll_readings.csv"),
         ward_names=load_ward_names(RAW / "defeatability" / "data-qT4Kx.csv"),
     )

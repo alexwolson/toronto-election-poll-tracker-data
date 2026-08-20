@@ -1,15 +1,16 @@
-"""Candidate electoral biography from the canonical results dataset (ADR 0043, 0044).
+"""Candidate electoral biography from the canonical results dataset (ADR 0043, 0044, 0045).
 
 The descriptive backbone of the Council v1 race card: each candidate's prior
 council electoral record, used to render biographies and derived competitiveness
 facts — not as a model input.
 
 Results come from the vendored canonical dataset (`toronto-election-results`,
-ADR 0044), filtered to `office = councillor`. Identity is that dataset's
-persistent, fuzzy-matched `candidate_id`, which links a person across years and
-the 44->25 ward redraw (e.g. `c00755` John Filion spans wards 23->18) and cleanly
-separates same-surname people (Mike Layton `c01140` vs Clayton Jones `c00487`) —
-so the biography no longer re-implements name matching.
+ADR 0045), filtered to `represented_body = toronto_city_council` and
+`office_type = councillor`. Identity is that dataset's persistent `person_id`,
+which links a person across years and the 44->25 ward redraw and cleanly
+separates same-surname people — so the biography no longer re-implements name
+matching. Rows the canonical could not link to a person carry a blank id and are
+skipped when biographies are built (they hold no cross-year record anyway).
 """
 
 from __future__ import annotations
@@ -17,6 +18,13 @@ from __future__ import annotations
 import csv
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Final
+
+# Canonical boundary_regime -> the biography's boundary_era label.
+_BOUNDARY_ERA: Final = {
+    "toronto_council_44_wards": "44-ward",
+    "toronto_council_25_wards": "25-ward",
+}
 
 
 def _to_int(value: str) -> int:
@@ -93,23 +101,33 @@ class CandidateBiography:
 
 def load_council_results(path: str | Path) -> tuple[CouncilElectionResult, ...]:
     """Load councillor rows from the vendored canonical results table."""
+    results: list[CouncilElectionResult] = []
     with open(path, newline="", encoding="utf-8") as handle:
-        rows = tuple(
-            CouncilElectionResult(
-                election_year=int(row["election_year"]),
-                ward=row["ward_number"],
-                boundary_era=row["ward_system"],
-                candidate_id=row["candidate_id"],
-                candidate_name=row["candidate_name"],
-                votes=_to_int(row["votes"]),
-                vote_share=_to_float(row["vote_share"]),
-                is_winner=row["elected"] == "True",
-                is_acclaimed=row["acclaimed"] == "True",
+        for row in csv.DictReader(handle):
+            if (
+                row["represented_body"] != "toronto_city_council"
+                or row["office_type"] != "councillor"
+            ):
+                continue
+            boundary_era = _BOUNDARY_ERA.get(row["boundary_regime"])
+            if boundary_era is None:
+                raise ValueError(
+                    f"unknown councillor boundary_regime {row['boundary_regime']!r}"
+                )
+            results.append(
+                CouncilElectionResult(
+                    election_year=int(row["election_year"]),
+                    ward=row["official_district_id"].removeprefix("ward-"),
+                    boundary_era=boundary_era,
+                    candidate_id=row["person_id"].strip(),
+                    candidate_name=row["candidate_name"],
+                    votes=_to_int(row["votes"]),
+                    vote_share=_to_float(row["vote_share"]),
+                    is_winner=row["elected"] == "True",
+                    is_acclaimed=row["acclaimed"] == "True",
+                )
             )
-            for row in csv.DictReader(handle)
-            if row["office"] == "councillor"
-        )
-    return rows
+    return tuple(results)
 
 
 def _appearance(result: CouncilElectionResult) -> ElectoralAppearance:

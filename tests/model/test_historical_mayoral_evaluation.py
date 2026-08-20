@@ -53,11 +53,11 @@ def test_adapter_builds_complete_outcomes_and_source_backed_incumbents() -> None
         for cycle_id, cycle in cycles.items()
     } == {
         "toronto_2003": None,
-        "toronto_2006": "miller",
+        "toronto_2006": "per_ad293f1387af572cad45897886519bb6",
         "toronto_2010": None,
         "toronto_2014": None,
-        "toronto_2018": "tory",
-        "toronto_2022": "tory",
+        "toronto_2018": "per_a9eb70da799659daaa285f92cfed1674",
+        "toronto_2022": "per_a9eb70da799659daaa285f92cfed1674",
         "toronto_2023": None,
     }
     assert all(
@@ -287,9 +287,9 @@ def test_outcomes_do_not_leak_into_snapshot_evidence_or_its_revision() -> None:
     )["toronto_2018"]
     changed_outcomes = tuple(
         replace(row, share=row.share + Decimal("0.001"))
-        if row.election_cycle_id == "toronto_2018" and row.candidate_id == "tory"
+        if row.election_cycle_id == "toronto_2018" and row.candidate_id == "per_a9eb70da799659daaa285f92cfed1674"
         else replace(row, share=row.share - Decimal("0.001"))
-        if row.election_cycle_id == "toronto_2018" and row.candidate_id == "keesmaat"
+        if row.election_cycle_id == "toronto_2018" and row.candidate_id == "per_49a098eb192452f988a3a579ef7f9cca"
         else row
         for row in corpus.outcomes
     )
@@ -369,7 +369,7 @@ def test_adapter_validates_source_backed_incumbent_against_final_ballot() -> Non
     corpus = load_historical_mayoral_corpus(ROOT)
     outcomes = tuple(
         replace(row, candidate_id="renamed-tory")
-        if row.election_cycle_id == "toronto_2018" and row.candidate_id == "tory"
+        if row.election_cycle_id == "toronto_2018" and row.candidate_id == "per_a9eb70da799659daaa285f92cfed1674"
         else row
         for row in corpus.outcomes
     )

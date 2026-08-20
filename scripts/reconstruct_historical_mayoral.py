@@ -41,7 +41,7 @@ TABLES = (
         ROOT / "data/raw/elections/mayoral_outcomes.csv",
         OUTCOME_COLUMNS,
         lambda: build_mayoral_outcome_rows(
-            ROOT / "data/raw/canonical/toronto_election_results.csv",
+            ROOT / "data/raw/canonical/election_results.csv",
         ),
     ),
     (

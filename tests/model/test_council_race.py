@@ -9,7 +9,7 @@ from backend.model.council_race import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-RESULTS = ROOT / "data/raw/canonical/toronto_election_results.csv"
+RESULTS = ROOT / "data/raw/canonical/election_results.csv"
 INCUMBENCY = ROOT / "data/raw/defeatability/ward_defeatability.csv"
 FIELD = ROOT / "data/raw/candidates/councillor_registered.csv"
 
@@ -68,7 +68,7 @@ def test_incumbent_record_is_matched_to_a_biography() -> None:
 def test_registered_candidate_is_matched_to_its_history() -> None:
     races = _races()
     saxe = next(c for c in races["11"].candidates if "saxe" in c.display_name.lower())
-    assert saxe.candidate_id == "c00665"
+    assert saxe.candidate_id == "per_4569490f5d825a0ca8c7320b499d8090"
     assert saxe.biography is not None
     assert saxe.biography.most_recent_win.year == 2022
 
@@ -85,11 +85,11 @@ def test_newcomers_carry_no_biography() -> None:
 
 def test_fuzzy_match_is_order_insensitive() -> None:
     # The registration gives "First Last"; candidate_id lookups need it
-    # (e.g. last-first "c01140"). A token-set match bridges both.
+    # (e.g. last-first "per_d4bb25c4053f5c59840f117e87f63ab6"). A token-set match bridges both.
     biographies = build_all_biographies(load_council_results(RESULTS))
     bio = match_biography("Mike", "Layton", biographies)
     assert bio is not None
-    assert bio.candidate_id == "c01140"
+    assert bio.candidate_id == "per_d4bb25c4053f5c59840f117e87f63ab6"
     assert bio.council_wins == 3
     # a genuine non-candidate returns nothing
     assert match_biography("Nobody", "Atall", biographies) is None

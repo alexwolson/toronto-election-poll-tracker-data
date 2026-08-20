@@ -95,9 +95,11 @@ def test_selector_uses_one_post_final_reading_per_respondent_sample() -> None:
         >= cycle.snapshots[0].evidence.final_ballot_evidence_available_at.date()
         for row in selected
     )
-    # The Sep 22 horserace release supplies the full all-respondents current field,
-    # which the selector now prefers over the trend-row proxy for that sample.
-    assert "forum_2014_sep22_horserace__r1" in {row.poll_reading_id for row in selected}
+    # The Sep 22 horserace's fuller four-way round (Ford/Tory/Chow/Goldkind) is now
+    # eligible — Ari Goldkind links to his canonical person_id (ADR 0045), where the
+    # retired slug scheme dropped him — so the selector prefers it over the three-way
+    # round and the trend-row proxy for that sample.
+    assert "forum_2014_sep22_horserace__r2" in {row.poll_reading_id for row in selected}
     assert "forum_2014_sep12_three_way_doug" not in {
         row.poll_reading_id for row in selected
     }
@@ -139,10 +141,10 @@ def test_selector_ignores_poll_residual_and_normalizes_only_numeric_candidates()
         if row.poll_reading_id == "forum_2018_oct10_decided_leaning"
     )
 
-    assert set(forum.candidate_shares) == {"tory", "keesmaat"}
+    assert set(forum.candidate_shares) == {"per_a9eb70da799659daaa285f92cfed1674", "per_49a098eb192452f988a3a579ef7f9cca"}
     assert sum(forum.candidate_shares.values(), Decimal(0)) == Decimal(1)
-    assert forum.candidate_shares["tory"] == Decimal(56) / Decimal(85)
-    assert forum.candidate_shares["keesmaat"] == Decimal(29) / Decimal(85)
+    assert forum.candidate_shares["per_a9eb70da799659daaa285f92cfed1674"] == Decimal(56) / Decimal(85)
+    assert forum.candidate_shares["per_49a098eb192452f988a3a579ef7f9cca"] == Decimal(29) / Decimal(85)
 
 
 def test_partial_unknown_head_to_head_is_not_forecast_evidence() -> None:
@@ -358,7 +360,7 @@ def test_predictor_returns_deterministic_distinct_full_ballot_draws() -> None:
     obscure = [
         index
         for index, candidate_id in enumerate(first.candidate_ids)
-        if candidate_id.startswith("toronto_2023:")
+        if candidate_id.startswith("can_")  # unlinked minor candidates (ADR 0045)
     ][:2]
     assert obscure
     assert any(draw[obscure[0]] != draw[obscure[1]] for draw in first.draws)

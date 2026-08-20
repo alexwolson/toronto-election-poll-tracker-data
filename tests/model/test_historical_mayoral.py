@@ -30,7 +30,7 @@ def test_committed_tables_equal_a_fresh_source_reconstruction() -> None:
     )
     assert _rows("data/raw/elections/mayoral_outcomes.csv") == (
         build_mayoral_outcome_rows(
-            ROOT / "data/raw/canonical/toronto_election_results.csv"
+            ROOT / "data/raw/canonical/election_results.csv"
         )
     )
     assert _rows("data/raw/polls/legacy_historical_poll_crosswalk.csv") == (
@@ -70,25 +70,27 @@ def test_outcomes_are_complete_candidate_level_official_results() -> None:
             for row in corpus.outcome_universe("toronto_2014")
             if row.candidate_name == "Doug Ford"
         ).candidate_id
-        == "doug-ford"
+        == "per_15643a9d6a59549bb8e536af298a4b2c"
     )
     assert (
         next(
             row
             for row in corpus.outcome_universe("toronto_2018")
-            if row.candidate_id == "tory"
+            if row.candidate_id == "per_a9eb70da799659daaa285f92cfed1674"
         ).candidate_name_as_reported
-        == "John Tory"
+        == "Tory John"
     )
     assert (
         next(
             row
             for row in corpus.outcome_universe("toronto_2023")
-            if row.candidate_id == "chow"
+            if row.candidate_id == "per_a4291ca7539b53e2acc1c4f108bc73e6"
         ).candidate_name_as_reported
-        == "Olivia Chow"
+        == "Chow Olivia"
     )
-    assert all("_" not in row.candidate_id.split(":", 1)[-1] for row in corpus.outcomes)
+    assert all(
+        row.candidate_id.startswith(("per_", "can_")) for row in corpus.outcomes
+    )
 
 
 def test_final_ballot_known_by_dates_are_conservative_replay_boundaries() -> None:
@@ -197,7 +199,7 @@ def test_only_audited_poll_sources_enter_the_canonical_seam() -> None:
         )
         for reading in nanos
     } == {
-        ("chow", "doug-ford", "tory"),
+        ("per_a4291ca7539b53e2acc1c4f108bc73e6", "per_15643a9d6a59549bb8e536af298a4b2c", "per_a9eb70da799659daaa285f92cfed1674"),
     }
 
 
@@ -234,7 +236,7 @@ def test_viewpoints_may_sample_keeps_timing_conflict_and_reported_rounding() -> 
     assert sum((row.share or Decimal() for row in decided), Decimal()) == Decimal(
         "1.01"
     )
-    assert "furey" not in {row.candidate_id for row in raw}
+    assert "per_27c46c62f83c5dbaae44b65d34a178c6" not in {row.candidate_id for row in raw}
     assert "Not sure" in {row.response_label for row in raw}
 
 
@@ -258,7 +260,7 @@ def test_forum_and_liaison_waves_preserve_source_semantics() -> None:
     perruzza = next(
         response
         for response in corpus.responses_for_reading("forum_2023_may26_all")
-        if response.candidate_id == "toronto_2023:anthony-perruzza"
+        if response.candidate_id == "per_18786ecd2dc7506794ac10340a5f68f6"
     )
     assert perruzza.response_label == "Anthony Perruza"
     assert perruzza.candidate_name == "Anthony Perruzza"
@@ -280,7 +282,7 @@ def test_forum_and_liaison_waves_preserve_source_semantics() -> None:
     liaison_decided = corpus.responses_for_reading("liaison_2023_06_22_23_decided")
     assert [response.option_order for response in liaison_decided] == list(range(1, 10))
     bailao = next(
-        response for response in liaison_decided if response.candidate_id == "bailao"
+        response for response in liaison_decided if response.candidate_id == "per_e42110d6d55c5145b6ff91e7169bffae"
     )
     assert bailao.share == Decimal("0.17")
 

@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SOURCE = ROOT.parent.parent / "toronto-election-results" / "data" / "out"
 DEST = ROOT / "data" / "raw" / "canonical"
 
-FILES = ("toronto_election_results.csv", "council_composition.csv")
+FILES = ("election_results.csv",)
 
 
 def main() -> None:

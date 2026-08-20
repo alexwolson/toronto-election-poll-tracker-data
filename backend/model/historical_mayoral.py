@@ -105,81 +105,10 @@ _OFFICIAL_2014_COLUMNS: Final = (
 
 _WARD_RESULT_COLUMNS: Final = ("year", "ward", "candidate", "votes")
 
-_KNOWN_CANDIDATE_IDS: Final = {
-    "ana bailao": "bailao",
-    "bailao ana": "bailao",
-    "blake acton": "acton",
-    "acton blake": "acton",
-    "brad bradford": "bradford",
-    "bradford brad": "bradford",
-    "chloe brown": "brown",
-    "brown chloe": "brown",
-    "brown chloe marie": "brown",
-    "chloe marie brown": "brown",
-    "doug ford": "doug-ford",
-    "gil penalosa": "penalosa",
-    "penalosa gil": "penalosa",
-    "jennifer keesmaat": "keesmaat",
-    "keesmaat jennifer": "keesmaat",
-    "john tory": "tory",
-    "tory john": "tory",
-    "josh matlow": "matlow",
-    "matlow josh": "matlow",
-    "mark saunders": "saunders",
-    "saunders mark": "saunders",
-    "mitzie hunter": "hunter",
-    "hunter mitzie": "hunter",
-    "olivia chow": "chow",
-    "chow olivia": "chow",
-    "anthony furey": "furey",
-    "furey anthony": "furey",
-    # 2010 field (candidates who also appear in the 2010 polls)
-    "rob ford": "rob-ford",
-    "ford rob": "rob-ford",
-    "george smitherman": "smitherman",
-    "smitherman george": "smitherman",
-    "joe pantalone": "pantalone",
-    "pantalone joe": "pantalone",
-    "rocco rossi": "rossi",
-    "rossi rocco": "rossi",
-    "sarah thomson": "thomson",
-    "thomson sarah": "thomson",
-    # 2006 field (incumbent David Miller vs Jane Pitfield)
-    "david miller": "miller",
-    "miller david": "miller",
-    "jane pitfield": "pitfield",
-    "pitfield jane": "pitfield",
-    # 2003 field (open race: Miller/Tory already mapped; add the next two)
-    "barbara hall": "hall",
-    "hall barbara": "hall",
-    "john nunziata": "nunziata",
-    "nunziata john": "nunziata",
-}
-
-_KNOWN_CANDIDATE_NAMES: Final = {
-    "acton": "Blake Acton",
-    "bailao": "Ana Bailão",
-    "bradford": "Brad Bradford",
-    "brown": "Chloe Brown",
-    "chow": "Olivia Chow",
-    "doug-ford": "Doug Ford",
-    "furey": "Anthony Furey",
-    "hunter": "Mitzie Hunter",
-    "keesmaat": "Jennifer Keesmaat",
-    "matlow": "Josh Matlow",
-    "penalosa": "Gil Peñalosa",
-    "saunders": "Mark Saunders",
-    "tory": "John Tory",
-    "rob-ford": "Rob Ford",
-    "smitherman": "George Smitherman",
-    "pantalone": "Joe Pantalone",
-    "rossi": "Rocco Rossi",
-    "thomson": "Sarah Thomson",
-    "miller": "David Miller",
-    "pitfield": "Jane Pitfield",
-    "hall": "Barbara Hall",
-    "nunziata": "John Nunziata",
-}
+# Mayoral candidate identity now comes from the canonical dataset's persistent
+# ``person_id`` (with a per-candidacy ``candidacy_id`` fallback for unlinked
+# minors), not from name-derived slugs (ADR 0045). The former curated slug maps
+# ``_KNOWN_CANDIDATE_IDS`` / ``_KNOWN_CANDIDATE_NAMES`` were retired with them.
 
 _ELECTION_CONFIG: Final = {
     2003: (
@@ -1276,26 +1205,42 @@ def build_mayoral_outcome_rows(
     canonical_results_path: str | Path,
 ) -> list[dict[str, str]]:
     """Build complete official candidate outcomes for every cycle from the vendored
-    canonical results dataset (office=mayor), replacing the fetched ward totals and
-    the per-year declaration sidecars (ADR 0044). Outcomes are share-identical to
-    the retired sources; minor-candidate ids follow the canonical name form.
+    canonical results dataset (represented_body=toronto_city_council,
+    office_type=mayor), keyed on the canonical persistent ``person_id`` where
+    present and the stable per-candidacy ``candidacy_id`` for unlinked minor
+    candidates (ADR 0045). Outcomes are share-identical to the prior sources;
+    identity is now the canonical's, not a name-derived slug.
     """
-    grouped: dict[int, dict[str, int]] = {}
+    grouped: dict[int, dict[str, dict[str, object]]] = {}
     winners_by_year: dict[int, set[str]] = defaultdict(set)
     with open(canonical_results_path, newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
-            if row["office"] != "mayor":
+            if (
+                row["represented_body"] != "toronto_city_council"
+                or row["office_type"] != "mayor"
+            ):
                 continue
             year = int(row["election_year"])
             if year not in _ELECTION_CONFIG:
                 continue
-            name = row["candidate_name"]
+            candidate_id = row["person_id"].strip() or row["candidacy_id"].strip()
+            if not candidate_id:
+                raise HistoricalMayoralDataError(
+                    f"{year} candidate {row['candidate_name']!r} has neither a "
+                    "person_id nor a candidacy_id"
+                )
             bucket = grouped.setdefault(year, {})
-            if name in bucket:
-                raise HistoricalMayoralDataError(f"duplicate {year} candidate {name!r}")
-            bucket[name] = int(row["votes"]) if row["votes"].strip() else 0
+            if candidate_id in bucket:
+                raise HistoricalMayoralDataError(
+                    f"duplicate {year} candidate id {candidate_id!r}"
+                )
+            bucket[candidate_id] = {
+                "candidate_name": row["candidate_name"],
+                "candidate_name_as_reported": row["candidate_name_raw"],
+                "votes": int(row["votes"]) if row["votes"].strip() else 0,
+            }
             if row["elected"] == "True":
-                winners_by_year[year].add(name)
+                winners_by_year[year].add(candidate_id)
     for year in grouped:
         if len(winners_by_year.get(year, set())) != 1:
             raise HistoricalMayoralDataError(
@@ -1323,28 +1268,31 @@ def build_mayoral_outcome_rows(
     rows: list[dict[str, str]] = []
     for year in sorted(expected_counts):
         candidates = grouped.get(year, {})
-        total = sum(candidates.values())
+        total = sum(int(info["votes"]) for info in candidates.values())
         if len(candidates) != expected_counts[year] or total != expected_totals[year]:
             raise HistoricalMayoralDataError(
                 f"{year} outcome expected {expected_counts[year]} candidates and "
                 f"{expected_totals[year]} votes; got {len(candidates)} and {total}"
             )
-        for name, votes in sorted(
-            candidates.items(), key=lambda item: _candidate_id(year, item[0])
-        ):
-            candidate_id = _candidate_id(year, name)
+        for candidate_id, info in sorted(candidates.items()):
+            votes = int(info["votes"])
             rows.append(
                 {
                     "election_cycle_id": _ELECTION_CONFIG[year][0],
                     "candidate_id": candidate_id,
-                    "candidate_name": _KNOWN_CANDIDATE_NAMES.get(candidate_id, name),
-                    "candidate_name_as_reported": name,
+                    "candidate_name": str(info["candidate_name"]),
+                    "candidate_name_as_reported": str(
+                        info["candidate_name_as_reported"]
+                    ),
                     "votes": str(votes),
                     "valid_vote_total": str(total),
                     "share": format(Decimal(votes) / Decimal(total), ".18f"),
-                    "is_winner": str(name in winners_by_year[year]).lower(),
-                    "source_document_id": "toronto_election_results",
-                    "source_locator": f"office=mayor;year={year}",
+                    "is_winner": str(candidate_id in winners_by_year[year]).lower(),
+                    "source_document_id": "election_results",
+                    "source_locator": (
+                        "represented_body=toronto_city_council;"
+                        f"office_type=mayor;year={year}"
+                    ),
                 }
             )
     return rows
@@ -1645,13 +1593,6 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
         raise HistoricalMayoralDataError(
             "legacy crosswalk does not cover every poll ID"
         )
-
-
-def _candidate_id(year: int, candidate_name: str) -> str:
-    known = _KNOWN_CANDIDATE_IDS.get(_normalized_name(candidate_name))
-    return (
-        known or f"toronto_{year}:{_normalized_name(candidate_name).replace(' ', '-')}"
-    )
 
 
 def _normalized_name(value: str) -> str:

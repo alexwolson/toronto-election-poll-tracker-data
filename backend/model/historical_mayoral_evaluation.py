@@ -32,16 +32,17 @@ from backend.model.mayoral_evaluation import (
 _TORONTO: Final = ZoneInfo("America/Toronto")
 _REVISION_SCHEMA: Final = "historical-mayoral-evidence-v4"
 _INCUMBENT_BY_CYCLE: Final = {
+    # Incumbent identity is the canonical person_id on the Final Ballot (ADR 0045).
     # Mel Lastman retired; the 2003 race was open (Miller won over Tory).
     "toronto_2003": None,
     # David Miller sought and won re-election in 2006.
-    "toronto_2006": "miller",
+    "toronto_2006": "per_ad293f1387af572cad45897886519bb6",  # David Miller
     # David Miller did not seek re-election; the 2010 race was open.
     "toronto_2010": None,
     # Rob Ford withdrew before the 2014 Final Ballot was settled.
     "toronto_2014": None,
-    "toronto_2018": "tory",
-    "toronto_2022": "tory",
+    "toronto_2018": "per_a9eb70da799659daaa285f92cfed1674",  # John Tory
+    "toronto_2022": "per_a9eb70da799659daaa285f92cfed1674",  # John Tory
     # The 2023 mayoral by-election was an open contest.
     "toronto_2023": None,
 }
