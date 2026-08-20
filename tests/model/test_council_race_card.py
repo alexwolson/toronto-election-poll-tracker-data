@@ -13,6 +13,7 @@ from backend.model.council_race_card import (
     build_prior_results,
     derive_competitiveness_facts,
     exposure_triggers,
+    load_ward_poll_readings,
     race_exposure_triggers,
 )
 
@@ -121,3 +122,47 @@ def test_open_seat_of_newcomers_flags_no_prior_winners() -> None:
 def test_base_rate_copy_is_honest_and_present() -> None:
     assert "6%" in COUNCIL_INCUMBENT_BASE_RATE_COPY
     assert "rarely" in COUNCIL_INCUMBENT_BASE_RATE_COPY.lower()
+
+
+WARD_POLLS = ROOT / "data/raw/polls/ward_poll_readings.csv"
+
+
+def test_raw_ward_poll_is_surfaced_where_it_exists() -> None:
+    # The lone 2026 ward poll (Ward 13, Forum) is shown as raw observed evidence
+    # with its limitations, never averaged (ADR 0037).
+    readings = load_ward_poll_readings(WARD_POLLS)
+    reading = readings["13"][0]
+    assert reading.firm == "Forum Research"
+    assert reading.sample_size == 355
+    assert reading.denominator == "decided voters"
+    assert reading.ballot_status == "different_candidate_field"  # a limitation
+    assert reading.undecided_share == 0.45
+    moise = next(c for c in reading.candidates if c.candidate_id == "moise")
+    assert moise.is_incumbent
+    assert moise.share == 0.35
+
+
+def test_wards_without_a_poll_have_no_readings() -> None:
+    readings = load_ward_poll_readings(WARD_POLLS)
+    assert readings.get("12", ()) == ()  # Matlow — no ward poll
+    assert readings.get("14", ()) == ()  # Fletcher open seat — no ward poll
+
+
+def test_ward_11_carries_both_forum_scenarios() -> None:
+    # The Aug-12 Forum poll offered two council scenarios; both are ingested, and
+    # the Layton-enters reading (its field matches the registered ballot) leads.
+    readings = load_ward_poll_readings(WARD_POLLS)
+    w11 = readings["11"]
+    assert len(w11) == 2
+    layton = next(r for r in w11 if r.poll_id.endswith("layton"))
+    assert layton.candidates[0].candidate_id == "layton"
+    assert layton.candidates[0].share == 0.44
+    saxe = next(c for c in layton.candidates if c.candidate_id == "saxe")
+    assert saxe.is_incumbent and saxe.share == 0.17
+
+
+def test_ward_poll_names_the_candidates_first_and_residual_last() -> None:
+    readings = load_ward_poll_readings(WARD_POLLS)
+    order = [c.candidate_id for c in readings["13"][0].candidates]
+    assert order[0] == "moise"  # top named by share
+    assert order[-1] == "residual"  # residual shown last despite its 40% share

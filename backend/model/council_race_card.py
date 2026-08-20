@@ -15,8 +15,10 @@ strictly non-predictive:
 
 from __future__ import annotations
 
+import csv
 import re
 from dataclasses import dataclass
+from pathlib import Path
 
 from backend.model.council_biography import CouncilElectionResult
 from backend.model.council_race import CouncilRace, WardIncumbent
@@ -162,3 +164,88 @@ def derive_competitiveness_facts(
         prior_margin_votes=prior.margin_votes if prior else None,
         prior_margin_share=prior.margin_share if prior else None,
     )
+
+
+# --- Raw ward polling (ADR 0037) -------------------------------------------
+# Sparse ward polls are shown as observed evidence with their date, source and
+# limitations, chronologically, and are never averaged unless replicated across
+# two pollsters (which no 2026 ward reaches). This surfaces the raw readings.
+
+
+@dataclass(frozen=True, slots=True)
+class WardPollCandidateReading:
+    candidate_id: str
+    candidate_name: str
+    share: float
+    is_incumbent: bool
+    is_residual: bool
+    registration_status: str
+
+
+@dataclass(frozen=True, slots=True)
+class WardPollReading:
+    ward: str
+    poll_id: str
+    firm: str
+    date_conducted: str
+    date_published: str
+    sample_size: int | None
+    methodology: str
+    denominator: str
+    ballot_status: str  # e.g. "different_candidate_field" — a comparability limit
+    undecided_share: float | None
+    candidates: tuple[WardPollCandidateReading, ...]
+
+
+def load_ward_poll_readings(path: str | Path) -> dict[str, tuple[WardPollReading, ...]]:
+    grouped: dict[tuple[str, str], list[dict[str, str]]] = {}
+    order: list[tuple[str, str]] = []
+    with open(path, newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            key = (row["ward"], row["poll_id"])
+            if key not in grouped:
+                grouped[key] = []
+                order.append(key)
+            grouped[key].append(row)
+
+    def candidate(row: dict[str, str]) -> WardPollCandidateReading:
+        return WardPollCandidateReading(
+            candidate_id=row["candidate_id"],
+            candidate_name=row["candidate_name"],
+            share=float(row["share"]) if row["share"].strip() else 0.0,
+            is_incumbent=row["is_incumbent"].strip().lower() == "true",
+            is_residual=row["is_residual"].strip().lower() == "true",
+            registration_status=row.get("registration_status", ""),
+        )
+
+    readings: dict[str, list[WardPollReading]] = {}
+    for key in order:
+        ward, poll_id = key
+        rows = grouped[key]
+        head = rows[0]
+        cands = [candidate(r) for r in rows]
+        # Named candidates by descending share, residual bucket(s) last.
+        cands.sort(key=lambda c: (c.is_residual, -c.share))
+        undecided = head.get("undecided_share", "").strip()
+        readings.setdefault(ward, []).append(
+            WardPollReading(
+                ward=ward,
+                poll_id=poll_id,
+                firm=head["firm"],
+                date_conducted=head["date_conducted"],
+                date_published=head["date_published"],
+                sample_size=int(head["sample_size"])
+                if head["sample_size"].strip()
+                else None,
+                methodology=head.get("methodology", ""),
+                denominator=head.get("denominator", ""),
+                ballot_status=head.get("ballot_status", ""),
+                undecided_share=float(undecided) if undecided else None,
+                candidates=tuple(cands),
+            )
+        )
+    # chronological per ward
+    return {
+        ward: tuple(sorted(items, key=lambda r: r.date_conducted))
+        for ward, items in readings.items()
+    }

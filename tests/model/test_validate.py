@@ -1,11 +1,13 @@
 """Tests for input validation functions."""
+
 import pandas as pd
 import pytest
+
 from backend.model.validate import (
     ValidationError,
     validate_challengers,
-    validate_registered_mayors,
     validate_registered_councillors,
+    validate_registered_mayors,
 )
 
 
@@ -42,13 +44,17 @@ def test_validate_challengers_accepts_pipe_separated_endorsers():
 
 def test_validate_challengers_rejects_missing_endorsements_column():
     """Missing endorsements column must raise ValidationError."""
-    df = pd.DataFrame([{
-        "ward": 1,
-        "candidate_name": "Test Candidate",
-        "name_recognition_tier": "known",
-        "mayoral_alignment": "unaligned",
-        "last_updated": "2026-01-01",
-    }])
+    df = pd.DataFrame(
+        [
+            {
+                "ward": 1,
+                "candidate_name": "Test Candidate",
+                "name_recognition_tier": "known",
+                "mayoral_alignment": "unaligned",
+                "last_updated": "2026-01-01",
+            }
+        ]
+    )
     with pytest.raises(ValidationError, match="endorsements"):
         validate_challengers(df)
 
@@ -56,6 +62,7 @@ def test_validate_challengers_rejects_missing_endorsements_column():
 def test_validate_challengers_rejects_null_endorsements():
     """NaN endorsements must be rejected — empty string is valid but null is not."""
     import numpy as np
+
     df = pd.DataFrame([_base_challengers_row(endorsements=np.nan)])
     with pytest.raises(ValidationError, match="endorsements"):
         validate_challengers(df)
@@ -64,6 +71,7 @@ def test_validate_challengers_rejects_null_endorsements():
 # ---------------------------------------------------------------------------
 # validate_registered_mayors
 # ---------------------------------------------------------------------------
+
 
 def _base_mayor_row(**overrides) -> dict:
     base = {
@@ -77,12 +85,16 @@ def _base_mayor_row(**overrides) -> dict:
 
 
 def test_validate_registered_mayors_accepts_valid():
-    df = pd.DataFrame([_base_mayor_row(), _base_mayor_row(first_name="Lyall", last_name="Sanders")])
+    df = pd.DataFrame(
+        [_base_mayor_row(), _base_mayor_row(first_name="Lyall", last_name="Sanders")]
+    )
     validate_registered_mayors(df)  # should not raise
 
 
 def test_validate_registered_mayors_rejects_missing_column():
-    df = pd.DataFrame([{"first_name": "Brad", "last_name": "Bradford", "status": "Active"}])
+    df = pd.DataFrame(
+        [{"first_name": "Brad", "last_name": "Bradford", "status": "Active"}]
+    )
     with pytest.raises(ValidationError, match="date_nomination"):
         validate_registered_mayors(df)
 
@@ -97,6 +109,7 @@ def test_validate_registered_mayors_rejects_bad_date():
 # validate_registered_councillors
 # ---------------------------------------------------------------------------
 
+
 def _base_councillor_row(**overrides) -> dict:
     base = {
         "ward": 1,
@@ -110,7 +123,12 @@ def _base_councillor_row(**overrides) -> dict:
 
 
 def test_validate_registered_councillors_accepts_valid():
-    df = pd.DataFrame([_base_councillor_row(), _base_councillor_row(ward=2, first_name="Mike", last_name="Layton")])
+    df = pd.DataFrame(
+        [
+            _base_councillor_row(),
+            _base_councillor_row(ward=2, first_name="Mike", last_name="Layton"),
+        ]
+    )
     validate_registered_councillors(df)  # should not raise
 
 
@@ -284,6 +302,14 @@ def _valid_ward_poll_readings() -> pd.DataFrame:
 
 def test_validate_observed_ward_poll_readings_accepts_complete_choice_set() -> None:
     validate_ward_poll_readings(_valid_ward_poll_readings())
+
+
+def test_validate_ward_poll_readings_accepts_an_open_seat_with_no_incumbent() -> None:
+    # Open-seat polls (e.g. Ward 19, Bradford departed) name no incumbent; the
+    # reading is still valid — is_incumbent is descriptive, not a poll invariant.
+    readings = _valid_ward_poll_readings()
+    readings["is_incumbent"] = False
+    validate_ward_poll_readings(readings)
 
 
 def test_validate_observed_ward_poll_readings_rejects_incomplete_denominator() -> None:

@@ -271,10 +271,10 @@ def validate_ward_poll_readings(df: pd.DataFrame) -> None:
             raise ValidationError(
                 f"ward poll {poll_id!r} choice shares do not sum to one"
             )
-        if int(group["is_incumbent"].astype(bool).sum()) != 1:
-            raise ValidationError(
-                f"ward poll {poll_id!r} must contain one incumbent row"
-            )
+        # is_incumbent is descriptive per-candidate metadata, not a poll invariant:
+        # an open-seat poll has zero incumbents (e.g. Ward 19), and a poll need not
+        # name the sitting councillor even in an incumbent race. The count is a
+        # property of the race, not the reading, so it is not validated here.
         if int(group["is_residual"].astype(bool).sum()) != 1:
             raise ValidationError(
                 f"ward poll {poll_id!r} must contain one residual row"
@@ -498,7 +498,9 @@ def validate_registered_mayors(df: pd.DataFrame) -> None:
 
     null_names = df[df["first_name"].isna() | df["last_name"].isna()]
     if not null_names.empty:
-        raise ValidationError(f"Missing first_name or last_name in {len(null_names)} row(s)")
+        raise ValidationError(
+            f"Missing first_name or last_name in {len(null_names)} row(s)"
+        )
 
     null_status = df[df["status"].isna() | (df["status"].astype(str).str.strip() == "")]
     if not null_status.empty:
@@ -516,7 +518,9 @@ def validate_registered_councillors(df: pd.DataFrame) -> None:
 
     null_names = df[df["first_name"].isna() | df["last_name"].isna()]
     if not null_names.empty:
-        raise ValidationError(f"Missing first_name or last_name in {len(null_names)} row(s)")
+        raise ValidationError(
+            f"Missing first_name or last_name in {len(null_names)} row(s)"
+        )
 
     bad_ward = df[~df["ward"].between(1, 25)]
     if not bad_ward.empty:
