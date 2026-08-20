@@ -23,7 +23,7 @@ from pathlib import Path
 from backend.model.council_biography import CouncilElectionResult
 from backend.model.council_race import CouncilRace, WardIncumbent
 
-CURRENT_BOUNDARY_ERA = "25_ward"
+CURRENT_BOUNDARY_ERA = "25-ward"
 
 # Fixed to the CDI validation report (never threshold-tuned — that overfits).
 _NARROW_WIN_MAX_SHARE = 0.35

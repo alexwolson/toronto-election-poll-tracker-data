@@ -11,7 +11,7 @@ from backend.model.council_snapshot import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-RESULTS = ROOT / "data/raw/elections/historical_council_results.csv"
+RESULTS = ROOT / "data/raw/canonical/toronto_election_results.csv"
 INCUMBENCY = ROOT / "data/raw/defeatability/ward_defeatability.csv"
 FIELD = ROOT / "data/raw/candidates/councillor_registered.csv"
 WARD_POLLS = ROOT / "data/raw/polls/ward_poll_readings.csv"

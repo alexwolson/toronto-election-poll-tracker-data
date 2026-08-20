@@ -88,7 +88,7 @@ def _candidate_card(candidate: RaceCandidate) -> dict:
     return {
         "display_name": candidate.display_name,
         "status": candidate.status,
-        "candidate_key": candidate.candidate_key,
+        "candidate_id": candidate.candidate_id,
         "is_matched": candidate.is_matched,
         "is_former_councillor": bool(bio and bio.is_former_councillor),
         "council_wins": bio.council_wins if bio else 0,

@@ -1,16 +1,15 @@
-"""Candidate electoral biography from historical council results (ADR 0043).
+"""Candidate electoral biography from the canonical results dataset (ADR 0043, 0044).
 
 The descriptive backbone of the Council v1 race card: each candidate's prior
 council electoral record, used to render biographies and derived competitiveness
-facts — not as a model input (ADR 0009/0028 officeholding history, used
-descriptively).
+facts — not as a model input.
 
-Identity is the dataset's own `candidate_key`, matched exactly. That key is
-consistent per person across years and the 44->25 ward redraw (e.g. `filion john`
-spans wards 23->18; `layton mike` spans wards 19->11), and it correctly separates
-surname collisions (`clayton jones` is not `layton mike`). Exact-key matching is
-therefore the honest identity *within* the historical corpus; matching an external
-current-cycle name to a key is a separate concern with its own fuzzy join.
+Results come from the vendored canonical dataset (`toronto-election-results`,
+ADR 0044), filtered to `office = councillor`. Identity is that dataset's
+persistent, fuzzy-matched `candidate_id`, which links a person across years and
+the 44->25 ward redraw (e.g. `c00755` John Filion spans wards 23->18) and cleanly
+separates same-surname people (Mike Layton `c01140` vs Clayton Jones `c00487`) —
+so the biography no longer re-implements name matching.
 """
 
 from __future__ import annotations
@@ -32,9 +31,9 @@ def _to_float(value: str) -> float:
 class CouncilElectionResult:
     election_year: int
     ward: str
-    boundary_era: str
+    boundary_era: str  # "44-ward" | "25-ward" (canonical ward_system)
+    candidate_id: str
     candidate_name: str
-    candidate_key: str
     votes: int
     vote_share: float
     is_winner: bool
@@ -54,7 +53,7 @@ class ElectoralAppearance:
 
 @dataclass(frozen=True, slots=True)
 class CandidateBiography:
-    candidate_key: str
+    candidate_id: str
     display_name: str
     appearances: tuple[ElectoralAppearance, ...]  # chronological, year ascending
 
@@ -93,20 +92,22 @@ class CandidateBiography:
 
 
 def load_council_results(path: str | Path) -> tuple[CouncilElectionResult, ...]:
+    """Load councillor rows from the vendored canonical results table."""
     with open(path, newline="", encoding="utf-8") as handle:
         rows = tuple(
             CouncilElectionResult(
                 election_year=int(row["election_year"]),
-                ward=row["ward"],
-                boundary_era=row["boundary_era"],
+                ward=row["ward_number"],
+                boundary_era=row["ward_system"],
+                candidate_id=row["candidate_id"],
                 candidate_name=row["candidate_name"],
-                candidate_key=row["candidate_key"],
                 votes=_to_int(row["votes"]),
                 vote_share=_to_float(row["vote_share"]),
-                is_winner=row["is_winner"] == "True",
-                is_acclaimed=row["is_acclaimed"] == "True",
+                is_winner=row["elected"] == "True",
+                is_acclaimed=row["acclaimed"] == "True",
             )
             for row in csv.DictReader(handle)
+            if row["office"] == "councillor"
         )
     return rows
 
@@ -124,13 +125,13 @@ def _appearance(result: CouncilElectionResult) -> ElectoralAppearance:
 
 
 def build_candidate_biography(
-    candidate_key: str, results: tuple[CouncilElectionResult, ...]
+    candidate_id: str, results: tuple[CouncilElectionResult, ...]
 ) -> CandidateBiography:
-    mine = [r for r in results if r.candidate_key == candidate_key]
+    mine = [r for r in results if r.candidate_id and r.candidate_id == candidate_id]
     mine.sort(key=lambda r: r.election_year)
-    display_name = mine[-1].candidate_name if mine else candidate_key
+    display_name = mine[-1].candidate_name if mine else candidate_id
     return CandidateBiography(
-        candidate_key=candidate_key,
+        candidate_id=candidate_id,
         display_name=display_name,
         appearances=tuple(_appearance(r) for r in mine),
     )
@@ -139,5 +140,7 @@ def build_candidate_biography(
 def build_all_biographies(
     results: tuple[CouncilElectionResult, ...],
 ) -> dict[str, CandidateBiography]:
-    keys = {r.candidate_key for r in results}
-    return {key: build_candidate_biography(key, results) for key in keys}
+    # Rows with no canonical candidate_id could not be linked to a person and are
+    # skipped (they carry no cross-year biography anyway).
+    ids = {r.candidate_id for r in results if r.candidate_id}
+    return {cid: build_candidate_biography(cid, results) for cid in ids}

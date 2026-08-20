@@ -12,13 +12,13 @@ withdraws after the flag was last set). The `is_running` flag is kept only as a
 cross-check — `incumbency_flag_disagrees` marks wards where the two disagree, for
 editorial review (a real withdrawal the flag missed, or a name-match miss).
 
-Matching a current-cycle name to a historical `candidate_key` is a fuzzy join:
-the registration gives "First Last" while `candidate_key` ordering is
-inconsistent, so identity is a **token set** (the set of name tokens), matched
-exactly. A token set that maps to more than one key is treated as unmatched
-rather than guessed — a missing biography degrades to "newcomer", never to a
-wrong record. Middle names / nicknames that break exact token-set equality are a
-known, safe-direction limitation (they show as newcomers).
+Matching a current-cycle registration name to a historical `candidate_id` is a
+fuzzy join: the registration gives "First Last" and no id, so we index the
+canonical people by the **token set** of their (normalized) name and match
+exactly. A token set that maps to more than one candidate_id is treated as
+unmatched rather than guessed — a missing biography degrades to "newcomer", never
+to a wrong record. Middle names / nicknames that break exact token-set equality
+are a known, safe-direction limitation (they show as newcomers).
 """
 
 from __future__ import annotations
@@ -47,12 +47,12 @@ class WardIncumbent:
 class RaceCandidate:
     display_name: str
     status: str
-    candidate_key: str | None
+    candidate_id: str | None
     biography: CandidateBiography | None
 
     @property
     def is_matched(self) -> bool:
-        return self.candidate_key is not None
+        return self.candidate_id is not None
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,7 +73,7 @@ def _name_tokens(name: str) -> frozenset[str]:
 def _build_name_index(
     biographies: dict[str, CandidateBiography],
 ) -> tuple[dict[frozenset[str], str], set[frozenset[str]]]:
-    """Map each unambiguous name token-set to its candidate_key.
+    """Map each unambiguous name token-set to its candidate_id.
 
     A token-set claimed by more than one key is recorded as ambiguous and
     excluded, so a lookup on it returns nothing rather than an arbitrary match.
@@ -175,7 +175,7 @@ def build_council_races(
                 RaceCandidate(
                     display_name=f"{entry['first_name']} {entry['last_name']}",
                     status=entry.get("status", ""),
-                    candidate_key=bio.candidate_key if bio else None,
+                    candidate_id=bio.candidate_id if bio else None,
                     biography=bio,
                 )
             )
