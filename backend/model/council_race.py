@@ -39,6 +39,7 @@ class WardIncumbent:
     is_byelection_incumbent: bool
     defeatability_score: int | None
     vote_share: float | None
+    notes: str
     biography: CandidateBiography | None
 
 
@@ -161,6 +162,7 @@ def build_council_races(
             == "true",
             defeatability_score=_to_int(row.get("defeatability_score", "")),
             vote_share=_to_float(row.get("vote_share", "")),
+            notes=row.get("notes", ""),
             biography=match(_name_tokens(row["councillor_name"])),
         )
         candidates = []
