@@ -115,6 +115,7 @@ _KNOWN_CANDIDATE_IDS: Final = {
     "chloe brown": "brown",
     "brown chloe": "brown",
     "brown chloe marie": "brown",
+    "chloe marie brown": "brown",
     "doug ford": "doug-ford",
     "gil penalosa": "penalosa",
     "penalosa gil": "penalosa",
@@ -1272,65 +1273,33 @@ def build_mayoral_election_rows() -> list[dict[str, str]]:
 
 
 def build_mayoral_outcome_rows(
-    sidecar_paths: dict[int, str | Path], ward_results_path: str | Path
+    canonical_results_path: str | Path,
 ) -> list[dict[str, str]]:
-    """Build complete official candidate outcomes for every cycle.
-
-    Sidecar cycles carry candidate-total declarations from a per-year CSV — used
-    where the ward geography is not the current 25 (2010's 44 wards) or the source
-    is a candidate-level declaration (2014). The 25-ward cycles (2018/2022/2023)
-    are aggregated from the shared ward-results file.
+    """Build complete official candidate outcomes for every cycle from the vendored
+    canonical results dataset (office=mayor), replacing the fetched ward totals and
+    the per-year declaration sidecars (ADR 0044). Outcomes are share-identical to
+    the retired sources; minor-candidate ids follow the canonical name form.
     """
     grouped: dict[int, dict[str, int]] = {}
-    winners_by_year: dict[int, set[str]] = {}
-    for year, path in sidecar_paths.items():
-        source_rows = _read_csv(Path(path), _OFFICIAL_2014_COLUMNS)
-        expected_source = {
-            "source_document_id": _ELECTION_CONFIG[year][3],
-            "source_url": _ELECTION_CONFIG[year][4],
-            "source_locator": _ELECTION_CONFIG[year][5],
-            "source_sha256": _ELECTION_CONFIG[year][6],
-            "source_completeness": _ELECTION_CONFIG[year][7],
-        }
-        grouped[year] = {}
-        winners_by_year[year] = set()
-        for row in source_rows:
-            for field, expected in expected_source.items():
-                # Compare the raw declared value against the config; source_sha256
-                # is legitimately blank when the artifact was not retained.
-                if row.get(field, "") != expected:
-                    raise HistoricalMayoralDataError(
-                        f"{year} sidecar has unexpected {field}={row.get(field)!r}"
-                    )
-            name = _required(row, "candidate_name")
-            if name in grouped[year]:
+    winners_by_year: dict[int, set[str]] = defaultdict(set)
+    with open(canonical_results_path, newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            if row["office"] != "mayor":
+                continue
+            year = int(row["election_year"])
+            if year not in _ELECTION_CONFIG:
+                continue
+            name = row["candidate_name"]
+            bucket = grouped.setdefault(year, {})
+            if name in bucket:
                 raise HistoricalMayoralDataError(f"duplicate {year} candidate {name!r}")
-            grouped[year][name] = _positive_int(row, "votes")
-            if _boolean(row, "is_winner"):
+            bucket[name] = int(row["votes"]) if row["votes"].strip() else 0
+            if row["elected"] == "True":
                 winners_by_year[year].add(name)
-        if len(winners_by_year[year]) != 1:
+    for year in grouped:
+        if len(winners_by_year.get(year, set())) != 1:
             raise HistoricalMayoralDataError(
-                f"{year} sidecar must identify exactly one official winner"
-            )
-
-    ward_rows = _read_csv(Path(ward_results_path), _WARD_RESULT_COLUMNS)
-    wards_by_candidate: dict[tuple[int, str], set[int]] = defaultdict(set)
-    for row in ward_rows:
-        year = _positive_int(row, "year")
-        if year not in {2018, 2022, 2023}:
-            raise HistoricalMayoralDataError(f"unexpected mayoral result year {year}")
-        ward = _positive_int(row, "ward")
-        if not 1 <= ward <= 25:
-            raise HistoricalMayoralDataError(f"invalid ward {ward} for {year}")
-        name = _required(row, "candidate")
-        grouped.setdefault(year, {})[name] = grouped.setdefault(year, {}).get(
-            name, 0
-        ) + _nonnegative_int(row, "votes")
-        wards_by_candidate[(year, name)].add(ward)
-    for (year, name), wards in wards_by_candidate.items():
-        if wards != set(range(1, 26)):
-            raise HistoricalMayoralDataError(
-                f"{year} candidate {name!r} does not have all 25 ward totals"
+                f"{year} must identify exactly one official winner"
             )
 
     expected_counts = {
@@ -1360,18 +1329,10 @@ def build_mayoral_outcome_rows(
                 f"{year} outcome expected {expected_counts[year]} candidates and "
                 f"{expected_totals[year]} votes; got {len(candidates)} and {total}"
             )
-        max_votes = max(candidates.values())
-        source_id = _ELECTION_CONFIG[year][3]
-        source_locator = _ELECTION_CONFIG[year][5]
         for name, votes in sorted(
             candidates.items(), key=lambda item: _candidate_id(year, item[0])
         ):
             candidate_id = _candidate_id(year, name)
-            is_winner = (
-                name in winners_by_year[year]
-                if year in winners_by_year
-                else votes == max_votes
-            )
             rows.append(
                 {
                     "election_cycle_id": _ELECTION_CONFIG[year][0],
@@ -1381,9 +1342,9 @@ def build_mayoral_outcome_rows(
                     "votes": str(votes),
                     "valid_vote_total": str(total),
                     "share": format(Decimal(votes) / Decimal(total), ".18f"),
-                    "is_winner": str(is_winner).lower(),
-                    "source_document_id": source_id,
-                    "source_locator": source_locator,
+                    "is_winner": str(name in winners_by_year[year]).lower(),
+                    "source_document_id": "toronto_election_results",
+                    "source_locator": f"office=mayor;year={year}",
                 }
             )
     return rows
@@ -1579,13 +1540,9 @@ def _validate_corpus(corpus: HistoricalMayoralCorpus, legacy_poll_path: Path) ->
     for outcome in corpus.outcomes:
         if outcome.election_cycle_id not in election_by_id:
             raise HistoricalMayoralDataError("outcome references unknown election")
-        if (
-            outcome.source_document_id
-            != election_by_id[outcome.election_cycle_id].source_document_id
-        ):
-            raise HistoricalMayoralDataError(
-                "outcome source does not match its election manifest"
-            )
+        # Outcome provenance (canonical results dataset, ADR 0044) is independent
+        # of the election manifest's ballot-timing provenance, so they are no
+        # longer required to share a source_document_id.
         outcomes_by_cycle[outcome.election_cycle_id].append(outcome)
         canonical_names_by_id[outcome.candidate_id].add(outcome.candidate_name)
     if any(len(names) != 1 for names in canonical_names_by_id.values()):

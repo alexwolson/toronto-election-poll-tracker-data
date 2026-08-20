@@ -109,12 +109,12 @@ dart_2018_head_to_head,candidate-tory,candidate,tory,John Tory,individually_publ
 dart_2018_head_to_head,candidate-keesmaat,candidate,keesmaat,Jennifer Keesmaat,individually_published,Jennifer Keesmaat,,27,0.27,Published only in factum prose; no response-option order or missing remainder is inferred.
 probit_2018_all,candidate-tory,candidate,tory,John Tory,individually_published,Tory,1,43,0.43,Source-exact chart label retained.
 probit_2018_all,candidate-keesmaat,candidate,keesmaat,Jennifer Keesmaat,individually_published,Keesmaat,2,21,0.21,Source-exact chart label retained.
-probit_2018_all,candidate-goldy-faith,candidate,toronto_2018:goldy-faith,Faith Goldy,individually_published,Goldy,3,2,0.02,Faith Goldy is a named candidate response and is not folded into residual support.
+probit_2018_all,candidate-goldy-faith,candidate,toronto_2018:faith-goldy,Faith Goldy,individually_published,Goldy,3,2,0.02,Faith Goldy is a named candidate response and is not folded into residual support.
 probit_2018_all,other,other,,,,Other,4,1,0.01,Other is a published poll response and not an Unmeasured Candidate Tail estimate.
 probit_2018_all,undecided,undecided,,,,Undecided,5,33,0.33,Source-exact chart category retained.
 probit_2018_undecideds_removed,candidate-tory,candidate,tory,John Tory,individually_published,Tory,1,64,0.64,Dependent undecideds-removed chart.
 probit_2018_undecideds_removed,candidate-keesmaat,candidate,keesmaat,Jennifer Keesmaat,individually_published,Keesmaat,2,31,0.31,Dependent undecideds-removed chart.
-probit_2018_undecideds_removed,candidate-goldy-faith,candidate,toronto_2018:goldy-faith,Faith Goldy,individually_published,Goldy,3,3,0.03,Faith Goldy is a named candidate response and is not folded into residual support.
+probit_2018_undecideds_removed,candidate-goldy-faith,candidate,toronto_2018:faith-goldy,Faith Goldy,individually_published,Goldy,3,3,0.03,Faith Goldy is a named candidate response and is not folded into residual support.
 probit_2018_undecideds_removed,other,other,,,,Other,4,2,0.02,Other is a published poll response and not an Unmeasured Candidate Tail estimate.
 viewpoints_2023_06_02_raw,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Ana Bailão,1,7.7%,0.077,Source-exact PDF label and value.
 viewpoints_2023_06_02_raw,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,7.4%,0.074,Source-exact PDF label and value.
@@ -201,7 +201,7 @@ forum_2023_apr26_all,saunders,candidate,saunders,Mark Saunders,individually_publ
 forum_2023_apr26_all,bailao,candidate,bailao,Ana Bailão,individually_published,Ana Bailao,4,7,0.07,Source-published percentage and label preserved exactly.
 forum_2023_apr26_all,bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,5,5,0.05,Source-published percentage and label preserved exactly.
 forum_2023_apr26_all,hunter,candidate,hunter,Mitzie Hunter,individually_published,Mitzie Hunter,6,5,0.05,Source-published percentage and label preserved exactly.
-forum_2023_apr26_all,toronto_2023:davis-rob,candidate,toronto_2023:davis-rob,Rob Davis,individually_published,Rob Davis,7,2,0.02,Source-published percentage and label preserved exactly.
+forum_2023_apr26_all,toronto_2023:rob-davis,candidate,toronto_2023:rob-davis,Rob Davis,individually_published,Rob Davis,7,2,0.02,Source-published percentage and label preserved exactly.
 forum_2023_apr26_all,some_other_candidate,other,,,,Some other candidate,8,9,0.09,Source-published percentage and label preserved exactly.
 forum_2023_apr26_all,dont_know,dont_know,,,,Don’t know,9,30,0.3,Source-published percentage and label preserved exactly.
 forum_2023_apr26_decided_leaning,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,31,0.31,Source-published percentage and label preserved exactly.
@@ -210,7 +210,7 @@ forum_2023_apr26_decided_leaning,saunders,candidate,saunders,Mark Saunders,indiv
 forum_2023_apr26_decided_leaning,bailao,candidate,bailao,Ana Bailão,individually_published,Ana Bailao,4,10,0.1,Source-published percentage and label preserved exactly.
 forum_2023_apr26_decided_leaning,bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,5,8,0.08,Source-published percentage and label preserved exactly.
 forum_2023_apr26_decided_leaning,hunter,candidate,hunter,Mitzie Hunter,individually_published,Mitzie Hunter,6,7,0.07,Source-published percentage and label preserved exactly.
-forum_2023_apr26_decided_leaning,toronto_2023:davis-rob,candidate,toronto_2023:davis-rob,Rob Davis,individually_published,Rob Davis,7,3,0.03,Source-published percentage and label preserved exactly.
+forum_2023_apr26_decided_leaning,toronto_2023:rob-davis,candidate,toronto_2023:rob-davis,Rob Davis,individually_published,Rob Davis,7,3,0.03,Source-published percentage and label preserved exactly.
 forum_2023_apr26_decided_leaning,some_other_candidate,other,,,,Some other candidate,8,12,0.12,Source-published percentage and label preserved exactly.
 forum_2023_apr26_tory_decided_leaning,tory,candidate,tory,John Tory,individually_published,John Tory,1,44,0.44,Source-published percentage and label preserved exactly.
 forum_2023_apr26_tory_decided_leaning,matlow,candidate,matlow,Josh Matlow,individually_published,Josh Matlow,2,10,0.1,Source-published percentage and label preserved exactly.
@@ -218,7 +218,7 @@ forum_2023_apr26_tory_decided_leaning,bradford,candidate,bradford,Brad Bradford,
 forum_2023_apr26_tory_decided_leaning,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,4,18,0.18,Source-published percentage and label preserved exactly.
 forum_2023_apr26_tory_decided_leaning,bailao,candidate,bailao,Ana Bailão,individually_published,Ana Bailao,5,4,0.04,Source-published percentage and label preserved exactly.
 forum_2023_apr26_tory_decided_leaning,saunders,candidate,saunders,Mark Saunders,individually_published,Mark Saunders,6,6,0.06,Source-published percentage and label preserved exactly.
-forum_2023_apr26_tory_decided_leaning,toronto_2023:davis-rob,candidate,toronto_2023:davis-rob,Rob Davis,individually_published,Rob Davis,7,1,0.01,Source-published percentage and label preserved exactly.
+forum_2023_apr26_tory_decided_leaning,toronto_2023:rob-davis,candidate,toronto_2023:rob-davis,Rob Davis,individually_published,Rob Davis,7,1,0.01,Source-published percentage and label preserved exactly.
 forum_2023_apr26_tory_decided_leaning,hunter,candidate,hunter,Mitzie Hunter,individually_published,Mitzie Hunter,8,4,0.04,Source-published percentage and label preserved exactly.
 forum_2023_apr26_tory_decided_leaning,some_other_candidate,other,,,,Some other candidate,9,9,0.09,Source-published percentage and label preserved exactly.
 forum_2023_may07_decided_leaning,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,33,0.33,Source-published percentage and label preserved exactly.
@@ -274,10 +274,10 @@ forum_2023_may26_all,bailao,candidate,bailao,Ana Bailão,individually_published,
 forum_2023_may26_all,hunter,candidate,hunter,Mitzie Hunter,individually_published,Mitzie Hunter,6,6,0.06,Source-published percentage and label preserved exactly.
 forum_2023_may26_all,bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,7,4,0.04,Source-published percentage and label preserved exactly.
 forum_2023_may26_all,brown,candidate,brown,Chloe Brown,individually_published,Chloe Brown,8,1,0.01,Source-published percentage and label preserved exactly.
-forum_2023_may26_all,toronto_2023:davis-rob,candidate,toronto_2023:davis-rob,Rob Davis,individually_published,Rob Davis,9,0,0,Source-published percentage and label preserved exactly.
-forum_2023_may26_all,toronto_2023:perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Anthony Perruza,10,0,0,Source-published percentage and label preserved exactly.
-forum_2023_may26_all,toronto_2023:mammoliti-giorgio,candidate,toronto_2023:mammoliti-giorgio,Giorgio Mammoliti,individually_published,Giorgio Mammoliti,11,0,0,Source-published percentage and label preserved exactly.
-forum_2023_may26_all,toronto_2023:caesar-chavannes-celina,candidate,toronto_2023:caesar-chavannes-celina,Celina Caesar-Chavannes,individually_published,Celina Caesar-Chavannes,12,0,0,Source-published percentage and label preserved exactly.
+forum_2023_may26_all,toronto_2023:rob-davis,candidate,toronto_2023:rob-davis,Rob Davis,individually_published,Rob Davis,9,0,0,Source-published percentage and label preserved exactly.
+forum_2023_may26_all,toronto_2023:anthony-perruzza,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Anthony Perruza,10,0,0,Source-published percentage and label preserved exactly.
+forum_2023_may26_all,toronto_2023:giorgio-mammoliti,candidate,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,individually_published,Giorgio Mammoliti,11,0,0,Source-published percentage and label preserved exactly.
+forum_2023_may26_all,toronto_2023:celina-caesar-chavannes,candidate,toronto_2023:celina-caesar-chavannes,Celina Caesar-Chavannes,individually_published,Celina Caesar-Chavannes,12,0,0,Source-published percentage and label preserved exactly.
 forum_2023_may26_all,some_other_candidate,other,,,,Some other candidate,13,4,0.04,Source-published percentage and label preserved exactly.
 forum_2023_may26_all,dont_know,dont_know,,,,Don’t know,14,21,0.21,Source-published percentage and label preserved exactly.
 forum_2023_may26_decided_leaning,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,34,0.34,Source-published percentage and label preserved exactly.
@@ -289,10 +289,10 @@ forum_2023_may26_decided_leaning,bailao,candidate,bailao,Ana Bailão,individuall
 forum_2023_may26_decided_leaning,bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,7,5,0.05,Source-published percentage and label preserved exactly.
 forum_2023_may26_decided_leaning,some_other_candidate,other,,,,Some other candidate,8,8,0.08,Source-published percentage and label preserved exactly.
 forum_2023_may26_decided_leaning,brown,candidate,brown,Chloe Brown,offered_not_individually_published,Chloe Brown,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_may26_decided_leaning,toronto_2023:davis-rob,candidate,toronto_2023:davis-rob,Rob Davis,offered_not_individually_published,Rob Davis,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_may26_decided_leaning,toronto_2023:perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,offered_not_individually_published,Anthony Perruza,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_may26_decided_leaning,toronto_2023:mammoliti-giorgio,candidate,toronto_2023:mammoliti-giorgio,Giorgio Mammoliti,offered_not_individually_published,Giorgio Mammoliti,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_may26_decided_leaning,toronto_2023:caesar-chavannes-celina,candidate,toronto_2023:caesar-chavannes-celina,Celina Caesar-Chavannes,offered_not_individually_published,Celina Caesar-Chavannes,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_may26_decided_leaning,toronto_2023:rob-davis,candidate,toronto_2023:rob-davis,Rob Davis,offered_not_individually_published,Rob Davis,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_may26_decided_leaning,toronto_2023:anthony-perruzza,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,offered_not_individually_published,Anthony Perruza,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_may26_decided_leaning,toronto_2023:giorgio-mammoliti,candidate,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,offered_not_individually_published,Giorgio Mammoliti,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_may26_decided_leaning,toronto_2023:celina-caesar-chavannes,candidate,toronto_2023:celina-caesar-chavannes,Celina Caesar-Chavannes,offered_not_individually_published,Celina Caesar-Chavannes,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
 forum_2023_jun02_all,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,31,0.31,Source-published percentage and label preserved exactly.
 forum_2023_jun02_all,saunders,candidate,saunders,Mark Saunders,individually_published,Mark Saunders,2,11,0.11,Source-published percentage and label preserved exactly.
 forum_2023_jun02_all,matlow,candidate,matlow,Josh Matlow,individually_published,Josh Matlow,3,10,0.1,Source-published percentage and label preserved exactly.
@@ -301,10 +301,10 @@ forum_2023_jun02_all,bailao,candidate,bailao,Ana Bailão,individually_published,
 forum_2023_jun02_all,hunter,candidate,hunter,Mitzie Hunter,individually_published,Mitzie Hunter,6,6,0.06,Source-published percentage and label preserved exactly.
 forum_2023_jun02_all,bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,7,4,0.04,Source-published percentage and label preserved exactly.
 forum_2023_jun02_all,brown,candidate,brown,Chloe Brown,individually_published,Chloe Brown,8,2,0.02,Source-published percentage and label preserved exactly.
-forum_2023_jun02_all,toronto_2023:davis-rob,candidate,toronto_2023:davis-rob,Rob Davis,individually_published,Rob Davis,9,0,0,Source-published percentage and label preserved exactly.
-forum_2023_jun02_all,toronto_2023:perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Anthony Perruza,10,0,0,Source-published percentage and label preserved exactly.
-forum_2023_jun02_all,toronto_2023:mammoliti-giorgio,candidate,toronto_2023:mammoliti-giorgio,Giorgio Mammoliti,individually_published,Giorgio Mammoliti,11,0,0,Source-published percentage and label preserved exactly.
-forum_2023_jun02_all,toronto_2023:caesar-chavannes-celina,candidate,toronto_2023:caesar-chavannes-celina,Celina Caesar-Chavannes,individually_published,Celina Caesar-Chavannes,12,0,0,Source-published percentage and label preserved exactly.
+forum_2023_jun02_all,toronto_2023:rob-davis,candidate,toronto_2023:rob-davis,Rob Davis,individually_published,Rob Davis,9,0,0,Source-published percentage and label preserved exactly.
+forum_2023_jun02_all,toronto_2023:anthony-perruzza,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Anthony Perruza,10,0,0,Source-published percentage and label preserved exactly.
+forum_2023_jun02_all,toronto_2023:giorgio-mammoliti,candidate,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,individually_published,Giorgio Mammoliti,11,0,0,Source-published percentage and label preserved exactly.
+forum_2023_jun02_all,toronto_2023:celina-caesar-chavannes,candidate,toronto_2023:celina-caesar-chavannes,Celina Caesar-Chavannes,individually_published,Celina Caesar-Chavannes,12,0,0,Source-published percentage and label preserved exactly.
 forum_2023_jun02_all,some_other_candidate,other,,,,Some other candidate,13,5,0.05,Source-published percentage and label preserved exactly.
 forum_2023_jun02_all,dont_know,dont_know,,,,Don’t know,14,18,0.18,Source-published percentage and label preserved exactly.
 forum_2023_jun02_decided_leaning,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,38,0.38,Source-published percentage and label preserved exactly.
@@ -316,10 +316,10 @@ forum_2023_jun02_decided_leaning,some_other_candidate,other,,,,Some other candid
 forum_2023_jun02_decided_leaning,hunter,candidate,hunter,Mitzie Hunter,individually_published,Mitzie Hunter,7,7,0.07,Source-published percentage and label preserved exactly.
 forum_2023_jun02_decided_leaning,bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,8,5,0.05,Source-published percentage and label preserved exactly.
 forum_2023_jun02_decided_leaning,brown,candidate,brown,Chloe Brown,offered_not_individually_published,Chloe Brown,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun02_decided_leaning,toronto_2023:davis-rob,candidate,toronto_2023:davis-rob,Rob Davis,offered_not_individually_published,Rob Davis,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun02_decided_leaning,toronto_2023:perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,offered_not_individually_published,Anthony Perruza,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun02_decided_leaning,toronto_2023:mammoliti-giorgio,candidate,toronto_2023:mammoliti-giorgio,Giorgio Mammoliti,offered_not_individually_published,Giorgio Mammoliti,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun02_decided_leaning,toronto_2023:caesar-chavannes-celina,candidate,toronto_2023:caesar-chavannes-celina,Celina Caesar-Chavannes,offered_not_individually_published,Celina Caesar-Chavannes,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun02_decided_leaning,toronto_2023:rob-davis,candidate,toronto_2023:rob-davis,Rob Davis,offered_not_individually_published,Rob Davis,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun02_decided_leaning,toronto_2023:anthony-perruzza,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,offered_not_individually_published,Anthony Perruza,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun02_decided_leaning,toronto_2023:giorgio-mammoliti,candidate,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,offered_not_individually_published,Giorgio Mammoliti,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun02_decided_leaning,toronto_2023:celina-caesar-chavannes,candidate,toronto_2023:celina-caesar-chavannes,Celina Caesar-Chavannes,offered_not_individually_published,Celina Caesar-Chavannes,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
 forum_2023_jun09_all,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,31,0.31,Source-published percentage and label preserved exactly.
 forum_2023_jun09_all,saunders,candidate,saunders,Mark Saunders,individually_published,Mark Saunders,2,13,0.13,Source-published percentage and label preserved exactly.
 forum_2023_jun09_all,furey,candidate,furey,Anthony Furey,individually_published,Anthony Furey,3,9,0.09,Source-published percentage and label preserved exactly.
@@ -328,10 +328,10 @@ forum_2023_jun09_all,matlow,candidate,matlow,Josh Matlow,individually_published,
 forum_2023_jun09_all,hunter,candidate,hunter,Mitzie Hunter,individually_published,Mitzie Hunter,6,5,0.05,Source-published percentage and label preserved exactly.
 forum_2023_jun09_all,bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,7,3,0.03,Source-published percentage and label preserved exactly.
 forum_2023_jun09_all,brown,candidate,brown,Chloe Brown,individually_published,Chloe Brown,8,3,0.03,Source-published percentage and label preserved exactly.
-forum_2023_jun09_all,toronto_2023:mammoliti-giorgio,candidate,toronto_2023:mammoliti-giorgio,Giorgio Mammoliti,individually_published,Giorgio Mammoliti,9,1,0.01,Source-published percentage and label preserved exactly.
-forum_2023_jun09_all,toronto_2023:perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Anthony Perruza,10,0,0,Source-published percentage and label preserved exactly.
-forum_2023_jun09_all,toronto_2023:caesar-chavannes-celina,candidate,toronto_2023:caesar-chavannes-celina,Celina Caesar-Chavannes,individually_published,Celina Caesar-Chavannes,11,0,0,Source-published percentage and label preserved exactly.
-forum_2023_jun09_all,toronto_2023:davis-rob,candidate,toronto_2023:davis-rob,Rob Davis,individually_published,Rob Davis,12,0,0,Source-published percentage and label preserved exactly.
+forum_2023_jun09_all,toronto_2023:giorgio-mammoliti,candidate,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,individually_published,Giorgio Mammoliti,9,1,0.01,Source-published percentage and label preserved exactly.
+forum_2023_jun09_all,toronto_2023:anthony-perruzza,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Anthony Perruza,10,0,0,Source-published percentage and label preserved exactly.
+forum_2023_jun09_all,toronto_2023:celina-caesar-chavannes,candidate,toronto_2023:celina-caesar-chavannes,Celina Caesar-Chavannes,individually_published,Celina Caesar-Chavannes,11,0,0,Source-published percentage and label preserved exactly.
+forum_2023_jun09_all,toronto_2023:rob-davis,candidate,toronto_2023:rob-davis,Rob Davis,individually_published,Rob Davis,12,0,0,Source-published percentage and label preserved exactly.
 forum_2023_jun09_all,some_other_candidate,other,,,,Some other candidate,13,4,0.04,Source-published percentage and label preserved exactly.
 forum_2023_jun09_all,dont_know,dont_know,,,,Don’t know,14,15,0.15,Source-published percentage and label preserved exactly.
 forum_2023_jun09_decided_leaning,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,35,0.35,Source-published percentage and label preserved exactly.
@@ -343,10 +343,10 @@ forum_2023_jun09_decided_leaning,hunter,candidate,hunter,Mitzie Hunter,individua
 forum_2023_jun09_decided_leaning,bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,7,5,0.05,Source-published percentage and label preserved exactly.
 forum_2023_jun09_decided_leaning,some_other_candidate,other,,,,Some other candidate,8,10,0.1,Source-published percentage and label preserved exactly.
 forum_2023_jun09_decided_leaning,brown,candidate,brown,Chloe Brown,offered_not_individually_published,Chloe Brown,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun09_decided_leaning,toronto_2023:davis-rob,candidate,toronto_2023:davis-rob,Rob Davis,offered_not_individually_published,Rob Davis,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun09_decided_leaning,toronto_2023:perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,offered_not_individually_published,Anthony Perruza,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun09_decided_leaning,toronto_2023:mammoliti-giorgio,candidate,toronto_2023:mammoliti-giorgio,Giorgio Mammoliti,offered_not_individually_published,Giorgio Mammoliti,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun09_decided_leaning,toronto_2023:caesar-chavannes-celina,candidate,toronto_2023:caesar-chavannes-celina,Celina Caesar-Chavannes,offered_not_individually_published,Celina Caesar-Chavannes,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun09_decided_leaning,toronto_2023:rob-davis,candidate,toronto_2023:rob-davis,Rob Davis,offered_not_individually_published,Rob Davis,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun09_decided_leaning,toronto_2023:anthony-perruzza,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,offered_not_individually_published,Anthony Perruza,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun09_decided_leaning,toronto_2023:giorgio-mammoliti,candidate,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,offered_not_individually_published,Giorgio Mammoliti,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun09_decided_leaning,toronto_2023:celina-caesar-chavannes,candidate,toronto_2023:celina-caesar-chavannes,Celina Caesar-Chavannes,offered_not_individually_published,Celina Caesar-Chavannes,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
 forum_2023_jun23_all,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,26,0.26,Source-published percentage and label preserved exactly.
 forum_2023_jun23_all,bailao,candidate,bailao,Ana Bailão,individually_published,Ana Bailao,2,18,0.18,Source-published percentage and label preserved exactly.
 forum_2023_jun23_all,saunders,candidate,saunders,Mark Saunders,individually_published,Mark Saunders,3,14,0.14,Source-published percentage and label preserved exactly.
@@ -355,10 +355,10 @@ forum_2023_jun23_all,matlow,candidate,matlow,Josh Matlow,individually_published,
 forum_2023_jun23_all,hunter,candidate,hunter,Mitzie Hunter,individually_published,Mitzie Hunter,6,4,0.04,Source-published percentage and label preserved exactly.
 forum_2023_jun23_all,bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,7,2,0.02,Source-published percentage and label preserved exactly.
 forum_2023_jun23_all,brown,candidate,brown,Chloe Brown,individually_published,Chloe Brown,8,2,0.02,Source-published percentage and label preserved exactly.
-forum_2023_jun23_all,toronto_2023:perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Anthony Perruza,9,0,0,Source-published percentage and label preserved exactly.
-forum_2023_jun23_all,toronto_2023:caesar-chavannes-celina,candidate,toronto_2023:caesar-chavannes-celina,Celina Caesar-Chavannes,individually_published,Celina Caesar-Chavannes,10,0,0,Source-published percentage and label preserved exactly.
-forum_2023_jun23_all,toronto_2023:davis-rob,candidate,toronto_2023:davis-rob,Rob Davis,individually_published,Rob Davis,11,0,0,Source-published percentage and label preserved exactly.
-forum_2023_jun23_all,toronto_2023:mammoliti-giorgio,candidate,toronto_2023:mammoliti-giorgio,Giorgio Mammoliti,individually_published,Giorgio Mammoliti,12,0,0,Source-published percentage and label preserved exactly.
+forum_2023_jun23_all,toronto_2023:anthony-perruzza,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Anthony Perruza,9,0,0,Source-published percentage and label preserved exactly.
+forum_2023_jun23_all,toronto_2023:celina-caesar-chavannes,candidate,toronto_2023:celina-caesar-chavannes,Celina Caesar-Chavannes,individually_published,Celina Caesar-Chavannes,10,0,0,Source-published percentage and label preserved exactly.
+forum_2023_jun23_all,toronto_2023:rob-davis,candidate,toronto_2023:rob-davis,Rob Davis,individually_published,Rob Davis,11,0,0,Source-published percentage and label preserved exactly.
+forum_2023_jun23_all,toronto_2023:giorgio-mammoliti,candidate,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,individually_published,Giorgio Mammoliti,12,0,0,Source-published percentage and label preserved exactly.
 forum_2023_jun23_all,some_other_candidate,other,,,,Some other candidate,13,5,0.05,Source-published percentage and label preserved exactly.
 forum_2023_jun23_all,dont_know,dont_know,,,,Don’t know,14,12,0.12,Source-published percentage and label preserved exactly.
 forum_2023_jun23_decided_leaning,chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,29,0.29,Source-published percentage and label preserved exactly.
@@ -370,17 +370,17 @@ forum_2023_jun23_decided_leaning,hunter,candidate,hunter,Mitzie Hunter,individua
 forum_2023_jun23_decided_leaning,bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,7,3,0.03,Source-published percentage and label preserved exactly.
 forum_2023_jun23_decided_leaning,some_other_candidate,other,,,,Some other candidate,8,9,0.09,Source-published percentage and label preserved exactly.
 forum_2023_jun23_decided_leaning,brown,candidate,brown,Chloe Brown,offered_not_individually_published,Chloe Brown,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun23_decided_leaning,toronto_2023:davis-rob,candidate,toronto_2023:davis-rob,Rob Davis,offered_not_individually_published,Rob Davis,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun23_decided_leaning,toronto_2023:perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,offered_not_individually_published,Anthony Perruza,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun23_decided_leaning,toronto_2023:mammoliti-giorgio,candidate,toronto_2023:mammoliti-giorgio,Giorgio Mammoliti,offered_not_individually_published,Giorgio Mammoliti,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
-forum_2023_jun23_decided_leaning,toronto_2023:caesar-chavannes-celina,candidate,toronto_2023:caesar-chavannes-celina,Celina Caesar-Chavannes,offered_not_individually_published,Celina Caesar-Chavannes,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun23_decided_leaning,toronto_2023:rob-davis,candidate,toronto_2023:rob-davis,Rob Davis,offered_not_individually_published,Rob Davis,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun23_decided_leaning,toronto_2023:anthony-perruzza,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,offered_not_individually_published,Anthony Perruza,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun23_decided_leaning,toronto_2023:giorgio-mammoliti,candidate,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,offered_not_individually_published,Giorgio Mammoliti,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
+forum_2023_jun23_decided_leaning,toronto_2023:celina-caesar-chavannes,candidate,toronto_2023:celina-caesar-chavannes,Celina Caesar-Chavannes,offered_not_individually_published,Celina Caesar-Chavannes,,,,Candidate is printed in the same sample's all-respondent ballot table but omitted from this decided/leaning table; no value or row order is inferred.
 liaison_2023_04_21_22_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Bailao,1,5%,0.05,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_all,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Bradford,2,6%,0.06,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_all,candidate-chow,candidate,chow,Olivia Chow,individually_published,Chow,3,13%,0.13,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,5%,0.05,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_all,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,12%,0.12,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_04_21_22_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_04_21_22_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_all,someone-else,other,,,,Someone Else,9,3%,0.03,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_all,undecided,undecided,,,,Undecided,10,43%,0.43,Published undecided response. Detailed report display order only; questionnaire presentation order is not asserted.
@@ -390,7 +390,7 @@ liaison_2023_04_21_22_decided,candidate-chow,candidate,chow,Olivia Chow,individu
 liaison_2023_04_21_22_decided,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,2%,0.02,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_decided,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,9%,0.09,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_decided,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,21%,0.21,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_04_21_22_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,2%,0.02,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_04_21_22_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,2%,0.02,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_decided,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,19%,0.19,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_21_22_decided,someone-else,other,,,,Someone Else,9,5%,0.05,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_28_29_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Bailao,1,4%,0.04,Detailed report display order only; questionnaire presentation order is not asserted.
@@ -399,7 +399,7 @@ liaison_2023_04_28_29_all,candidate-chow,candidate,chow,Olivia Chow,individually
 liaison_2023_04_28_29_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,2%,0.02,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_28_29_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,6%,0.06,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_28_29_all,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,12%,0.12,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_04_28_29_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_04_28_29_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_28_29_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,12%,0.12,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_28_29_all,someone-else,other,,,,Someone Else,9,3%,0.03,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_28_29_all,undecided,undecided,,,,Undecided,10,38%,0.38,Published undecided response. Detailed report display order only; questionnaire presentation order is not asserted.
@@ -409,7 +409,7 @@ liaison_2023_04_28_29_decided,candidate-chow,candidate,chow,Olivia Chow,individu
 liaison_2023_04_28_29_decided,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,3%,0.03,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_28_29_decided,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,10%,0.10,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_28_29_decided,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,19%,0.19,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_04_28_29_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_04_28_29_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_28_29_decided,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,20%,0.20,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_04_28_29_decided,someone-else,other,,,,Someone Else,9,5%,0.05,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_05_06_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Bailao,1,6%,0.06,Detailed report display order only; questionnaire presentation order is not asserted.
@@ -418,7 +418,7 @@ liaison_2023_05_05_06_all,candidate-chow,candidate,chow,Olivia Chow,individually
 liaison_2023_05_05_06_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_05_06_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,7%,0.07,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_05_06_all,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_05_05_06_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_05_05_06_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_05_06_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_05_06_all,someone-else,other,,,,Someone Else,9,5%,0.05,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_05_06_all,undecided,undecided,,,,Undecided,10,32%,0.32,Published undecided response. Detailed report display order only; questionnaire presentation order is not asserted.
@@ -428,7 +428,7 @@ liaison_2023_05_05_06_decided,candidate-chow,candidate,chow,Olivia Chow,individu
 liaison_2023_05_05_06_decided,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,2%,0.02,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_05_06_decided,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,10%,0.10,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_05_06_decided,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,16%,0.16,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_05_05_06_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_05_05_06_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_05_06_decided,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,16%,0.16,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_05_06_decided,someone-else,other,,,,Someone Else,9,7%,0.07,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_12_13_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Bailao,1,5%,0.05,Detailed report display order only; questionnaire presentation order is not asserted.
@@ -437,7 +437,7 @@ liaison_2023_05_12_13_all,candidate-chow,candidate,chow,Olivia Chow,individually
 liaison_2023_05_12_13_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_12_13_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,8%,0.08,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_12_13_all,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,10%,0.10,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_05_12_13_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_05_12_13_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_12_13_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_12_13_all,someone-else,other,,,,Someone Else,9,4%,0.04,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_12_13_all,undecided,undecided,,,,Undecided,10,32%,0.32,Published undecided response. Detailed report display order only; questionnaire presentation order is not asserted.
@@ -447,7 +447,7 @@ liaison_2023_05_12_13_decided,candidate-chow,candidate,chow,Olivia Chow,individu
 liaison_2023_05_12_13_decided,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,2%,0.02,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_12_13_decided,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,12%,0.12,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_12_13_decided,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,15%,0.15,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_05_12_13_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_05_12_13_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_12_13_decided,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,16%,0.16,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_12_13_decided,someone-else,other,,,,Someone Else,9,6%,0.06,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_17_18_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Bailao,1,6%,0.06,Detailed report display order only; questionnaire presentation order is not asserted.
@@ -456,7 +456,7 @@ liaison_2023_05_17_18_all,candidate-chow,candidate,chow,Olivia Chow,individually
 liaison_2023_05_17_18_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,2%,0.02,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_17_18_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_17_18_all,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,8%,0.08,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_05_17_18_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_05_17_18_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_17_18_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,12%,0.12,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_17_18_all,someone-else,other,,,,Someone Else,9,4%,0.04,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_17_18_all,undecided,undecided,,,,Undecided,10,28%,0.28,Published undecided response. Detailed report display order only; questionnaire presentation order is not asserted.
@@ -466,7 +466,7 @@ liaison_2023_05_17_18_decided,candidate-chow,candidate,chow,Olivia Chow,individu
 liaison_2023_05_17_18_decided,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,3%,0.03,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_17_18_decided,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,15%,0.15,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_17_18_decided,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_05_17_18_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_05_17_18_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_17_18_decided,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,17%,0.17,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_17_18_decided,someone-else,other,,,,Someone Else,9,5%,0.05,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_26_27_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Bailao,1,7%,0.07,Detailed report display order only; questionnaire presentation order is not asserted.
@@ -475,7 +475,7 @@ liaison_2023_05_26_27_all,candidate-chow,candidate,chow,Olivia Chow,individually
 liaison_2023_05_26_27_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,2%,0.02,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_26_27_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,10%,0.10,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_26_27_all,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,8%,0.08,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_05_26_27_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_05_26_27_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_26_27_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,10%,0.10,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_26_27_all,someone-else,other,,,,Someone Else,9,7%,0.07,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_26_27_all,undecided,undecided,,,,Undecided,10,27%,0.27,Published undecided response. Detailed report display order only; questionnaire presentation order is not asserted.
@@ -485,7 +485,7 @@ liaison_2023_05_26_27_decided,candidate-chow,candidate,chow,Olivia Chow,individu
 liaison_2023_05_26_27_decided,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,3%,0.03,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_26_27_decided,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,14%,0.14,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_26_27_decided,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_05_26_27_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_05_26_27_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,1%,0.01,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_26_27_decided,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,14%,0.14,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_05_26_27_decided,someone-else,other,,,,Someone Else,9,10%,0.10,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_03_04_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Bailao,1,7%,0.07,Detailed report display order only; questionnaire presentation order is not asserted.
@@ -494,7 +494,7 @@ liaison_2023_06_03_04_all,candidate-chow,candidate,chow,Olivia Chow,individually
 liaison_2023_06_03_04_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,5%,0.05,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_03_04_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,9%,0.09,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_03_04_all,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,9%,0.09,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_06_03_04_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_06_03_04_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_03_04_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_03_04_all,someone-else,other,,,,Someone Else,9,6%,0.06,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_03_04_all,undecided,undecided,,,,Undecided,10,21%,0.21,Published undecided response. Detailed report display order only; questionnaire presentation order is not asserted.
@@ -504,7 +504,7 @@ liaison_2023_06_03_04_decided,candidate-chow,candidate,chow,Olivia Chow,individu
 liaison_2023_06_03_04_decided,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,6%,0.06,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_03_04_decided,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_03_04_decided,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_06_03_04_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_06_03_04_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_03_04_decided,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,14%,0.14,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_03_04_decided,someone-else,other,,,,Someone Else,9,7%,0.07,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_10_11_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Bailao,1,8%,0.08,Detailed report display order only; questionnaire presentation order is not asserted.
@@ -513,7 +513,7 @@ liaison_2023_06_10_11_all,candidate-chow,candidate,chow,Olivia Chow,individually
 liaison_2023_06_10_11_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,7%,0.07,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_10_11_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,7%,0.07,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_10_11_all,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,10%,0.10,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_06_10_11_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_06_10_11_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_10_11_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,12%,0.12,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_10_11_all,someone-else,other,,,,Someone Else,9,4%,0.04,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_10_11_all,undecided,undecided,,,,Undecided,10,18%,0.18,Published undecided response. Detailed report display order only; questionnaire presentation order is not asserted.
@@ -523,7 +523,7 @@ liaison_2023_06_10_11_decided,candidate-chow,candidate,chow,Olivia Chow,individu
 liaison_2023_06_10_11_decided,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,9%,0.09,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_10_11_decided,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,9%,0.09,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_10_11_decided,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,12%,0.12,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_06_10_11_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_06_10_11_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_10_11_decided,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,15%,0.15,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_10_11_decided,someone-else,other,,,,Someone Else,9,5%,0.05,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_12_13_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Bailao,1,9%,0.09,Detailed report display order only; questionnaire presentation order is not asserted.
@@ -532,7 +532,7 @@ liaison_2023_06_12_13_all,candidate-chow,candidate,chow,Olivia Chow,individually
 liaison_2023_06_12_13_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,7%,0.07,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_12_13_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,7%,0.07,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_12_13_all,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,14%,0.14,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_06_12_13_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_06_12_13_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_12_13_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,14%,0.14,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_12_13_all,someone-else,other,,,,Someone Else,9,5%,0.05,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_12_13_all,undecided,undecided,,,,Undecided,10,13%,0.13,Published undecided response. Detailed report display order only; questionnaire presentation order is not asserted.
@@ -542,7 +542,7 @@ liaison_2023_06_12_13_decided,candidate-chow,candidate,chow,Olivia Chow,individu
 liaison_2023_06_12_13_decided,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,8%,0.08,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_12_13_decided,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,8%,0.08,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_12_13_decided,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,16%,0.16,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_06_12_13_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_06_12_13_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_12_13_decided,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,16%,0.16,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_12_13_decided,someone-else,other,,,,Someone Else,9,5%,0.05,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_17_18_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Bailao,1,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
@@ -551,7 +551,7 @@ liaison_2023_06_17_18_all,candidate-chow,candidate,chow,Olivia Chow,individually
 liaison_2023_06_17_18_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,9%,0.09,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_17_18_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,6%,0.06,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_17_18_all,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_06_17_18_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_06_17_18_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_17_18_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,14%,0.14,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_17_18_all,someone-else,other,,,,Someone Else,9,7%,0.07,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_17_18_all,undecided,undecided,,,,Undecided,10,12%,0.12,Published undecided response. Detailed report display order only; questionnaire presentation order is not asserted.
@@ -561,7 +561,7 @@ liaison_2023_06_17_18_decided,candidate-chow,candidate,chow,Olivia Chow,individu
 liaison_2023_06_17_18_decided,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,10%,0.10,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_17_18_decided,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,7%,0.07,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_17_18_decided,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,13%,0.13,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_06_17_18_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_06_17_18_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_17_18_decided,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,16%,0.16,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_17_18_decided,someone-else,other,,,,Someone Else,9,8%,0.08,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_22_23_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Bailao,1,15%,0.15,Detailed report display order only; questionnaire presentation order is not asserted.
@@ -570,7 +570,7 @@ liaison_2023_06_22_23_all,candidate-chow,candidate,chow,Olivia Chow,individually
 liaison_2023_06_22_23_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,10%,0.10,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_22_23_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,5%,0.05,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_22_23_all,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,9%,0.09,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_06_22_23_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_06_22_23_all,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_22_23_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,14%,0.14,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_22_23_all,someone-else,other,,,,Someone Else,9,5%,0.05,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_22_23_all,undecided,undecided,,,,Undecided,10,9%,0.09,Published undecided response. Detailed report display order only; questionnaire presentation order is not asserted.
@@ -580,7 +580,7 @@ liaison_2023_06_22_23_decided,candidate-chow,candidate,chow,Olivia Chow,individu
 liaison_2023_06_22_23_decided,candidate-furey,candidate,furey,Anthony Furey,individually_published,Furey,4,11%,0.11,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_22_23_decided,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Hunter,5,6%,0.06,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_22_23_decided,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Matlow,6,10%,0.10,Detailed report display order only; questionnaire presentation order is not asserted.
-liaison_2023_06_22_23_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:perruzza-anthony,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
+liaison_2023_06_22_23_decided,candidate-toronto_2023-perruzza-anthony,candidate,toronto_2023:anthony-perruzza,Anthony Perruzza,individually_published,Perruzza,7,0%,0.00,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_22_23_decided,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Saunders,8,16%,0.16,Detailed report display order only; questionnaire presentation order is not asserted.
 liaison_2023_06_22_23_decided,someone-else,other,,,,Someone Else,9,5%,0.05,Published Someone Else response; retained separately from undecided. Detailed report display order only; questionnaire presentation order is not asserted.
 mainstreet_2023_feb14_all,wouldnt-vote,would_not_vote,,,,Wouldn’t vote,1,6.8%,0.068,
@@ -610,8 +610,8 @@ mainstreet_2023_mar19_all,candidate-matlow,candidate,matlow,Josh Matlow,individu
 mainstreet_2023_mar19_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Mark Saunders,5,5%,0.05,
 mainstreet_2023_mar19_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Mitzie Hunter,6,7.1%,0.071,
 mainstreet_2023_mar19_all,candidate-penalosa,candidate,penalosa,Gil Peñalosa,individually_published,Gil Penalosa,7,9.1%,0.091,
-mainstreet_2023_mar19_all,candidate-mammoliti,candidate,toronto_2023:mammoliti-giorgio,Giorgio Mammoliti,individually_published,Georgio Mammolitti,8,3.9%,0.039,
-mainstreet_2023_mar19_all,candidate-davis,candidate,toronto_2023:davis-rob,Rob Davis,individually_published,Rob Davis,9,1.3%,0.013,
+mainstreet_2023_mar19_all,candidate-mammoliti,candidate,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,individually_published,Georgio Mammolitti,8,3.9%,0.039,
+mainstreet_2023_mar19_all,candidate-davis,candidate,toronto_2023:rob-davis,Rob Davis,individually_published,Rob Davis,9,1.3%,0.013,
 mainstreet_2023_mar19_all,someone-else,other,,,,Someone else,10,7.8%,0.078,
 mainstreet_2023_mar19_named_field_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Ana Bailao,1,16.8%,0.168,
 mainstreet_2023_mar19_named_field_all,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,6.4%,0.064,
@@ -626,14 +626,14 @@ mainstreet_2023_apr13_all,candidate-matlow,candidate,matlow,Josh Matlow,individu
 mainstreet_2023_apr13_all,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Mark Saunders,4,10.3%,0.103,
 mainstreet_2023_apr13_all,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Mitzie Hunter,5,5.8%,0.058,
 mainstreet_2023_apr13_all,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,6,13.2%,0.132,
-mainstreet_2023_apr13_all,candidate-mammoliti,candidate,toronto_2023:mammoliti-giorgio,Giorgio Mammoliti,individually_published,Georgio Mammolitti,7,3.4%,0.034,
-mainstreet_2023_apr13_all,candidate-davis,candidate,toronto_2023:davis-rob,Rob Davis,individually_published,Rob Davis,8,0.9%,0.009,
+mainstreet_2023_apr13_all,candidate-mammoliti,candidate,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,individually_published,Georgio Mammolitti,7,3.4%,0.034,
+mainstreet_2023_apr13_all,candidate-davis,candidate,toronto_2023:rob-davis,Rob Davis,individually_published,Rob Davis,8,0.9%,0.009,
 mainstreet_2023_apr13_all,candidate-penalosa,candidate,penalosa,Gil Peñalosa,individually_published,Gil Penalosa,9,3.3%,0.033,
 mainstreet_2023_apr13_all,candidate-brown,candidate,brown,Chloe Brown,individually_published,Chloe Brown,10,3.1%,0.031,
-mainstreet_2023_apr13_all,candidate-saccoccia,candidate,toronto_2023:saccoccia-chris,Chris Saccoccia,individually_published,Chris Saccoccia,11,2%,0.02,
-mainstreet_2023_apr13_all,candidate-caesar-chavannes,candidate,toronto_2023:caesar-chavannes-celina,Celina Caesar-Chavannes,individually_published,Celina Caesar-Chavannes,12,0.7%,0.007,
+mainstreet_2023_apr13_all,candidate-saccoccia,candidate,toronto_2023:chris-saccoccia,Chris Saccoccia,individually_published,Chris Saccoccia,11,2%,0.02,
+mainstreet_2023_apr13_all,candidate-caesar-chavannes,candidate,toronto_2023:celina-caesar-chavannes,Celina Caesar-Chavannes,individually_published,Celina Caesar-Chavannes,12,0.7%,0.007,
 mainstreet_2023_apr13_all,candidate-furey,candidate,furey,Anthony Furey,individually_published,Anthony Furey,13,2.1%,0.021,
-mainstreet_2023_apr13_all,candidate-dangelo,candidate,toronto_2023:d-angelo-frank,Frank D'Angelo,individually_published,Frank D’Angelo,14,1.6%,0.016,
+mainstreet_2023_apr13_all,candidate-dangelo,candidate,toronto_2023:frank-d-angelo,Frank D'Angelo,individually_published,Frank D’Angelo,14,1.6%,0.016,
 mainstreet_2023_apr13_all,candidate-acton,candidate,acton,Blake Acton,individually_published,Blake Acton,15,0.5%,0.005,
 mainstreet_2023_apr13_all,someone-else,other,,,,Someone else,16,0.4%,0.004,
 mainstreet_2023_apr13_all,undecided,undecided,,,,Undecided,17,10.4%,0.104,
@@ -643,8 +643,8 @@ mainstreet_2023_apr13_no_chow,candidate-bradford,candidate,bradford,Brad Bradfor
 mainstreet_2023_apr13_no_chow,candidate-matlow,candidate,matlow,Josh Matlow,individually_published,Josh Matlow,3,23.7%,0.237,
 mainstreet_2023_apr13_no_chow,candidate-saunders,candidate,saunders,Mark Saunders,individually_published,Mark Saunders,4,5.3%,0.053,
 mainstreet_2023_apr13_no_chow,candidate-hunter,candidate,hunter,Mitzie Hunter,individually_published,Mitzie Hunter,5,14.3%,0.143,
-mainstreet_2023_apr13_no_chow,candidate-mammoliti,candidate,toronto_2023:mammoliti-giorgio,Giorgio Mammoliti,individually_published,Georgio Mammolitti,6,4.5%,0.045,
-mainstreet_2023_apr13_no_chow,candidate-davis,candidate,toronto_2023:davis-rob,Rob Davis,individually_published,Rob Davis,7,0.9%,0.009,
+mainstreet_2023_apr13_no_chow,candidate-mammoliti,candidate,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,individually_published,Georgio Mammolitti,6,4.5%,0.045,
+mainstreet_2023_apr13_no_chow,candidate-davis,candidate,toronto_2023:rob-davis,Rob Davis,individually_published,Rob Davis,7,0.9%,0.009,
 mainstreet_2023_apr13_no_chow,someone-else,other,,,,Someone else,8,15.1%,0.151,
 mainstreet_2023_apr13_no_chow,undecided,undecided,,,,Undecided,9,0.3%,0.003,
 mainstreet_2023_apr20_all,candidate-bailao,candidate,bailao,Ana Bailão,individually_published,Ana Bailao,1,13.3%,0.133,

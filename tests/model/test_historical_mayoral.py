@@ -30,13 +30,7 @@ def test_committed_tables_equal_a_fresh_source_reconstruction() -> None:
     )
     assert _rows("data/raw/elections/mayoral_outcomes.csv") == (
         build_mayoral_outcome_rows(
-            {
-                2003: ROOT / "data/raw/elections/mayoral_results_2003_official.csv",
-                2006: ROOT / "data/raw/elections/mayoral_results_2006_official.csv",
-                2010: ROOT / "data/raw/elections/mayoral_results_2010_official.csv",
-                2014: ROOT / "data/raw/elections/mayoral_results_2014_official.csv",
-            },
-            ROOT / "data/raw/elections/mayoral_results.csv",
+            ROOT / "data/raw/canonical/toronto_election_results.csv"
         )
     )
     assert _rows("data/raw/polls/legacy_historical_poll_crosswalk.csv") == (
@@ -84,7 +78,7 @@ def test_outcomes_are_complete_candidate_level_official_results() -> None:
             for row in corpus.outcome_universe("toronto_2018")
             if row.candidate_id == "tory"
         ).candidate_name_as_reported
-        == "Tory John"
+        == "John Tory"
     )
     assert (
         next(
@@ -92,7 +86,7 @@ def test_outcomes_are_complete_candidate_level_official_results() -> None:
             for row in corpus.outcome_universe("toronto_2023")
             if row.candidate_id == "chow"
         ).candidate_name_as_reported
-        == "Chow Olivia"
+        == "Olivia Chow"
     )
     assert all("_" not in row.candidate_id.split(":", 1)[-1] for row in corpus.outcomes)
 

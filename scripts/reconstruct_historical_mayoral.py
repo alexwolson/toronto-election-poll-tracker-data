@@ -41,13 +41,7 @@ TABLES = (
         ROOT / "data/raw/elections/mayoral_outcomes.csv",
         OUTCOME_COLUMNS,
         lambda: build_mayoral_outcome_rows(
-            {
-                2003: ROOT / "data/raw/elections/mayoral_results_2003_official.csv",
-                2006: ROOT / "data/raw/elections/mayoral_results_2006_official.csv",
-                2010: ROOT / "data/raw/elections/mayoral_results_2010_official.csv",
-                2014: ROOT / "data/raw/elections/mayoral_results_2014_official.csv",
-            },
-            ROOT / "data/raw/elections/mayoral_results.csv",
+            ROOT / "data/raw/canonical/toronto_election_results.csv",
         ),
     ),
     (

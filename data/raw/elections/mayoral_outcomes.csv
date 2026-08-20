@@ -1,356 +1,356 @@
 election_cycle_id,candidate_id,candidate_name,candidate_name_as_reported,votes,valid_vote_total,share,is_winner,source_document_id,source_locator
-toronto_2003,hall,Barbara Hall,"Hall, Barbara",63751,692085,0.092114407912322908,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,miller,David Miller,"Miller, David",299385,692085,0.432584147900908125,true,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,nunziata,John Nunziata,"Nunziata, John",36021,692085,0.052047075142504172,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:andrews-don,"Andrews, Don","Andrews, Don",1220,692085,0.001762789252765195,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:benner-gary,"Benner, Gary","Benner, Gary",802,692085,0.001158817197309579,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:brausewetter-michael,"Brausewetter, Michael","Brausewetter, Michael",672,692085,0.000970978998244435,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:campbell-douglas,"Campbell, Douglas","Campbell, Douglas",2197,692085,0.003174465564200929,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:castillo-jaime,"Castillo, Jaime","Castillo, Jaime",1616,692085,0.002334973305302094,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:clarke-kevin,"Clarke, Kevin","Clarke, Kevin",804,692085,0.001161707015756735,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:cocon-axcel,"Cocon, Axcel","Cocon, Axcel",498,692085,0.000719564793341858,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:csak-kendal,"Csak, Kendal","Csak, Kendal",193,692085,0.000278867480150560,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:derome-gerald,"Derome, Gerald","Derome, Gerald",278,692085,0.000401684764154692,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:dhir-hardy,"Dhir, Hardy","Dhir, Hardy",199,692085,0.000287536935492028,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:glisic-aleksandar,"Glisic, Aleksandar","Glisic, Aleksandar",420,692085,0.000606861873902772,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:gold-mitch,"Gold, Mitch","Gold, Mitch",412,692085,0.000595302600114148,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:graham-ronald,"Graham, Ronald","Graham, Ronald",619,692085,0.000894398809394800,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:hartnett-john,"Hartnett, John","Hartnett, John",803,692085,0.001160262106533157,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:hossain-monowar,"Hossain, Monowar","Hossain, Monowar",537,692085,0.000775916253061401,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:howell-albert,"Howell, Albert","Howell, Albert",717,692085,0.001035999913305447,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:jahshan-john,"Jahshan, John","Jahshan, John",703,692085,0.001015771184175354,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:jakobek-tom,"Jakobek, Tom","Jakobek, Tom",5277,692085,0.007624785972821258,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:kerr-ben,"Kerr, Ben","Kerr, Ben",433,692085,0.000625645693809286,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:lewin-paul,"Lewin, Paul","Lewin, Paul",271,692085,0.000391570399589646,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:lichacz-david,"Lichacz, David","Lichacz, David",659,692085,0.000952195178337921,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:makhoul-elias,"Makhoul, Elias","Makhoul, Elias",644,692085,0.000930521539984250,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:mbaegbu-benjamin,"Mbaegbu, Benjamin","Mbaegbu, Benjamin",288,692085,0.000416133856390472,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:mcauliffe-timothy,"McAuliffe, Timothy","McAuliffe, Timothy",821,692085,0.001186270472557562,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:naimji-duri,"Naimji, Duri","Naimji, Duri",569,692085,0.000822153348215898,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:narula-ram,"Narula, Ram","Narula, Ram",645,692085,0.000931966449207829,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:o-beirne-patricia,"O'Beirne, Patricia","O'Beirne, Patricia",358,692085,0.000517277502040934,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:peters-fen,"Peters, Fen","Peters, Fen",598,692085,0.000864055715699661,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:pletch-barry,"Pletch, Barry","Pletch, Barry",110,692085,0.000158940014593583,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:poremski-daniel,"Poremski, Daniel","Poremski, Daniel",627,692085,0.000905958083183424,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:prashad-rabindra,"Prashad, Rabindra","Prashad, Rabindra",271,692085,0.000391570399589646,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:safi-hashmat,"Safi, Hashmat","Safi, Hashmat",383,692085,0.000553400232630385,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:shaw-simon,"Shaw, Simon","Shaw, Simon",376,692085,0.000543285868065339,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:shehab-ahmad,"Shehab, Ahmad","Shehab, Ahmad",2084,692085,0.003011190821936612,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:silva-luis,"Silva, Luis","Silva, Luis",1305,692085,0.001885606536769327,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:van-wyk-abel,"Van Wyk, Abel","Van Wyk, Abel",332,692085,0.000479709862227906,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:wadhwa-ratan,"Wadhwa, Ratan","Wadhwa, Ratan",121,692085,0.000174834016052941,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:weston-richard,"Weston, Richard","Weston, Richard",133,692085,0.000192172926735878,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:yagiz-mehmet,"Yagiz, Mehmet","Yagiz, Mehmet",193,692085,0.000278867480150560,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,toronto_2003:yee-scott,"Yee, Scott","Yee, Scott",551,692085,0.000796144982191494,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2003,tory,John Tory,"Tory, John",263189,692085,0.380284213644277798,false,toronto_open_data_2003_results,2003 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,miller,David Miller,MILLER DAVID,332969,584484,0.569680264985867877,true,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,pitfield,Jane Pitfield,PITFIELD JANE,188932,584484,0.323245803135757352,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:alexander-michael,ALEXANDER MICHAEL,ALEXANDER MICHAEL,5247,584484,0.008977149075081610,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:brooks-nicholas,BROOKS NICHOLAS,BROOKS NICHOLAS,1397,584484,0.002390142416216697,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:bruce-shaun,BRUCE SHAUN,BRUCE SHAUN,2820,584484,0.004824768513765988,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:campbell-douglas,CAMPBELL DOUGLAS,CAMPBELL DOUGLAS,4183,584484,0.007156739962086216,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:castillo-jaime,CASTILLO JAIME,CASTILLO JAIME,5215,584484,0.008922399928826110,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:clarke-kevin,CLARKE KEVIN,CLARKE KEVIN,2081,584484,0.003560405417428022,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:coles-glenn,COLES GLENN,COLES GLENN,1019,584484,0.001743418126073597,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:deb-soumen,DEB SOUMEN,DEB SOUMEN,517,584484,0.000884540894190431,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:derome-gerald,DEROME GERALD,DEROME GERALD,578,584484,0.000988906454239979,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:dicks-david,DICKS DAVID,DICKS DAVID,1283,584484,0.002195098582681476,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:dumoulin-dave,DUMOULIN DAVE,DUMOULIN DAVE,601,584484,0.001028257403111120,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:gold-mitch,GOLD MITCH,GOLD MITCH,880,584484,0.001505601522026266,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:goldhar-ryan,GOLDHAR RYAN,GOLDHAR RYAN,787,584484,0.001346486815721217,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:hossain-monowar,HOSSAIN MONOWAR,HOSSAIN MONOWAR,2726,584484,0.004663942896640456,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:jackson-hazel,JACKSON HAZEL,JACKSON HAZEL,3333,584484,0.005702465764674482,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:korolnek-mark,KOROLNEK MARK,KOROLNEK MARK,1079,584484,0.001846072775302660,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:ledrew-stephen,LEDREW STEPHEN,LEDREW STEPHEN,8078,584484,0.013820737607872927,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:maxted-diana-de,MAXTED DIANA-DE,MAXTED DIANA-DE,1311,584484,0.002243004085655039,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:muir-rodney,MUIR RODNEY,MUIR RODNEY,1458,584484,0.002494507976266245,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:naimji-duri,NAIMJI DURI,NAIMJI DURI,1240,584484,0.002121529417400647,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:porter-john,PORTER JOHN,PORTER JOHN,1348,584484,0.002306307786012962,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:romano-lee,ROMANO LEE,ROMANO LEE,3108,584484,0.005317510830065494,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:rubinovich-joel,RUBINOVICH JOEL,RUBINOVICH JOEL,1642,584484,0.002809315567235373,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:schiebel-david,SCHIEBEL DAVID,SCHIEBEL DAVID,498,584484,0.000852033588601228,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:sheldon-paul,SHELDON PAUL,SHELDON PAUL,624,584484,0.001067608351982261,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:shipley-thomas,SHIPLEY THOMAS,SHIPLEY THOMAS,574,584484,0.000982062810958042,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:sit-adam,SIT ADAM,SIT ADAM,663,584484,0.001134333873981153,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:smith-bob,SMITH BOB,SMITH BOB,1105,584484,0.001890556456635254,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:state-mark,STATE MARK,STATE MARK,194,584484,0.000331916699173972,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:styrsky-peter,STYRSKY PETER,STYRSKY PETER,945,584484,0.001616810725357751,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:vallance-david,VALLANCE DAVID,VALLANCE DAVID,486,584484,0.000831502658755415,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:wadhwa-ratan,WADHWA RATAN,WADHWA RATAN,696,584484,0.001190793931057138,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:weingust-john,WEINGUST JOHN,WEINGUST JOHN,312,584484,0.000533804175991131,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:yagiz-mehmet-ali,YAGIZ MEHMET ALI,YAGIZ MEHMET ALI,753,584484,0.001288315847824748,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:yee-scott,YEE SCOTT,YEE SCOTT,1538,584484,0.002631380841904997,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2006,toronto_2006:young-joseph,YOUNG JOSEPH,YOUNG JOSEPH,2264,584484,0.003873502097576666,false,toronto_open_data_2006_results,2006 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,pantalone,Joe Pantalone,PANTALONE JOE,95482,813984,0.117302059991351181,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,rob-ford,Rob Ford,FORD ROB,383501,813984,0.471140710382513661,true,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,rossi,Rocco Rossi,ROSSI ROCCO,5012,813984,0.006157369186617919,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,smitherman,George Smitherman,SMITHERMAN GEORGE,289832,813984,0.356065966898612258,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,thomson,Sarah Thomson,THOMSON SARAH,1883,813984,0.002313313283799190,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:achampong-rocco,ACHAMPONG ROCCO,ACHAMPONG ROCCO,2805,813984,0.003446013680858592,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:alexander-michael,ALEXANDER MICHAEL,ALEXANDER MICHAEL,2470,813984,0.003034457679757833,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:andrews-don,ANDREWS DON,ANDREWS DON,1032,813984,0.001267838188465621,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:babula-george,BABULA GEORGE,BABULA GEORGE,3273,813984,0.004020963557023234,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:ball-christopher,BALL CHRISTOPHER,BALL CHRISTOPHER,696,813984,0.000855053661988442,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:brausewetter-michael,BRAUSEWETTER MICHAEL,BRAUSEWETTER MICHAEL,796,813984,0.000977906199630460,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:campbell-douglas,CAMPBELL DOUGLAS,CAMPBELL DOUGLAS,1428,813984,0.001754334237528010,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:castillo-jaime,CASTILLO JAIME,CASTILLO JAIME,1874,813984,0.002302256555411409,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:clarke-kevin,CLARKE KEVIN,CLARKE KEVIN,1411,813984,0.001733449306128867,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:cole-keith,COLE KEITH,COLE KEITH,801,813984,0.000984048826512560,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:cottle-charlene,COTTLE CHARLENE,COTTLE CHARLENE,733,813984,0.000900509100915989,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:derome-gerald,DEROME GERALD,DEROME GERALD,251,813984,0.000308359869481464,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:devenyi-diane,DEVENYI DIANE,DEVENYI DIANE,629,813984,0.000772742461768290,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:di-fiore-james,DI FIORE JAMES,DI FIORE JAMES,655,813984,0.000804684121555215,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:epstein-david,EPSTEIN DAVID,EPSTEIN DAVID,1202,813984,0.001476687502457051,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:firth-selwyn,FIRTH SELWYN,FIRTH SELWYN,394,813984,0.000484038998309549,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:flie-michael,FLIE MICHAEL,FLIE MICHAEL,1190,813984,0.001461945197940009,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:ghazi-abdullah-baquie,GHAZI ABDULLAH-BAQUIE,GHAZI ABDULLAH-BAQUIE,2761,813984,0.003391958564296104,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:gomberg-howard,GOMBERG HOWARD,GOMBERG HOWARD,477,813984,0.000586006604552424,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:goodhead-barry,GOODHEAD BARRY,GOODHEAD BARRY,740,813984,0.000909108778550930,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:hossain-monowar,HOSSAIN MONOWAR,HOSSAIN MONOWAR,1194,813984,0.001466859299445689,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:lee-dewitt,LEE DEWITT,LEE DEWITT,1699,813984,0.002087264614537878,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:letonja-john,LETONJA JOHN,LETONJA JOHN,592,813984,0.000727287022840744,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:macklin-carmen,MACKLIN CARMEN,MACKLIN CARMEN,575,813984,0.000706402091441601,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:magee-colin,MAGEE COLIN,MAGEE COLIN,401,813984,0.000492638675944490,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:pampena-joseph,PAMPENA JOSEPH,PAMPENA JOSEPH,1319,813984,0.001620424971498211,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:sarma-vijay,SARMA VIJAY,SARMA VIJAY,2264,813984,0.002781381452215277,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:state-mark,STATE MARK,STATE MARK,438,813984,0.000538094114872037,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:steinberger-tibor,STEINBERGER TIBOR,STEINBERGER TIBOR,735,813984,0.000902966151668829,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:syed-himy,SYED HIMY,SYED HIMY,582,813984,0.000715001769076542,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:tang-weizhen,TANG WEIZHEN,TANG WEIZHEN,890,813984,0.001093387585013956,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:taylor-phil,TAYLOR PHIL,TAYLOR PHIL,429,813984,0.000527037386484255,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:vallance-david,VALLANCE DAVID,VALLANCE DAVID,444,813984,0.000545465267130558,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:wadhwa-ratan,WADHWA RATAN,WADHWA RATAN,290,813984,0.000356272359161851,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2010,toronto_2010:walker-daniel,WALKER DANIEL,WALKER DANIEL,804,813984,0.000987734402641821,false,toronto_open_data_2010_results,2010 Poll-by-Poll Mayor workbook; 44 ward sheets aggregated citywide
-toronto_2014,chow,Olivia Chow,Olivia Chow,227003,981054,0.231386855361682435,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,doug-ford,Doug Ford,Doug Ford,331006,981054,0.337398349122474400,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:ari-goldkind,Ari Goldkind,Ari Goldkind,3916,981054,0.003991625333569814,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:ashok-sajnani,Ashok Sajnani,Ashok Sajnani,368,981054,0.000375106772919737,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:carlie-ritch,Carlie Ritch,Carlie Ritch,194,981054,0.000197746505289209,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:chai-kalevar,Chai Kalevar,Chai Kalevar,102,981054,0.000103969812059275,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:charles-huang,Charles Huang,Charles Huang,134,981054,0.000136587792313165,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:chinh-huynh,Chinh Huynh,Chinh Huynh,312,981054,0.000318025307475429,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:christina-van-eyck,Christina Van Eyck,Christina Van Eyck,203,981054,0.000206920312235616,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:christopher-ball,Christopher Ball,Christopher Ball,377,981054,0.000384280579866144,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:d-onne-renee,D!ONNE Renée,D!ONNE Renée,323,981054,0.000329237738187704,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:daniel-walker,Daniel Walker,Daniel Walker,162,981054,0.000165128525035319,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:dave-mckay,Dave McKay,Dave McKay,407,981054,0.000414859936354166,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:dewitt-lee,Dewitt Lee,Dewitt Lee,489,981054,0.000498443510754760,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:diana-maxted,Diana Maxted,Diana Maxted,117,981054,0.000119259490303286,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:don-andrews,Don Andrews,Don Andrews,1012,981054,0.001031543625529278,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:donovan-searchwell,Donovan Searchwell,Donovan Searchwell,90,981054,0.000091738069464066,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:erwin-sniedzins,Erwin Sniedzins,Erwin Sniedzins,105,981054,0.000107027747708077,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:frank-burgess,Frank Burgess,Frank Burgess,335,981054,0.000341469480782913,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:gary-mcbean,Gary McBean,Gary McBean,135,981054,0.000137607104196099,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:george-dedopoulos,George Dedopoulos,George Dedopoulos,941,981054,0.000959172481840959,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:himy-syed,Hïmy Syed,Hïmy Syed,465,981054,0.000473980025564342,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:jack-weenen,Jack Weenen,Jack Weenen,52,981054,0.000053004217912572,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:jamie-shannon,Jamie Shannon,Jamie Shannon,156,981054,0.000159012653737715,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:jeff-billard,Jeff Billard,Jeff Billard,288,981054,0.000293561822285012,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:jim-ruel,Jim Ruel,Jim Ruel,110,981054,0.000112124307122748,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:jon-karsemeyer,Jon Karsemeyer,Jon Karsemeyer,232,981054,0.000236480356840704,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:jonathan-bliguin,Jonathan Bliguin,Jonathan Bliguin,207,981054,0.000210997559767352,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:jonathan-glaister,Jonathan Glaister,Jonathan Glaister,748,981054,0.000762445288434684,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:josh-rachlis,Josh Rachlis,Josh Rachlis,201,981054,0.000204881688469748,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:kevin-clarke,Kevin Clarke,Kevin Clarke,547,981054,0.000557563599964936,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:klim-khomenko,Klim Khomenko,Klim Khomenko,186,981054,0.000189592010225737,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:lee-romanov,Lee Romanov,Lee Romanov,271,981054,0.000276233520275133,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:leo-gambin,Leo Gambin,Leo Gambin,165,981054,0.000168186460684121,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:mark-cidade,Mark Cidade,Mark Cidade,453,981054,0.000461748282969133,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:matt-mernagh,Matt Mernagh,Matt Mernagh,102,981054,0.000103969812059275,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:matthew-crack,Matthew Crack,Matthew Crack,366,981054,0.000373068149153869,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:matthew-wong,Matthew Wong,Matthew Wong,491,981054,0.000500482134520628,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:michael-gordon,Michael Gordon,Michael Gordon,388,981054,0.000395493010578419,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:michael-nicula,Michael Nicula,Michael Nicula,145,981054,0.000147800223025440,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:michael-tasevski,Michael Tasevski,Michael Tasevski,319,981054,0.000325160490655968,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:michael-tramov,Michael Tramov,Michael Tramov,560,981054,0.000570814654443079,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:mike-gallay,Mike Gallay,Mike Gallay,570,981054,0.000581007773272419,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:mohammad-okhovat,Mohammad Okhovat,Mohammad Okhovat,318,981054,0.000324141178773034,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:monowar-hossain,Monowar Hossain,Monowar Hossain,614,981054,0.000625857496121518,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:morgan-baskin,Morgan Baskin,Morgan Baskin,1009,981054,0.001028485689880475,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:oweka-arac-ongwen,Oweka-Arac Ongwen,Oweka-Arac Ongwen,56,981054,0.000057081465444308,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:pat-roberge,Pat Roberge,Pat Roberge,273,981054,0.000278272144041001,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:radu-popescu,Radu Popescu,Radu Popescu,233,981054,0.000237499668723638,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:ram-narula,Ram Narula,Ram Narula,156,981054,0.000159012653737715,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:ramnarine-tiwari,Ramnarine Tiwari,Ramnarine Tiwari,1008,981054,0.001027466377997541,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:ratan-wadhwa,Ratan Wadhwa,Ratan Wadhwa,73,981054,0.000074409767454187,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:rene-viau,René Viau,René Viau,69,981054,0.000070332519922451,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:robb-johannes,Robb Johannes,Robb Johannes,756,981054,0.000770599783498156,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:rocco-di-paola,Rocco Di Paola,Rocco Di Paola,1557,981054,0.001587068601728345,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:russell-saunders,Russell Saunders,Russell Saunders,134,981054,0.000136587792313165,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:said-aly,Said Aly,Said Aly,800,981054,0.000815449506347255,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:sam-surendran,Sam Surendran,Sam Surendran,569,981054,0.000579988461389485,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:selina-chan,Selina Chan,Selina Chan,2336,981054,0.002381112558533985,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:steven-lam,Steven Lam,Steven Lam,226,981054,0.000230364485543100,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:tibor-steinberger,Tibor Steinberger,Tibor Steinberger,188,981054,0.000191630633991605,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:troy-young,Troy Young,Troy Young,411,981054,0.000418937183885902,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:veerayya-kembhavimath,Veerayya Kembhavimath,Veerayya Kembhavimath,294,981054,0.000299677693582616,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,toronto_2014:wally-schwauss,Wally Schwauss,Wally Schwauss,97,981054,0.000098873252644605,false,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2014,tory,John Tory,John Tory,395124,981054,0.402754588432441028,true,toronto_2014_official_declaration,PDF pages 2-3 (printed pages 1-2)
-toronto_2018,keesmaat,Jennifer Keesmaat,Keesmaat Jennifer,178193,755493,0.235863204556494898,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:basaric-dobrosav,Basaric Dobrosav,Basaric Dobrosav,2882,755493,0.003814727601711730,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:brosky-chris,Brosky Chris,Brosky Chris,2782,755493,0.003682363701582940,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:buckingham-drew,Buckingham Drew,Buckingham Drew,1971,755493,0.002608892471538452,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:buffey-brian,Buffey Brian,Buffey Brian,1275,755493,0.001687639726642073,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:choy-logan,Choy Logan,Choy Logan,3518,755493,0.004656562006530835,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:christoff-daryl,Christoff Daryl,Christoff Daryl,1751,755493,0.002317691891255114,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:clarke-kevin,Clarke Kevin,Clarke Kevin,3853,755493,0.005099981071962282,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:climenhaga-sarah,Climenhaga Sarah,Climenhaga Sarah,4765,755493,0.006307139841136847,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:gallay-mike,Gallay Mike,Gallay Mike,1940,755493,0.002567859662498527,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:gebresellassi-saron,Gebresellassi Saron,Gebresellassi Saron,15222,755493,0.020148432877604425,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:goldy-faith,Goldy Faith,Goldy Faith,25667,755493,0.033973842246056549,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:graff-brian,Graff Brian,Graff Brian,1139,755493,0.001507624822466919,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:haque-tofazzel,Haque Tofazzel,Haque Tofazzel,2307,755493,0.003053635175971187,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:hossain-monowar,Hossain Monowar,Hossain Monowar,3602,755493,0.004767747682639018,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:humphrey-christopher,Humphrey Christopher,Humphrey Christopher,1428,755493,0.001890156493839122,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:kalevar-chai,Kalevar Chai,Kalevar Chai,615,755493,0.000814037985792059,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:kardys-andrzej,Kardys Andrzej,Kardys Andrzej,1035,755493,0.001369966366332977,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:lam-steven,Lam Steven,Lam Steven,5920,755493,0.007835942887624372,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:langenfeld-kris,Langenfeld Kris,Langenfeld Kris,695,755493,0.000919929105895091,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:mcmillan-jim,McMillan Jim,McMillan Jim,2422,755493,0.003205853661119296,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:nath-gautam,Nath Gautam,Nath Gautam,1474,755493,0.001951043887898366,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:nicula-michael,Nicula Michael,Nicula Michael,1048,755493,0.001387173673349720,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:o-neill-thomas,O'Neill Thomas,O'Neill Thomas,1325,755493,0.001753821676706468,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:osuji-joseph,Osuji Joseph,Osuji Joseph,486,755493,0.000643288554625920,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:pampena-joseph,Pampena Joseph,Pampena Joseph,773,755493,0.001023172947995547,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:rachlis-josh,Rachlis Josh,Rachlis Josh,337,755493,0.000446066343434023,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:renee-d-onne,Renée D!ONNE,Renée D!ONNE,1280,755493,0.001694257921648513,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:ruel-jim,Ruel Jim,Ruel Jim,276,755493,0.000365324364355461,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:sears-james,Sears James,Sears James,680,755493,0.000900074520875773,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:singh-knia,Singh Knia,Singh Knia,3244,755493,0.004293884920177950,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:vardy-jakob,Vardy Jakob,Vardy Jakob,757,755493,0.001001994723974941,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:vintila-ion-gelu,Vintila Ion Gelu,Vintila Ion Gelu,565,755493,0.000747856035727664,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,toronto_2018:weenen-jack,Weenen Jack,Weenen Jack,607,755493,0.000803448873781756,false,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2018,tory,John Tory,Tory John,479659,755493,0.634895359718753185,true,toronto_open_data_2018_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,acton,Blake Acton,Acton Blake,8893,551890,0.016113718313432024,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,brown,Chloe Brown,Brown Chloe-Marie,34821,551890,0.063094094837739405,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,penalosa,Gil Peñalosa,Penalosa Gil,98525,551890,0.178522894054974723,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:arrobas-avraham,Arrobas Avraham,Arrobas Avraham,942,551890,0.001706861874648934,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:atkinson-darren,Atkinson Darren,Atkinson Darren,2580,551890,0.004674844624834659,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:buckingham-drew,Buckingham Drew,Buckingham Drew,1679,551890,0.003042272916704416,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:caputolan-elvira,Caputolan Elvira,Caputolan Elvira,1280,551890,0.002319302759607893,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:clarke-kevin,Clarke Kevin,Clarke Kevin,4333,551890,0.007851202232328906,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:climenhaga-sarah,Climenhaga Sarah,Climenhaga Sarah,6729,551890,0.012192647085469931,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:d-cruze-phillip,D'Cruze Phillip,D'Cruze Phillip,1695,551890,0.003071264201199514,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:deville-cory,Deville Cory,Deville Cory,1142,551890,0.002069252930837667,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:efimovskikh-alexey,Efimovskikh Alexey,Efimovskikh Alexey,844,551890,0.001529290257116454,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:gamk-isabella,Gamk Isabella,Gamk Isabella,1151,551890,0.002085560528366160,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:gupta-arjun,Gupta Arjun,Gupta Arjun,2843,551890,0.005151388863722843,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:handjis-peter,Handjis Peter,Handjis Peter,755,551890,0.001368026237112468,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:hatton-robert,Hatton Robert,Hatton Robert,1918,551890,0.003475330228849952,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:hossain-monowar,Hossain Monowar,Hossain Monowar,1840,551890,0.003333997716936346,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:hossain-soaad,Hossain Soaad,Hossain Soaad,1670,551890,0.003025965319175923,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:jamal-khadijah,Jamal Khadijah,Jamal Khadijah,3656,551890,0.006624508507130044,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:langenfeld-kris,Langenfeld Kris,Langenfeld Kris,1326,551890,0.002402652702531302,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:letonja-john,Letonja John,Letonja John,859,551890,0.001556469586330609,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:luk-tony,Luk Tony,Luk Tony,6662,551890,0.012071246081646705,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:malek-ferin,Malek Ferin,Malek Ferin,939,551890,0.001701426008806103,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:punwasi-stephen,Punwasi Stephen,Punwasi Stephen,5236,551890,0.009487397851021037,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:renee-d-onne,Renée D!ONNE,Renée D!ONNE,1483,551890,0.002687129681639457,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:schwartz-kyle,Schwartz Kyle,Schwartz Kyle,1357,551890,0.002458823316240555,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:singh-knia,Singh Knia,Singh Knia,3030,551890,0.005490224501259309,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:srivastava-sandeep,Srivastava Sandeep,Srivastava Sandeep,2024,551890,0.003667397488629981,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:tull-reginald,Tull Reginald,Tull Reginald,3935,551890,0.007130044030513327,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,toronto_2022:yan-jack,Yan Jack,Yan Jack,5585,551890,0.010119770244070376,false,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2022,tory,John Tory,Tory John,342158,551890,0.619974995017122977,true,toronto_open_data_2022_results,Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,acton,Blake Acton,Acton Blake,264,724638,0.000364319839699271,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,bailao,Ana Bailão,Bailão Ana,235175,724638,0.324541357201802831,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,bradford,Brad Bradford,Bradford Brad,9254,724638,0.012770514380973672,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,brown,Chloe Brown,Brown Chloe,18831,724638,0.025986768565821831,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,chow,Olivia Chow,Chow Olivia,269372,724638,0.371733196437393568,true,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,furey,Anthony Furey,Furey Anthony,35899,724638,0.049540598202136791,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,hunter,Mitzie Hunter,Hunter Mitzie,21229,724638,0.029296007109756872,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,matlow,Josh Matlow,Matlow Josh,35572,724638,0.049089338400691104,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,saunders,Mark Saunders,Saunders Mark,62167,724638,0.085790422252214209,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:abdulsalam-bahira,Abdulsalam Bahira,Abdulsalam Bahira,913,724638,0.001259939445626644,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:acquaye-emmanuel,Acquaye Emmanuel,Acquaye Emmanuel,236,724638,0.000325679856700863,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:ahmed-sharif,Ahmed Sharif,Ahmed Sharif,814,724638,0.001123319505739417,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:alam-asadul,Alam Asadul,Alam Asadul,257,724638,0.000354659843949669,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:allan-gru-jesse,Allan Gru Jesse,Allan Gru Jesse,352,724638,0.000485759786265694,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:aly-atef,Aly Atef,Aly Atef,147,724638,0.000202859910741639,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:apostolopoulos-dionysios,Apostolopoulos Dionysios,Apostolopoulos Dionysios,726,724638,0.001001879559172994,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:atkinson-darren,Atkinson Darren,Atkinson Darren,192,724638,0.000264959883417651,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:atkinson-jamie,Atkinson Jamie,Atkinson Jamie,361,724638,0.000498179780800896,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:baking-jose,Baking Jose,Baking Jose,284,724638,0.000391919827555276,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:bankas-ben,Bankas Ben,Bankas Ben,203,724638,0.000280139876738454,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:beals-claudette,Beals Claudette,Beals Claudette,151,724638,0.000208379908312840,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:benway-glen,Benway Glen,Benway Glen,118,724638,0.000162839928350432,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:bonilla-eliazar,Bonilla Eliazar,Bonilla Eliazar,310,724638,0.000427799811768083,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:buffey-brian,Buffey Brian,Buffey Brian,113,724638,0.000155939931386430,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:caesar-chavannes-celina,Caesar-Chavannes Celina,Caesar-Chavannes Celina,254,724638,0.000350519845771268,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:carrie-mason,Carrie Mason,Carrie Mason,150,724638,0.000206999908920040,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:chan-roland,Chan Roland,Chan Roland,515,724638,0.000710699687292138,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:charlton-matti,Charlton Matti,Charlton Matti,134,724638,0.000184919918635236,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:chevalier-romero-danny,Chevalier Romero Danny,Chevalier Romero Danny,281,724638,0.000387779829376875,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:choy-logan,Choy Logan,Choy Logan,695,724638,0.000959099577996186,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:clarke-kevin,Clarke Kevin,Clarke Kevin,265,724638,0.000365699839092071,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:climenhaga-sarah,Climenhaga Sarah,Climenhaga Sarah,195,724638,0.000269099881596052,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:cohen-gordon,Cohen Gordon,Cohen Gordon,214,724638,0.000295319870059257,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:collins-paul,Collins Paul,Collins Paul,168,724638,0.000231839897990445,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:d-amico-frank,D'Amico Frank,D'Amico Frank,357,724638,0.000492659783229695,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:d-angelo-frank,D'Angelo Frank,D'Angelo Frank,343,724638,0.000473339791730492,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:d-cruze-phillip,D'Cruze Phillip,D'Cruze Phillip,68,724638,0.000093839958710418,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:davis-rob,Davis Rob,Davis Rob,378,724638,0.000521639770478501,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:deb-samson,Deb Samson,Deb Samson,129,724638,0.000178019921671234,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:desai-habiba,Desai Habiba,Desai Habiba,196,724638,0.000270479880988852,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:deville-cory,Deville Cory,Deville Cory,96,724638,0.000132479941708826,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:fenby-simryn,Fenby Simryn,Fenby Simryn,97,724638,0.000133859941101626,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:forrester-monica,Forrester Monica,Forrester Monica,278,724638,0.000383639831198474,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:furnival-scott,Furnival Scott,Furnival Scott,110,724638,0.000151799933208029,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:gamk-isabella,Gamk Isabella,Gamk Isabella,88,724638,0.000121439946566424,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:gao-feng,Gao Feng,Gao Feng,198,724638,0.000273239879774453,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:gong-xiao-hua,Gong Xiao Hua,Gong Xiao Hua,2983,724638,0.004116538188723197,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:goraya-adil,Goraya Adil,Goraya Adil,104,724638,0.000143519936851228,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:graff-brian,Graff Brian,Graff Brian,89,724638,0.000122819945959224,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:grosman-ari,Grosman Ari,Grosman Ari,177,724638,0.000244259892525647,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:guglielmin-james,Guglielmin James,Guglielmin James,101,724638,0.000139379938672827,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:gulyas-david,Gulyas David,Gulyas David,120,724638,0.000165599927136032,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:hall-thomas,Hall Thomas,Hall Thomas,258,724638,0.000356039843342469,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:handjis-peter,Handjis Peter,Handjis Peter,127,724638,0.000175259922885634,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:he-heather,He Heather,He Heather,297,724638,0.000409859819661679,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:heaps-toby,Heaps Toby,Heaps Toby,593,724638,0.000818339639930558,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:hossain-monowar,Hossain Monowar,Hossain Monowar,164,724638,0.000226319900419244,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:igodan-sheila,Igodan Sheila,Igodan Sheila,42,724638,0.000057959974497611,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:irmya-daniel,Irmya Daniel,Irmya Daniel,27,724638,0.000037259983605607,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:jaffery-syed,Jaffery Syed,Jaffery Syed,147,724638,0.000202859910741639,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:jensen-michael,Jensen Michael,Jensen Michael,115,724638,0.000158699930172031,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:johnston-patricia,Johnston Patricia,Johnston Patricia,217,724638,0.000299459868237658,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:khan-walayat,Khan Walayat,Khan Walayat,109,724638,0.000150419933815229,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:korovitsyn-serge,Korovitsyn Serge,Korovitsyn Serge,96,724638,0.000132479941708826,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:lamoureux-michael,Lamoureux Michael,Lamoureux Michael,120,724638,0.000165599927136032,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:langenfeld-kris,Langenfeld Kris,Langenfeld Kris,137,724638,0.000189059916813637,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:lee-rick,Lee Rick,Lee Rick,241,724638,0.000332579853664864,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:leliever-mark,LeLiever Mark,LeLiever Mark,259,724638,0.000357419842735269,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:letonja-john,Letonja John,Letonja John,45,724638,0.000062099972676012,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:macleod-norman,MacLeod Norman,MacLeod Norman,163,724638,0.000224939901026444,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:mammoliti-giorgio,Mammoliti Giorgio,Mammoliti Giorgio,1105,724638,0.001524899329044295,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:mann-steve,Mann Steve,Mann Steve,127,724638,0.000175259922885634,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:marshall-cleveland,Marshall Cleveland,Marshall Cleveland,270,724638,0.000372599836056072,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:mohee-faizul,Mohee Faizul,Mohee Faizul,255,724638,0.000351899845164068,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:murphy-bob,Murphy Bob,Murphy Bob,203,724638,0.000280139876738454,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:nicula-michael,Nicula Michael,Nicula Michael,88,724638,0.000121439946566424,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:nowwarah-jamil,Nowwarah Jamil,Nowwarah Jamil,38,724638,0.000052439976926410,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:perruzza-anthony,Perruzza Anthony,Perruzza Anthony,3025,724638,0.004174498163220808,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:ransome-john,Ransome John,Ransome John,75,724638,0.000103499954460020,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:renee-d-onne,Renée D!ONNE,Renée D!ONNE,188,724638,0.000259439885846450,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:reodica-willie,Reodica Willie,Reodica Willie,225,724638,0.000310499863380060,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:rubino-walter,Rubino Walter,Rubino Walter,67,724638,0.000092459959317618,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:saccoccia-chris,Saccoccia Chris,Saccoccia Chris,8001,724638,0.011041375141794938,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:sanders-lyall,Sanders Lyall,Sanders Lyall,2775,724638,0.003829498315020741,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:schipano-rocco,Schipano Rocco,Schipano Rocco,94,724638,0.000129719942923225,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:shusterman-robert,Shusterman Robert,Shusterman Robert,114,724638,0.000157319930779230,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:singh-knia,Singh Knia,Singh Knia,246,724638,0.000339479850628866,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:singh-partap-dua,Singh Partap Dua,Singh Partap Dua,132,724638,0.000182159919849635,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:sivaneswaran-raksheni,Sivaneswaran Raksheni,Sivaneswaran Raksheni,779,724638,0.001075019526991408,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:sniedzins-erwin,Sniedzins Erwin,Sniedzins Erwin,38,724638,0.000052439976926410,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:srivastava-sandeep,Srivastava Sandeep,Srivastava Sandeep,166,724638,0.000229079899204844,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:straus-meir,Straus Meir,Straus Meir,129,724638,0.000178019921671234,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:tang-weizhen,Tang Weizhen,Tang Weizhen,125,724638,0.000172499924100033,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:toye-mitchell,Toye Mitchell,Toye Mitchell,72,724638,0.000099359956281619,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:tull-reginald,Tull Reginald,Tull Reginald,482,724638,0.000665159707329729,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:tunney-jeffery,Tunney Jeffery,Tunney Jeffery,83,724638,0.000114539949602422,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:vadivelu-kiri,Vadivelu Kiri,Vadivelu Kiri,290,724638,0.000400199823912077,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:weenen-jack,Weenen Jack,Weenen Jack,30,724638,0.000041399981784008,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:wei-yuanqian,Wei Yuanqian,Wei Yuanqian,78,724638,0.000107639952638421,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:williams-jody,Williams Jody,Williams Jody,160,724638,0.000220799902848043,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:winter-john,Winter John,Winter John,118,724638,0.000162839928350432,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
-toronto_2023,toronto_2023:yan-nathalie-xian-yi,Yan Nathalie Xian Yi,Yan Nathalie Xian Yi,180,724638,0.000248399890704048,false,toronto_open_data_2023_mayoral_by_election,2023 Office of the Mayor workbook; 25 ward sheets aggregated citywide
+toronto_2003,hall,Barbara Hall,Barbara Hall,63751,692085,0.092114407912322908,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,miller,David Miller,David Miller,299385,692085,0.432584147900908125,true,toronto_election_results,office=mayor;year=2003
+toronto_2003,nunziata,John Nunziata,John Nunziata,36021,692085,0.052047075142504172,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:abel-van-wyk,Abel Van Wyk,Abel Van Wyk,332,692085,0.000479709862227906,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:ahmad-shehab,Ahmad Shehab,Ahmad Shehab,2084,692085,0.003011190821936612,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:albert-howell,Albert Howell,Albert Howell,717,692085,0.001035999913305447,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:aleksandar-glisic,Aleksandar Glisic,Aleksandar Glisic,420,692085,0.000606861873902772,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:axcel-cocon,Axcel Cocon,Axcel Cocon,498,692085,0.000719564793341858,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:barry-pletch,Barry Pletch,Barry Pletch,110,692085,0.000158940014593583,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:ben-kerr,Ben Kerr,Ben Kerr,433,692085,0.000625645693809286,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:benjamin-mbaegbu,Benjamin Mbaegbu,Benjamin Mbaegbu,288,692085,0.000416133856390472,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:daniel-poremski,Daniel Poremski,Daniel Poremski,627,692085,0.000905958083183424,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:david-lichacz,David Lichacz,David Lichacz,659,692085,0.000952195178337921,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:don-andrews,Don Andrews,Don Andrews,1220,692085,0.001762789252765195,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:douglas-campbell,Douglas Campbell,Douglas Campbell,2197,692085,0.003174465564200929,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:duri-naimji,Duri Naimji,Duri Naimji,569,692085,0.000822153348215898,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:elias-makhoul,Elias Makhoul,Elias Makhoul,644,692085,0.000930521539984250,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:fen-peters,Fen Peters,Fen Peters,598,692085,0.000864055715699661,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:gary-benner,Gary Benner,Gary Benner,802,692085,0.001158817197309579,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:gerald-derome,Gerald Derome,Gerald Derome,278,692085,0.000401684764154692,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:hardy-dhir,Hardy Dhir,Hardy Dhir,199,692085,0.000287536935492028,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:hashmat-safi,Hashmat Safi,Hashmat Safi,383,692085,0.000553400232630385,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:jaime-castillo,Jaime Castillo,Jaime Castillo,1616,692085,0.002334973305302094,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:john-hartnett,John Hartnett,John Hartnett,803,692085,0.001160262106533157,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:john-jahshan,John Jahshan,John Jahshan,703,692085,0.001015771184175354,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:kendal-csak,Kendal Csak,Kendal Csak,193,692085,0.000278867480150560,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:kevin-clarke,Kevin Clarke,Kevin Clarke,804,692085,0.001161707015756735,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:luis-silva,Luis Silva,Luis Silva,1305,692085,0.001885606536769327,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:mehmet-yagiz,Mehmet Yagiz,Mehmet Yagiz,193,692085,0.000278867480150560,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:michael-brausewetter,Michael Brausewetter,Michael Brausewetter,672,692085,0.000970978998244435,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:mitch-gold,Mitch Gold,Mitch Gold,412,692085,0.000595302600114148,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:monowar-hossain,Monowar Hossain,Monowar Hossain,537,692085,0.000775916253061401,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:patricia-o-beirne,Patricia O'Beirne,Patricia O'Beirne,358,692085,0.000517277502040934,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:paul-lewin,Paul Lewin,Paul Lewin,271,692085,0.000391570399589646,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:rabindra-prashad,Rabindra Prashad,Rabindra Prashad,271,692085,0.000391570399589646,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:ram-narula,Ram Narula,Ram Narula,645,692085,0.000931966449207829,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:ratan-wadhwa,Ratan Wadhwa,Ratan Wadhwa,121,692085,0.000174834016052941,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:richard-weston,Richard Weston,Richard Weston,133,692085,0.000192172926735878,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:ronald-graham,Ronald Graham,Ronald Graham,619,692085,0.000894398809394800,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:scott-yee,Scott Yee,Scott Yee,551,692085,0.000796144982191494,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:simon-shaw,Simon Shaw,Simon Shaw,376,692085,0.000543285868065339,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:timothy-mcauliffe,Timothy Mcauliffe,Timothy Mcauliffe,821,692085,0.001186270472557562,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,toronto_2003:tom-jakobek,Tom Jakobek,Tom Jakobek,5277,692085,0.007624785972821258,false,toronto_election_results,office=mayor;year=2003
+toronto_2003,tory,John Tory,John Tory,263189,692085,0.380284213644277798,false,toronto_election_results,office=mayor;year=2003
+toronto_2006,miller,David Miller,David Miller,332969,584484,0.569680264985867877,true,toronto_election_results,office=mayor;year=2006
+toronto_2006,pitfield,Jane Pitfield,Jane Pitfield,188932,584484,0.323245803135757352,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:adam-sit,Adam Sit,Adam Sit,663,584484,0.001134333873981153,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:bob-smith,Bob Smith,Bob Smith,1105,584484,0.001890556456635254,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:dave-dumoulin,Dave Dumoulin,Dave Dumoulin,601,584484,0.001028257403111120,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:david-dicks,David Dicks,David Dicks,1283,584484,0.002195098582681476,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:david-schiebel,David Schiebel,David Schiebel,498,584484,0.000852033588601228,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:david-vallance,David Vallance,David Vallance,486,584484,0.000831502658755415,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:diana-de-maxted,Diana-De Maxted,Diana-De Maxted,1311,584484,0.002243004085655039,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:douglas-campbell,Douglas Campbell,Douglas Campbell,4183,584484,0.007156739962086216,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:duri-naimji,Duri Naimji,Duri Naimji,1240,584484,0.002121529417400647,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:gerald-derome,Gerald Derome,Gerald Derome,578,584484,0.000988906454239979,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:glenn-coles,Glenn Coles,Glenn Coles,1019,584484,0.001743418126073597,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:hazel-jackson,Hazel Jackson,Hazel Jackson,3333,584484,0.005702465764674482,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:jaime-castillo,Jaime Castillo,Jaime Castillo,5215,584484,0.008922399928826110,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:joel-rubinovich,Joel Rubinovich,Joel Rubinovich,1642,584484,0.002809315567235373,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:john-porter,John Porter,John Porter,1348,584484,0.002306307786012962,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:john-weingust,John Weingust,John Weingust,312,584484,0.000533804175991131,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:joseph-young,Joseph Young,Joseph Young,2264,584484,0.003873502097576666,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:kevin-clarke,Kevin Clarke,Kevin Clarke,2081,584484,0.003560405417428022,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:lee-romano,Lee Romano,Lee Romano,3108,584484,0.005317510830065494,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:mark-korolnek,Mark Korolnek,Mark Korolnek,1079,584484,0.001846072775302660,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:mark-state,Mark State,Mark State,194,584484,0.000331916699173972,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:mehmet-ali-yagiz,Mehmet Ali Yagiz,Mehmet Ali Yagiz,753,584484,0.001288315847824748,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:michael-alexander,Michael Alexander,Michael Alexander,5247,584484,0.008977149075081610,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:mitch-gold,Mitch Gold,Mitch Gold,880,584484,0.001505601522026266,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:monowar-hossain,Monowar Hossain,Monowar Hossain,2726,584484,0.004663942896640456,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:nicholas-brooks,Nicholas Brooks,Nicholas Brooks,1397,584484,0.002390142416216697,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:paul-sheldon,Paul Sheldon,Paul Sheldon,624,584484,0.001067608351982261,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:peter-styrsky,Peter Styrsky,Peter Styrsky,945,584484,0.001616810725357751,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:ratan-wadhwa,Ratan Wadhwa,Ratan Wadhwa,696,584484,0.001190793931057138,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:rodney-muir,Rodney Muir,Rodney Muir,1458,584484,0.002494507976266245,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:ryan-goldhar,Ryan Goldhar,Ryan Goldhar,787,584484,0.001346486815721217,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:scott-yee,Scott Yee,Scott Yee,1538,584484,0.002631380841904997,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:shaun-bruce,Shaun Bruce,Shaun Bruce,2820,584484,0.004824768513765988,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:soumen-deb,Soumen Deb,Soumen Deb,517,584484,0.000884540894190431,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:stephen-ledrew,Stephen Ledrew,Stephen Ledrew,8078,584484,0.013820737607872927,false,toronto_election_results,office=mayor;year=2006
+toronto_2006,toronto_2006:thomas-shipley,Thomas Shipley,Thomas Shipley,574,584484,0.000982062810958042,false,toronto_election_results,office=mayor;year=2006
+toronto_2010,pantalone,Joe Pantalone,Joe Pantalone,95482,813984,0.117302059991351181,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,rob-ford,Rob Ford,Rob Ford,383501,813984,0.471140710382513661,true,toronto_election_results,office=mayor;year=2010
+toronto_2010,rossi,Rocco Rossi,Rocco Rossi,5012,813984,0.006157369186617919,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,smitherman,George Smitherman,George Smitherman,289832,813984,0.356065966898612258,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,thomson,Sarah Thomson,Sarah Thomson,1883,813984,0.002313313283799190,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:abdullah-baquie-ghazi,Abdullah-Baquie Ghazi,Abdullah-Baquie Ghazi,2761,813984,0.003391958564296104,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:barry-goodhead,Barry Goodhead,Barry Goodhead,740,813984,0.000909108778550930,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:carmen-macklin,Carmen Macklin,Carmen Macklin,575,813984,0.000706402091441601,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:charlene-cottle,Charlene Cottle,Charlene Cottle,733,813984,0.000900509100915989,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:christopher-ball,Christopher Ball,Christopher Ball,696,813984,0.000855053661988442,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:colin-magee,Colin Magee,Colin Magee,401,813984,0.000492638675944490,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:daniel-walker,Daniel Walker,Daniel Walker,804,813984,0.000987734402641821,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:david-epstein,David Epstein,David Epstein,1202,813984,0.001476687502457051,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:david-vallance,David Vallance,David Vallance,444,813984,0.000545465267130558,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:dewitt-lee,Dewitt Lee,Dewitt Lee,1699,813984,0.002087264614537878,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:diane-devenyi,Diane Devenyi,Diane Devenyi,629,813984,0.000772742461768290,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:don-andrews,Don Andrews,Don Andrews,1032,813984,0.001267838188465621,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:douglas-campbell,Douglas Campbell,Douglas Campbell,1428,813984,0.001754334237528010,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:george-babula,George Babula,George Babula,3273,813984,0.004020963557023234,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:gerald-derome,Gerald Derome,Gerald Derome,251,813984,0.000308359869481464,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:himy-syed,Himy Syed,Himy Syed,582,813984,0.000715001769076542,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:howard-gomberg,Howard Gomberg,Howard Gomberg,477,813984,0.000586006604552424,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:jaime-castillo,Jaime Castillo,Jaime Castillo,1874,813984,0.002302256555411409,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:james-di-fiore,James Di Fiore,James Di Fiore,655,813984,0.000804684121555215,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:john-letonja,John Letonja,John Letonja,592,813984,0.000727287022840744,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:joseph-pampena,Joseph Pampena,Joseph Pampena,1319,813984,0.001620424971498211,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:keith-cole,Keith Cole,Keith Cole,801,813984,0.000984048826512560,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:kevin-clarke,Kevin Clarke,Kevin Clarke,1411,813984,0.001733449306128867,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:mark-state,Mark State,Mark State,438,813984,0.000538094114872037,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:michael-alexander,Michael Alexander,Michael Alexander,2470,813984,0.003034457679757833,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:michael-brausewetter,Michael Brausewetter,Michael Brausewetter,796,813984,0.000977906199630460,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:michael-flie,Michael Flie,Michael Flie,1190,813984,0.001461945197940009,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:monowar-hossain,Monowar Hossain,Monowar Hossain,1194,813984,0.001466859299445689,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:phil-taylor,Phil Taylor,Phil Taylor,429,813984,0.000527037386484255,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:ratan-wadhwa,Ratan Wadhwa,Ratan Wadhwa,290,813984,0.000356272359161851,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:rocco-achampong,Rocco Achampong,Rocco Achampong,2805,813984,0.003446013680858592,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:selwyn-firth,Selwyn Firth,Selwyn Firth,394,813984,0.000484038998309549,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:tibor-steinberger,Tibor Steinberger,Tibor Steinberger,735,813984,0.000902966151668829,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:vijay-sarma,Vijay Sarma,Vijay Sarma,2264,813984,0.002781381452215277,false,toronto_election_results,office=mayor;year=2010
+toronto_2010,toronto_2010:weizhen-tang,Weizhen Tang,Weizhen Tang,890,813984,0.001093387585013956,false,toronto_election_results,office=mayor;year=2010
+toronto_2014,chow,Olivia Chow,Olivia Chow,227003,981054,0.231386855361682435,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,doug-ford,Doug Ford,Doug Ford,331006,981054,0.337398349122474400,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:ari-goldkind,Ari Goldkind,Ari Goldkind,3916,981054,0.003991625333569814,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:ashok-sajnani,Ashok Sajnani,Ashok Sajnani,368,981054,0.000375106772919737,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:carlie-ritch,Carlie Ritch,Carlie Ritch,194,981054,0.000197746505289209,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:chai-kalevar,Chai Kalevar,Chai Kalevar,102,981054,0.000103969812059275,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:charles-huang,Charles Huang,Charles Huang,134,981054,0.000136587792313165,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:chinh-huynh,Chinh Huynh,Chinh Huynh,312,981054,0.000318025307475429,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:christina-van-eyck,Christina Van Eyck,Christina Van Eyck,203,981054,0.000206920312235616,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:christopher-ball,Christopher Ball,Christopher Ball,377,981054,0.000384280579866144,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:d-onne-renee,D!Onne Renée,D!Onne Renée,323,981054,0.000329237738187704,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:daniel-walker,Daniel Walker,Daniel Walker,162,981054,0.000165128525035319,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:dave-mckay,Dave Mckay,Dave Mckay,407,981054,0.000414859936354166,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:dewitt-lee,Dewitt Lee,Dewitt Lee,489,981054,0.000498443510754760,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:diana-maxted,Diana Maxted,Diana Maxted,117,981054,0.000119259490303286,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:don-andrews,Don Andrews,Don Andrews,1012,981054,0.001031543625529278,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:donovan-searchwell,Donovan Searchwell,Donovan Searchwell,90,981054,0.000091738069464066,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:erwin-sniedzins,Erwin Sniedzins,Erwin Sniedzins,105,981054,0.000107027747708077,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:frank-burgess,Frank Burgess,Frank Burgess,335,981054,0.000341469480782913,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:gary-mcbean,Gary Mcbean,Gary Mcbean,135,981054,0.000137607104196099,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:george-dedopoulos,George Dedopoulos,George Dedopoulos,941,981054,0.000959172481840959,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:himy-syed,Hïmy Syed,Hïmy Syed,465,981054,0.000473980025564342,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:jack-weenen,Jack Weenen,Jack Weenen,52,981054,0.000053004217912572,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:jamie-shannon,Jamie Shannon,Jamie Shannon,156,981054,0.000159012653737715,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:jeff-billard,Jeff Billard,Jeff Billard,288,981054,0.000293561822285012,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:jim-ruel,Jim Ruel,Jim Ruel,110,981054,0.000112124307122748,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:jon-karsemeyer,Jon Karsemeyer,Jon Karsemeyer,232,981054,0.000236480356840704,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:jonathan-bliguin,Jonathan Bliguin,Jonathan Bliguin,207,981054,0.000210997559767352,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:jonathan-glaister,Jonathan Glaister,Jonathan Glaister,748,981054,0.000762445288434684,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:josh-rachlis,Josh Rachlis,Josh Rachlis,201,981054,0.000204881688469748,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:kevin-clarke,Kevin Clarke,Kevin Clarke,547,981054,0.000557563599964936,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:klim-khomenko,Klim Khomenko,Klim Khomenko,186,981054,0.000189592010225737,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:lee-romanov,Lee Romanov,Lee Romanov,271,981054,0.000276233520275133,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:leo-gambin,Leo Gambin,Leo Gambin,165,981054,0.000168186460684121,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:mark-cidade,Mark Cidade,Mark Cidade,453,981054,0.000461748282969133,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:matt-mernagh,Matt Mernagh,Matt Mernagh,102,981054,0.000103969812059275,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:matthew-crack,Matthew Crack,Matthew Crack,366,981054,0.000373068149153869,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:matthew-wong,Matthew Wong,Matthew Wong,491,981054,0.000500482134520628,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:michael-gordon,Michael Gordon,Michael Gordon,388,981054,0.000395493010578419,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:michael-nicula,Michael Nicula,Michael Nicula,145,981054,0.000147800223025440,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:michael-tasevski,Michael Tasevski,Michael Tasevski,319,981054,0.000325160490655968,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:michael-tramov,Michael Tramov,Michael Tramov,560,981054,0.000570814654443079,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:mike-gallay,Mike Gallay,Mike Gallay,570,981054,0.000581007773272419,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:mohammad-okhovat,Mohammad Okhovat,Mohammad Okhovat,318,981054,0.000324141178773034,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:monowar-hossain,Monowar Hossain,Monowar Hossain,614,981054,0.000625857496121518,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:morgan-baskin,Morgan Baskin,Morgan Baskin,1009,981054,0.001028485689880475,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:oweka-arac-ongwen,Oweka-Arac Ongwen,Oweka-Arac Ongwen,56,981054,0.000057081465444308,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:pat-roberge,Pat Roberge,Pat Roberge,273,981054,0.000278272144041001,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:radu-popescu,Radu Popescu,Radu Popescu,233,981054,0.000237499668723638,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:ram-narula,Ram Narula,Ram Narula,156,981054,0.000159012653737715,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:ramnarine-tiwari,Ramnarine Tiwari,Ramnarine Tiwari,1008,981054,0.001027466377997541,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:ratan-wadhwa,Ratan Wadhwa,Ratan Wadhwa,73,981054,0.000074409767454187,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:rene-viau,René Viau,René Viau,69,981054,0.000070332519922451,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:robb-johannes,Robb Johannes,Robb Johannes,756,981054,0.000770599783498156,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:rocco-di-paola,Rocco Di Paola,Rocco Di Paola,1557,981054,0.001587068601728345,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:russell-saunders,Russell Saunders,Russell Saunders,134,981054,0.000136587792313165,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:said-aly,Said Aly,Said Aly,800,981054,0.000815449506347255,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:sam-surendran,Sam Surendran,Sam Surendran,569,981054,0.000579988461389485,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:selina-chan,Selina Chan,Selina Chan,2336,981054,0.002381112558533985,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:steven-lam,Steven Lam,Steven Lam,226,981054,0.000230364485543100,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:tibor-steinberger,Tibor Steinberger,Tibor Steinberger,188,981054,0.000191630633991605,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:troy-young,Troy Young,Troy Young,411,981054,0.000418937183885902,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:veerayya-kembhavimath,Veerayya Kembhavimath,Veerayya Kembhavimath,294,981054,0.000299677693582616,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,toronto_2014:wally-schwauss,Wally Schwauss,Wally Schwauss,97,981054,0.000098873252644605,false,toronto_election_results,office=mayor;year=2014
+toronto_2014,tory,John Tory,John Tory,395124,981054,0.402754588432441028,true,toronto_election_results,office=mayor;year=2014
+toronto_2018,keesmaat,Jennifer Keesmaat,Jennifer Keesmaat,178193,755493,0.235863204556494898,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:andrzej-kardys,Andrzej Kardys,Andrzej Kardys,1035,755493,0.001369966366332977,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:brian-buffey,Brian Buffey,Brian Buffey,1275,755493,0.001687639726642073,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:brian-graff,Brian Graff,Brian Graff,1139,755493,0.001507624822466919,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:chai-kalevar,Chai Kalevar,Chai Kalevar,615,755493,0.000814037985792059,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:chris-brosky,Chris Brosky,Chris Brosky,2782,755493,0.003682363701582940,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:christopher-humphrey,Christopher Humphrey,Christopher Humphrey,1428,755493,0.001890156493839122,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:d-onne-renee,D!Onne Renée,D!Onne Renée,1280,755493,0.001694257921648513,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:daryl-christoff,Daryl Christoff,Daryl Christoff,1751,755493,0.002317691891255114,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:dobrosav-basaric,Dobrosav Basaric,Dobrosav Basaric,2882,755493,0.003814727601711730,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:drew-buckingham,Drew Buckingham,Drew Buckingham,1971,755493,0.002608892471538452,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:faith-goldy,Faith Goldy,Faith Goldy,25667,755493,0.033973842246056549,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:gautam-nath,Gautam Nath,Gautam Nath,1474,755493,0.001951043887898366,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:ion-gelu-vintila,Ion Gelu Vintila,Ion Gelu Vintila,565,755493,0.000747856035727664,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:jack-weenen,Jack Weenen,Jack Weenen,607,755493,0.000803448873781756,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:jakob-vardy,Jakob Vardy,Jakob Vardy,757,755493,0.001001994723974941,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:james-sears,James Sears,James Sears,680,755493,0.000900074520875773,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:jim-mcmillan,Jim Mcmillan,Jim Mcmillan,2422,755493,0.003205853661119296,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:jim-ruel,Jim Ruel,Jim Ruel,276,755493,0.000365324364355461,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:joseph-osuji,Joseph Osuji,Joseph Osuji,486,755493,0.000643288554625920,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:joseph-pampena,Joseph Pampena,Joseph Pampena,773,755493,0.001023172947995547,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:josh-rachlis,Josh Rachlis,Josh Rachlis,337,755493,0.000446066343434023,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:kevin-clarke,Kevin Clarke,Kevin Clarke,3853,755493,0.005099981071962282,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:knia-singh,Knia Singh,Knia Singh,3244,755493,0.004293884920177950,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:kris-langenfeld,Kris Langenfeld,Kris Langenfeld,695,755493,0.000919929105895091,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:logan-choy,Logan Choy,Logan Choy,3518,755493,0.004656562006530835,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:michael-nicula,Michael Nicula,Michael Nicula,1048,755493,0.001387173673349720,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:mike-gallay,Mike Gallay,Mike Gallay,1940,755493,0.002567859662498527,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:monowar-hossain,Monowar Hossain,Monowar Hossain,3602,755493,0.004767747682639018,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:sarah-climenhaga,Sarah Climenhaga,Sarah Climenhaga,4765,755493,0.006307139841136847,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:saron-gebresellassi,Saron Gebresellassi,Saron Gebresellassi,15222,755493,0.020148432877604425,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:steven-lam,Steven Lam,Steven Lam,5920,755493,0.007835942887624372,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:thomas-o-neill,Thomas O'Neill,Thomas O'Neill,1325,755493,0.001753821676706468,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,toronto_2018:tofazzel-haque,Tofazzel Haque,Tofazzel Haque,2307,755493,0.003053635175971187,false,toronto_election_results,office=mayor;year=2018
+toronto_2018,tory,John Tory,John Tory,479659,755493,0.634895359718753185,true,toronto_election_results,office=mayor;year=2018
+toronto_2022,acton,Blake Acton,Blake Acton,8893,551890,0.016113718313432024,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,brown,Chloe Brown,Chloe-Marie Brown,34821,551890,0.063094094837739405,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,penalosa,Gil Peñalosa,Gil Penalosa,98525,551890,0.178522894054974723,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:alexey-efimovskikh,Alexey Efimovskikh,Alexey Efimovskikh,844,551890,0.001529290257116454,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:arjun-gupta,Arjun Gupta,Arjun Gupta,2843,551890,0.005151388863722843,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:avraham-arrobas,Avraham Arrobas,Avraham Arrobas,942,551890,0.001706861874648934,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:cory-deville,Cory Deville,Cory Deville,1142,551890,0.002069252930837667,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:d-onne-renee,D!Onne Renée,D!Onne Renée,1483,551890,0.002687129681639457,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:darren-atkinson,Darren Atkinson,Darren Atkinson,2580,551890,0.004674844624834659,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:drew-buckingham,Drew Buckingham,Drew Buckingham,1679,551890,0.003042272916704416,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:elvira-caputolan,Elvira Caputolan,Elvira Caputolan,1280,551890,0.002319302759607893,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:ferin-malek,Ferin Malek,Ferin Malek,939,551890,0.001701426008806103,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:isabella-gamk,Isabella Gamk,Isabella Gamk,1151,551890,0.002085560528366160,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:jack-yan,Jack Yan,Jack Yan,5585,551890,0.010119770244070376,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:john-letonja,John Letonja,John Letonja,859,551890,0.001556469586330609,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:kevin-clarke,Kevin Clarke,Kevin Clarke,4333,551890,0.007851202232328906,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:khadijah-jamal,Khadijah Jamal,Khadijah Jamal,3656,551890,0.006624508507130044,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:knia-singh,Knia Singh,Knia Singh,3030,551890,0.005490224501259309,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:kris-langenfeld,Kris Langenfeld,Kris Langenfeld,1326,551890,0.002402652702531302,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:kyle-schwartz,Kyle Schwartz,Kyle Schwartz,1357,551890,0.002458823316240555,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:monowar-hossain,Monowar Hossain,Monowar Hossain,1840,551890,0.003333997716936346,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:peter-handjis,Peter Handjis,Peter Handjis,755,551890,0.001368026237112468,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:phillip-d-cruze,Phillip D'Cruze,Phillip D'Cruze,1695,551890,0.003071264201199514,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:reginald-tull,Reginald Tull,Reginald Tull,3935,551890,0.007130044030513327,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:robert-hatton,Robert Hatton,Robert Hatton,1918,551890,0.003475330228849952,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:sandeep-srivastava,Sandeep Srivastava,Sandeep Srivastava,2024,551890,0.003667397488629981,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:sarah-climenhaga,Sarah Climenhaga,Sarah Climenhaga,6729,551890,0.012192647085469931,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:soaad-hossain,Soaad Hossain,Soaad Hossain,1670,551890,0.003025965319175923,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:stephen-punwasi,Stephen Punwasi,Stephen Punwasi,5236,551890,0.009487397851021037,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,toronto_2022:tony-luk,Tony Luk,Tony Luk,6662,551890,0.012071246081646705,false,toronto_election_results,office=mayor;year=2022
+toronto_2022,tory,John Tory,John Tory,342158,551890,0.619974995017122977,true,toronto_election_results,office=mayor;year=2022
+toronto_2023,acton,Blake Acton,Blake Acton,264,724638,0.000364319839699271,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,bailao,Ana Bailão,Ana Bailão,235175,724638,0.324541357201802831,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,bradford,Brad Bradford,Brad Bradford,9254,724638,0.012770514380973672,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,brown,Chloe Brown,Chloe Brown,18831,724638,0.025986768565821831,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,chow,Olivia Chow,Olivia Chow,269372,724638,0.371733196437393568,true,toronto_election_results,office=mayor;year=2023
+toronto_2023,furey,Anthony Furey,Anthony Furey,35899,724638,0.049540598202136791,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,hunter,Mitzie Hunter,Mitzie Hunter,21229,724638,0.029296007109756872,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,matlow,Josh Matlow,Josh Matlow,35572,724638,0.049089338400691104,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,saunders,Mark Saunders,Mark Saunders,62167,724638,0.085790422252214209,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:adil-goraya,Adil Goraya,Adil Goraya,104,724638,0.000143519936851228,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:anthony-perruzza,Anthony Perruzza,Anthony Perruzza,3025,724638,0.004174498163220808,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:ari-grosman,Ari Grosman,Ari Grosman,177,724638,0.000244259892525647,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:asadul-alam,Asadul Alam,Asadul Alam,257,724638,0.000354659843949669,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:atef-aly,Atef Aly,Atef Aly,147,724638,0.000202859910741639,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:bahira-abdulsalam,Bahira Abdulsalam,Bahira Abdulsalam,913,724638,0.001259939445626644,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:ben-bankas,Ben Bankas,Ben Bankas,203,724638,0.000280139876738454,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:bob-murphy,Bob Murphy,Bob Murphy,203,724638,0.000280139876738454,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:brian-buffey,Brian Buffey,Brian Buffey,113,724638,0.000155939931386430,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:brian-graff,Brian Graff,Brian Graff,89,724638,0.000122819945959224,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:celina-caesar-chavannes,Celina Caesar-Chavannes,Celina Caesar-Chavannes,254,724638,0.000350519845771268,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:chris-saccoccia,Chris Saccoccia,Chris Saccoccia,8001,724638,0.011041375141794938,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:claudette-beals,Claudette Beals,Claudette Beals,151,724638,0.000208379908312840,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:cleveland-marshall,Cleveland Marshall,Cleveland Marshall,270,724638,0.000372599836056072,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:cory-deville,Cory Deville,Cory Deville,96,724638,0.000132479941708826,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:d-onne-renee,D!Onne Renée,D!Onne Renée,188,724638,0.000259439885846450,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:daniel-irmya,Daniel Irmya,Daniel Irmya,27,724638,0.000037259983605607,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:darren-atkinson,Darren Atkinson,Darren Atkinson,192,724638,0.000264959883417651,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:david-gulyas,David Gulyas,David Gulyas,120,724638,0.000165599927136032,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:dionysios-apostolopoulos,Dionysios Apostolopoulos,Dionysios Apostolopoulos,726,724638,0.001001879559172994,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:eliazar-bonilla,Eliazar Bonilla,Eliazar Bonilla,310,724638,0.000427799811768083,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:emmanuel-acquaye,Emmanuel Acquaye,Emmanuel Acquaye,236,724638,0.000325679856700863,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:erwin-sniedzins,Erwin Sniedzins,Erwin Sniedzins,38,724638,0.000052439976926410,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:faizul-mohee,Faizul Mohee,Faizul Mohee,255,724638,0.000351899845164068,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:feng-gao,Feng Gao,Feng Gao,198,724638,0.000273239879774453,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:frank-d-amico,Frank D'Amico,Frank D'Amico,357,724638,0.000492659783229695,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:frank-d-angelo,Frank D'Angelo,Frank D'Angelo,343,724638,0.000473339791730492,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:giorgio-mammoliti,Giorgio Mammoliti,Giorgio Mammoliti,1105,724638,0.001524899329044295,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:glen-benway,Glen Benway,Glen Benway,118,724638,0.000162839928350432,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:gordon-cohen,Gordon Cohen,Gordon Cohen,214,724638,0.000295319870059257,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:gru-jesse-allan,Gru Jesse Allan,Gru Jesse Allan,352,724638,0.000485759786265694,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:habiba-desai,Habiba Desai,Habiba Desai,196,724638,0.000270479880988852,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:heather-he,Heather He,Heather He,297,724638,0.000409859819661679,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:isabella-gamk,Isabella Gamk,Isabella Gamk,88,724638,0.000121439946566424,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:jack-weenen,Jack Weenen,Jack Weenen,30,724638,0.000041399981784008,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:james-guglielmin,James Guglielmin,James Guglielmin,101,724638,0.000139379938672827,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:jamie-atkinson,Jamie Atkinson,Jamie Atkinson,361,724638,0.000498179780800896,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:jamil-nowwarah,Jamil Nowwarah,Jamil Nowwarah,38,724638,0.000052439976926410,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:jeffery-tunney,Jeffery Tunney,Jeffery Tunney,83,724638,0.000114539949602422,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:jody-williams,Jody Williams,Jody Williams,160,724638,0.000220799902848043,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:john-letonja,John Letonja,John Letonja,45,724638,0.000062099972676012,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:john-ransome,John Ransome,John Ransome,75,724638,0.000103499954460020,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:john-winter,John Winter,John Winter,118,724638,0.000162839928350432,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:jose-baking,Jose Baking,Jose Baking,284,724638,0.000391919827555276,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:kevin-clarke,Kevin Clarke,Kevin Clarke,265,724638,0.000365699839092071,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:kiri-vadivelu,Kiri Vadivelu,Kiri Vadivelu,290,724638,0.000400199823912077,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:knia-singh,Knia Singh,Knia Singh,246,724638,0.000339479850628866,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:kris-langenfeld,Kris Langenfeld,Kris Langenfeld,137,724638,0.000189059916813637,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:logan-choy,Logan Choy,Logan Choy,695,724638,0.000959099577996186,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:lyall-sanders,Lyall Sanders,Lyall Sanders,2775,724638,0.003829498315020741,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:mark-leliever,Mark Leliever,Mark Leliever,259,724638,0.000357419842735269,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:mason-carrie,Mason Carrie,Mason Carrie,150,724638,0.000206999908920040,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:matti-charlton,Matti Charlton,Matti Charlton,134,724638,0.000184919918635236,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:meir-straus,Meir Straus,Meir Straus,129,724638,0.000178019921671234,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:michael-jensen,Michael Jensen,Michael Jensen,115,724638,0.000158699930172031,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:michael-lamoureux,Michael Lamoureux,Michael Lamoureux,120,724638,0.000165599927136032,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:michael-nicula,Michael Nicula,Michael Nicula,88,724638,0.000121439946566424,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:mitchell-toye,Mitchell Toye,Mitchell Toye,72,724638,0.000099359956281619,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:monica-forrester,Monica Forrester,Monica Forrester,278,724638,0.000383639831198474,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:monowar-hossain,Monowar Hossain,Monowar Hossain,164,724638,0.000226319900419244,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:nathalie-xian-yi-yan,Nathalie Xian Yi Yan,Nathalie Xian Yi Yan,180,724638,0.000248399890704048,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:norman-macleod,Norman Macleod,Norman Macleod,163,724638,0.000224939901026444,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:partap-dua-singh,Partap Dua Singh,Partap Dua Singh,132,724638,0.000182159919849635,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:patricia-johnston,Patricia Johnston,Patricia Johnston,217,724638,0.000299459868237658,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:paul-collins,Paul Collins,Paul Collins,168,724638,0.000231839897990445,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:peter-handjis,Peter Handjis,Peter Handjis,127,724638,0.000175259922885634,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:phillip-d-cruze,Phillip D'Cruze,Phillip D'Cruze,68,724638,0.000093839958710418,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:raksheni-sivaneswaran,Raksheni Sivaneswaran,Raksheni Sivaneswaran,779,724638,0.001075019526991408,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:reginald-tull,Reginald Tull,Reginald Tull,482,724638,0.000665159707329729,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:rick-lee,Rick Lee,Rick Lee,241,724638,0.000332579853664864,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:rob-davis,Rob Davis,Rob Davis,378,724638,0.000521639770478501,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:robert-shusterman,Robert Shusterman,Robert Shusterman,114,724638,0.000157319930779230,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:rocco-schipano,Rocco Schipano,Rocco Schipano,94,724638,0.000129719942923225,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:roland-chan,Roland Chan,Roland Chan,515,724638,0.000710699687292138,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:romero-danny-chevalier,Romero Danny Chevalier,Romero Danny Chevalier,281,724638,0.000387779829376875,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:samson-deb,Samson Deb,Samson Deb,129,724638,0.000178019921671234,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:sandeep-srivastava,Sandeep Srivastava,Sandeep Srivastava,166,724638,0.000229079899204844,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:sarah-climenhaga,Sarah Climenhaga,Sarah Climenhaga,195,724638,0.000269099881596052,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:scott-furnival,Scott Furnival,Scott Furnival,110,724638,0.000151799933208029,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:serge-korovitsyn,Serge Korovitsyn,Serge Korovitsyn,96,724638,0.000132479941708826,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:sharif-ahmed,Sharif Ahmed,Sharif Ahmed,814,724638,0.001123319505739417,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:sheila-igodan,Sheila Igodan,Sheila Igodan,42,724638,0.000057959974497611,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:simryn-fenby,Simryn Fenby,Simryn Fenby,97,724638,0.000133859941101626,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:steve-mann,Steve Mann,Steve Mann,127,724638,0.000175259922885634,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:syed-jaffery,Syed Jaffery,Syed Jaffery,147,724638,0.000202859910741639,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:thomas-hall,Thomas Hall,Thomas Hall,258,724638,0.000356039843342469,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:toby-heaps,Toby Heaps,Toby Heaps,593,724638,0.000818339639930558,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:walayat-khan,Walayat Khan,Walayat Khan,109,724638,0.000150419933815229,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:walter-rubino,Walter Rubino,Walter Rubino,67,724638,0.000092459959317618,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:weizhen-tang,Weizhen Tang,Weizhen Tang,125,724638,0.000172499924100033,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:willie-reodica,Willie Reodica,Willie Reodica,225,724638,0.000310499863380060,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:xiao-hua-gong,Xiao Hua Gong,Xiao Hua Gong,2983,724638,0.004116538188723197,false,toronto_election_results,office=mayor;year=2023
+toronto_2023,toronto_2023:yuanqian-wei,Yuanqian Wei,Yuanqian Wei,78,724638,0.000107639952638421,false,toronto_election_results,office=mayor;year=2023
