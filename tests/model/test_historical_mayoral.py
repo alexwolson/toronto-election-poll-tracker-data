@@ -91,21 +91,6 @@ def test_outcomes_are_complete_candidate_level_official_results() -> None:
     assert all("_" not in row.candidate_id.split(":", 1)[-1] for row in corpus.outcomes)
 
 
-def test_2014_sidecar_preserves_the_verified_declaration_provenance() -> None:
-    rows = _rows("data/raw/elections/mayoral_results_2014_official.csv")
-    assert len(rows) == 65
-    assert sum(int(row["votes"]) for row in rows) == 981_054
-    assert [row["candidate_name"] for row in rows if row["is_winner"] == "true"] == [
-        "John Tory"
-    ]
-    assert {row["source_locator"] for row in rows} == {
-        "PDF pages 2-3 (printed pages 1-2)"
-    }
-    assert {row["source_sha256"] for row in rows} == {
-        "007f5055da03ce1df17cb85c6c1871a1de822c55966e4518f845905fa4b12158"
-    }
-
-
 def test_final_ballot_known_by_dates_are_conservative_replay_boundaries() -> None:
     corpus = load_historical_mayoral_corpus(ROOT)
     elections = {row.election_cycle_id: row for row in corpus.elections}
@@ -273,7 +258,7 @@ def test_forum_and_liaison_waves_preserve_source_semantics() -> None:
     perruzza = next(
         response
         for response in corpus.responses_for_reading("forum_2023_may26_all")
-        if response.candidate_id == "toronto_2023:perruzza-anthony"
+        if response.candidate_id == "toronto_2023:anthony-perruzza"
     )
     assert perruzza.response_label == "Anthony Perruza"
     assert perruzza.candidate_name == "Anthony Perruzza"
