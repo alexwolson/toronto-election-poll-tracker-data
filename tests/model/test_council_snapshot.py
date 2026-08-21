@@ -2,7 +2,10 @@ import json
 from pathlib import Path
 
 from backend.model.council_biography import load_council_results
-from backend.model.council_hints import load_officeholding_history
+from backend.model.council_hints import (
+    load_officeholding_history,
+    load_supported_hints,
+)
 from backend.model.council_race import load_registered_field, load_ward_incumbency
 from backend.model.council_race_card import load_ward_poll_readings
 from backend.model.council_snapshot import (
@@ -17,6 +20,7 @@ INCUMBENCY = ROOT / "data/raw/defeatability/ward_defeatability.csv"
 FIELD = ROOT / "data/raw/candidates/councillor_registered.csv"
 WARD_POLLS = ROOT / "data/raw/polls/ward_poll_readings.csv"
 WARD_NAMES = ROOT / "data/raw/defeatability/data-qT4Kx.csv"
+HINTS = ROOT / "data/raw/hints/supported_historical_hints.csv"
 
 
 def _snapshot():
@@ -27,6 +31,7 @@ def _snapshot():
         load_ward_poll_readings(WARD_POLLS),
         ward_names=load_ward_names(WARD_NAMES),
         officeholding=load_officeholding_history(RESULTS),
+        supported_hints=load_supported_hints(HINTS),
     )
 
 
@@ -115,6 +120,35 @@ def test_ward_20_last_election_is_the_2023_by_election_and_matches_incumbent() -
     assert w["prior_result"]["winner_name"] == "Parthi Kandavel"
     # ...and it agrees with the incumbent's most recent win.
     assert w["incumbent"]["most_recent_win"]["year"] == 2023
+
+
+def test_ward_20_kaid_signals_carry_direction_and_provenance() -> None:
+    kaid = next(
+        c
+        for c in _snapshot()["wards"]["20"]["candidates"]
+        if c["display_name"] == "Naser Kaid"
+    )
+    hints = {h["hint_id"]: h for h in kaid["historical_hints"]}
+    # Most-recent qualifying result: a negative signal — a 7th-of-8 trustee loss in
+    # 2022, ~26 pts behind the winner.
+    margin = hints["own_most_recent_prior_elected_margin"]
+    assert margin["direction"] == "negative"
+    assert margin["source"]["result"] == "lost"
+    assert margin["source"]["rank"] == 7
+    assert margin["source"]["field_size"] == 8
+    assert margin["source"]["year"] == 2022
+    assert margin["source"]["margin"] < -0.2
+    # Victory count: a measured zero (0 of 2 qualifying candidacies), negative.
+    vc = hints["own_prior_elected_victory_count"]
+    assert vc["direction"] == "negative"
+    assert vc["source"]["victory_count"] == 0
+    assert vc["source"]["qualifying_candidacy_count"] == 2
+    assert vc["source"]["coverage"] == "measured_zero"
+    # Opponent signal names the opponent it rests on.
+    opp = hints["opponent_strongest_prior_elected_margin"]
+    assert opp["direction"] == "negative"
+    assert opp["subject"] == "opponent_history"
+    assert opp["source"]["opponent_name"] == "Parthi Kandavel"
 
 
 def test_open_seat_card_gates_triggers_and_surfaces_disagreement() -> None:

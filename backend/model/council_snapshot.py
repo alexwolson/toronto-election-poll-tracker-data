@@ -19,6 +19,7 @@ from backend.model.council_hints import (
     CandidacyRecord,
     FiredHint,
     PastElection,
+    SignalSource,
     SupportedHint,
     candidate_features,
     fire_candidate_hints,
@@ -65,6 +66,7 @@ def _race_candidate_hints(
             continue
         features[candidate.display_name] = candidate_features(
             history_by_person[person_id],
+            name=candidate.display_name,
             is_sitting_incumbent=incumbent_pid is not None
             and person_id == incumbent_pid,
         )
@@ -156,6 +158,22 @@ def _incumbent_card(
     }
 
 
+def _signal_source_card(source: SignalSource) -> dict:
+    return {
+        "opponent_name": source.opponent_name,
+        "office_type": source.office_type,
+        "year": source.year,
+        "district_name": source.district_name,
+        "result": source.result,
+        "rank": source.rank,
+        "field_size": source.field_size,
+        "margin": source.margin,
+        "victory_count": source.victory_count,
+        "qualifying_candidacy_count": source.qualifying_candidacy_count,
+        "coverage": source.coverage,
+    }
+
+
 def _hint_card(hint: FiredHint) -> dict:
     return {
         "hint_id": hint.hint_id,
@@ -167,6 +185,8 @@ def _hint_card(hint: FiredHint) -> dict:
         "ci_high_pp": hint.ci_high_pp,
         "effect_unit": hint.effect_unit,
         "evidence_tier": hint.evidence_tier,
+        "direction": hint.direction,
+        "source": _signal_source_card(hint.source) if hint.source else None,
     }
 
 

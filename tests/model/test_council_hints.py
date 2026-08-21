@@ -8,6 +8,7 @@ from backend.model.council_hints import (
     load_supported_hints,
     past_election_history,
     resolve_person_id,
+    signal_direction,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -135,6 +136,69 @@ def test_ran_but_never_won_fires_victory_count_of_zero() -> None:
 def test_newcomer_with_no_history_fires_nothing() -> None:
     f = CandidateFeatures(False, frozenset(), 0, 0, None)
     assert _fire(f, open_contest=True) == {}
+
+
+# --- signed historical direction (ticket 02) --------------------------------
+
+
+def test_signal_direction_for_all_six_hints() -> None:
+    # own presence-of-a-positive-factor hints read positive
+    assert (
+        signal_direction("own_any_prior_elected_office__open_contest", None)
+        == "positive"
+    )
+    assert signal_direction("own_prior_win_type__trustee", None) == "positive"
+    # opponent hints are negative for the subject whose card they'd appear on
+    assert (
+        signal_direction("opponent_any_prior_elected_office__open_contest", None)
+        == "negative"
+    )
+    assert (
+        signal_direction("opponent_strongest_prior_elected_margin", 0.35) == "negative"
+    )
+    # own margin: the candidate's actual value decides, not the coefficient
+    assert signal_direction("own_most_recent_prior_elected_margin", 0.24) == "positive"
+    assert signal_direction("own_most_recent_prior_elected_margin", -0.26) == "negative"
+    # own victory count: a measured zero is negative, one or more is positive
+    assert signal_direction("own_prior_elected_victory_count", 0) == "negative"
+    assert signal_direction("own_prior_elected_victory_count", 3) == "positive"
+    # a missing value falls to the conservative (negative) reading
+    assert signal_direction("own_most_recent_prior_elected_margin", None) == "negative"
+
+
+def test_fire_attaches_measured_zero_and_opponent_provenance() -> None:
+    subject = candidate_features(
+        [
+            _cand("c1", "trustee", "2022-10-24", False, 0.10, rank=7, field_size=8),
+            _cand("c2", "trustee", "2018-10-22", False, 0.12, rank=5, field_size=9),
+        ],
+        name="Subject",
+        is_sitting_incumbent=False,
+    )
+    opponent = candidate_features(
+        [_cand("c3", "trustee", "2018-10-22", True, 0.40, rank=1, field_size=10)],
+        name="Opp",
+        is_sitting_incumbent=False,
+    )
+    fired = {
+        h.hint_id: h
+        for h in fire_candidate_hints(
+            subject, [opponent], is_open_contest=True, hints=HINTS
+        )
+    }
+    # measured zero (0 of 2 qualifying candidacies), negative
+    vc = fired["own_prior_elected_victory_count"]
+    assert vc.direction == "negative"
+    assert vc.source is not None
+    assert vc.source.coverage == "measured_zero"
+    assert vc.source.victory_count == 0
+    assert vc.source.qualifying_candidacy_count == 2
+    assert vc.source.year == 2022  # most-recent qualifying race for context
+    # opponent signal names the opponent it rests on
+    opp_hint = fired["opponent_any_prior_elected_office__open_contest"]
+    assert opp_hint.direction == "negative"
+    assert opp_hint.source is not None
+    assert opp_hint.source.opponent_name == "Opp"
 
 
 # --- generous single-person_id resolution -----------------------------------

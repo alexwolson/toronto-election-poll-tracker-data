@@ -31,7 +31,7 @@ import csv
 import json
 import re
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 # Contract history_scope.non_council_office_types; "council" is councillor only.
@@ -209,10 +209,15 @@ class CandidateFeatures:
     prior_elected_candidacy_count: int
     prior_elected_victory_count: int
     most_recent_prior_elected_margin: float | None
+    # Provenance carriers (ticket 02); default empty so aggregate-only construction
+    # in tests still works.
+    candidate_name: str = ""
+    qualifying_records: tuple[CandidacyRecord, ...] = ()
+    most_recent_qualifying: CandidacyRecord | None = None
 
 
 def candidate_features(
-    records: list[CandidacyRecord], *, is_sitting_incumbent: bool
+    records: list[CandidacyRecord], *, name: str = "", is_sitting_incumbent: bool
 ) -> CandidateFeatures:
     non_council_wins = [
         r for r in records if r.office_type in _NON_COUNCIL_OFFICES and r.is_win
@@ -231,6 +236,9 @@ def candidate_features(
         prior_elected_candidacy_count=len(qualifying),
         prior_elected_victory_count=sum(1 for r in qualifying if r.is_win),
         most_recent_prior_elected_margin=most_recent.margin if most_recent else None,
+        candidate_name=name,
+        qualifying_records=tuple(qualifying),
+        most_recent_qualifying=most_recent,
     )
 
 
@@ -286,6 +294,81 @@ def past_election_history(records: list[CandidacyRecord]) -> tuple[PastElection,
     return tuple(elections)
 
 
+_POSITIVE_OWN_PRESENCE = frozenset(
+    {"own_any_prior_elected_office__open_contest", "own_prior_win_type__trustee"}
+)
+_NEGATIVE_OPPONENT = frozenset(
+    {
+        "opponent_any_prior_elected_office__open_contest",
+        "opponent_strongest_prior_elected_margin",
+    }
+)
+
+
+def signal_direction(hint_id: str, value: float | None) -> str:
+    """Signed historical direction of a fired hint for the candidate whose card it
+    appears on: ``"positive"`` or ``"negative"`` (ticket 02).
+
+    Derived from the candidate's actual value AND the measured association, not the
+    coefficient alone — a negative most-recent margin or a measured-zero victory
+    count reads negative even though those associations' coefficients are positive.
+    Opponent-history signals are negative for the subject (a stronger opponent).
+    The direction carries no magnitude, probability, or causal claim.
+    """
+    if hint_id in _POSITIVE_OWN_PRESENCE:
+        return "positive"
+    if hint_id in _NEGATIVE_OPPONENT:
+        return "negative"
+    if hint_id == "own_most_recent_prior_elected_margin":
+        return "positive" if (value or 0) > 0 else "negative"
+    if hint_id == "own_prior_elected_victory_count":
+        return "positive" if int(value or 0) >= 1 else "negative"
+    return "negative"
+
+
+@dataclass(frozen=True, slots=True)
+class SignalSource:
+    """Structured provenance behind a fired signal (ticket 02): the concrete race
+    (or aggregate) it rests on, so the frontend can explain it specifically instead
+    of printing catalog prose. ``opponent_name`` is set only for opponent signals;
+    ``coverage`` distinguishes a measured zero from resolved history."""
+
+    opponent_name: str | None
+    office_type: str | None
+    year: int | None
+    district_name: str | None
+    result: str | None  # won | lost
+    rank: int | None
+    field_size: int | None
+    margin: float | None
+    victory_count: int | None
+    qualifying_candidacy_count: int | None
+    coverage: str  # resolved | measured_zero
+
+
+def _source_from_record(
+    record: CandidacyRecord | None,
+    *,
+    opponent_name: str | None = None,
+    victory_count: int | None = None,
+    qualifying_candidacy_count: int | None = None,
+    coverage: str = "resolved",
+) -> SignalSource:
+    return SignalSource(
+        opponent_name=opponent_name,
+        office_type=record.office_type if record else None,
+        year=int(record.election_date[:4]) if record else None,
+        district_name=(record.district_name or None) if record else None,
+        result=("won" if record.is_win else "lost") if record else None,
+        rank=record.vote_rank if record else None,
+        field_size=record.field_size if record else None,
+        margin=record.margin if record else None,
+        victory_count=victory_count,
+        qualifying_candidacy_count=qualifying_candidacy_count,
+        coverage=coverage,
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class FiredHint:
     hint_id: str
@@ -297,6 +380,8 @@ class FiredHint:
     ci_high_pp: float
     effect_unit: str
     evidence_tier: str
+    direction: str = ""  # positive | negative (ticket 02)
+    source: SignalSource | None = None  # structured provenance (ticket 02)
 
 
 def _fire(
@@ -334,6 +419,7 @@ def _fire(
         ci_high_pp=hint.ci_high_pp,
         effect_unit=hint.effect_unit,
         evidence_tier=hint.evidence_tier,
+        direction=signal_direction(hint.hint_id, value),
     )
 
 
@@ -364,5 +450,71 @@ def fire_candidate_hints(
             max(opponent_margins) if opponent_margins else None
         ),
     }
-    fired = (_fire(hint, fields, is_open_contest=is_open_contest) for hint in hints)
-    return tuple(hint for hint in fired if hint is not None)
+    fired = [
+        hint
+        for hint in (
+            _fire(hint, fields, is_open_contest=is_open_contest) for hint in hints
+        )
+        if hint is not None
+    ]
+
+    # Provenance anchors (ticket 02): the concrete race behind each fired signal.
+    own_wins = [r for r in features.qualifying_records if r.is_win]
+    most_recent_own_win = max(own_wins, key=lambda r: r.election_date, default=None)
+    trustee_win = max(
+        (
+            r
+            for r in features.qualifying_records
+            if r.is_win and r.office_type == "trustee"
+        ),
+        key=lambda r: r.election_date,
+        default=None,
+    )
+    strongest_opp = max(
+        (o for o in opponents if o.most_recent_prior_elected_margin is not None),
+        key=lambda o: o.most_recent_prior_elected_margin,
+        default=None,
+    )
+    opp_with_office = max(
+        (o for o in opponents if o.has_prior_elected_office),
+        key=lambda o: (
+            o.most_recent_prior_elected_margin
+            if o.most_recent_prior_elected_margin is not None
+            else -9.0
+        ),
+        default=None,
+    )
+
+    def source_for(hint_id: str) -> SignalSource | None:
+        if hint_id == "own_most_recent_prior_elected_margin":
+            return _source_from_record(features.most_recent_qualifying)
+        if hint_id == "own_prior_elected_victory_count":
+            count = features.prior_elected_victory_count
+            return _source_from_record(
+                features.most_recent_qualifying,
+                victory_count=count,
+                qualifying_candidacy_count=features.prior_elected_candidacy_count,
+                coverage="measured_zero" if count == 0 else "resolved",
+            )
+        if hint_id == "own_any_prior_elected_office__open_contest":
+            return _source_from_record(
+                most_recent_own_win or features.most_recent_qualifying
+            )
+        if hint_id == "own_prior_win_type__trustee":
+            return _source_from_record(trustee_win)
+        if hint_id == "opponent_strongest_prior_elected_margin" and strongest_opp:
+            return _source_from_record(
+                strongest_opp.most_recent_qualifying,
+                opponent_name=strongest_opp.candidate_name,
+            )
+        if (
+            hint_id == "opponent_any_prior_elected_office__open_contest"
+            and opp_with_office
+        ):
+            return _source_from_record(
+                opp_with_office.most_recent_qualifying,
+                opponent_name=opp_with_office.candidate_name,
+            )
+        return None
+
+    return tuple(replace(hint, source=source_for(hint.hint_id)) for hint in fired)
