@@ -8,7 +8,7 @@ verdict, never folded into it (ADR 0033).
 
 The orchestrator consumes already-computed Mandatory Sensitivity Variants; the
 production of those variants from the live endpoint (running each seam and
-reducing draws to a quantity probability + 99% error interval) is model-to-gate
+reducing draws to a quantity probability + 95% error interval) is model-to-gate
 wiring and belongs to snapshot integration (INT), not to this gate layer.
 """
 

@@ -11,7 +11,7 @@ Frozen decisions implemented here:
 - The Probability Band grid and Frequency Statement wording are ADR 0006 verbatim.
 - The Band Stability Gate is ADR 0018: a quantity publishes only when every
   Mandatory Sensitivity Variant lands in the same half-open band and each
-  variant's two-sided 99% error interval lies wholly inside it; a variant that
+  variant's two-sided 95% error interval lies wholly inside it; a variant that
   cannot run fails the gate, and any inter-band boundary touch is Forecast
   Unavailable. Fail-closed (ADR 0032); each quantity is gated independently
   (ADR 0003).
@@ -208,7 +208,7 @@ def _consensus_on_grid(
     variants: tuple[SensitivityVariant, ...],
     grid: tuple[ProbabilityBand, ...],
 ) -> tuple[ProbabilityBand | None, str]:
-    """The consensus band on one grid if every variant lands in it with its 99%
+    """The consensus band on one grid if every variant lands in it with its 95%
     interval inside; otherwise (None, the first disagreement's reason)."""
     consensus = band_for(variants[0].probability, grid)
     for variant in variants:
@@ -222,7 +222,7 @@ def _consensus_on_grid(
         assert variant.error_interval is not None  # runnable => interval present
         if not _interval_within_band(variant.error_interval, consensus):
             return None, (
-                f"variant {variant.label!r} 99% error interval touches a band boundary"
+                f"variant {variant.label!r} 95% error interval touches a band boundary"
             )
     return consensus, ""
 
@@ -232,7 +232,7 @@ def evaluate_band_stability(
 ) -> PublicationDecision:
     """Apply the ADR 0018 Band Stability Gate at the finest resolution that holds:
     the out-of-ten grid, then the coarser out-of-five grid (ADR 0049). A quantity
-    publishes the finest band on which every variant agrees (with its 99% interval
+    publishes the finest band on which every variant agrees (with its 95% interval
     inside); if even the coarse grid is straddled, it is Forecast Unavailable."""
     variants = tuple(variants)
     if not variants:

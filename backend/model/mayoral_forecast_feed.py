@@ -79,8 +79,8 @@ _TAIL_MULTIPLIER_LOW = 0.5
 _TAIL_MULTIPLIER_HIGH = 2.0
 # Leave-one-pollster-out is Not Applicable below this many pollsters (ADR 0048).
 _MIN_POLLSTERS_FOR_LEAVE_ONE_OUT = 3
-# Two-sided 99% normal quantile, for the Monte-Carlo error interval (ADR 0018).
-_Z_99 = 2.5758293035489004
+# Two-sided 95% normal quantile, for the Monte-Carlo error interval (ADR 0018).
+_Z_95 = 1.959963984540054
 
 
 # --- pure quantity core (outcome-free) -------------------------------------
@@ -88,7 +88,7 @@ _Z_99 = 2.5758293035489004
 
 @dataclass(frozen=True, slots=True)
 class QuantityEstimate:
-    """A probability point estimate plus its two-sided 99% MC error interval."""
+    """A probability point estimate plus its two-sided 95% MC error interval."""
 
     probability: float
     interval_lower: float
@@ -96,17 +96,17 @@ class QuantityEstimate:
 
 
 def _wilson_interval(p: float, n: int) -> tuple[float, float]:
-    """Two-sided 99% Wilson score interval for a proportion p from n draws.
+    """Two-sided 95% Wilson score interval for a proportion p from n draws.
 
     Wilson stays inside [0, 1] and is well-behaved near 0 and 1, where the Band
     Stability Gate is most sensitive; the point estimate always lies within it.
     """
     if n <= 0:
         raise ValueError("draw count must be positive")
-    z2 = _Z_99 * _Z_99
+    z2 = _Z_95 * _Z_95
     denom = 1.0 + z2 / n
     center = (p + z2 / (2.0 * n)) / denom
-    half = (_Z_99 * math.sqrt(p * (1.0 - p) / n + z2 / (4.0 * n * n))) / denom
+    half = (_Z_95 * math.sqrt(p * (1.0 - p) / n + z2 / (4.0 * n * n))) / denom
     return max(0.0, center - half), min(1.0, center + half)
 
 
@@ -130,7 +130,7 @@ def forecast_quantities(
     incumbent_candidate_id: str | None,
     close_threshold: float = _CLOSE_THRESHOLD,
 ) -> MayoralForecastQuantities:
-    """Reduce full-ballot share draws to the published quantities + 99% intervals."""
+    """Reduce full-ballot share draws to the published quantities + 95% intervals."""
     candidate_ids = draws.candidate_ids
     draw_count = len(draws.draws)
     win_weight = dict.fromkeys(candidate_ids, 0.0)
