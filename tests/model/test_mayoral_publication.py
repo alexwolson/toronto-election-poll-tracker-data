@@ -79,7 +79,9 @@ def test_m2_close_result_publishes_a_band_when_variants_agree() -> None:
     assert pub.band.label == "45–<55%"
 
 
-def test_m2_unavailable_when_variants_disagree_on_band() -> None:
+def test_m2_falls_back_to_the_coarse_band_when_variants_agree_only_there() -> None:
+    # ADR 0049: 0.53/0.62 disagree on the out-of-ten band but both sit in the
+    # out-of-five band 50–<70, so the quantity publishes at that coarser resolution.
     tier = _tier([_s("a", "Forum")])  # M2
     pub = compose_mayoral_quantity_publication(
         CLOSE_RESULT,
@@ -87,7 +89,25 @@ def test_m2_unavailable_when_variants_disagree_on_band() -> None:
         race_has_incumbent=True,
         variants=[
             _variant("base", "0.53", "0.51", "0.54"),
-            _variant("tail-high", "0.62", "0.60", "0.64"),  # different band
+            _variant("tail-high", "0.62", "0.60", "0.64"),
+        ],
+    )
+    assert pub.availability is Availability.AVAILABLE
+    assert pub.band is not None
+    assert pub.band.label == "50–<70%"
+    assert pub.band.frequency_statement == "about 3 in 5"
+
+
+def test_m2_unavailable_when_variants_disagree_on_both_grids() -> None:
+    # 0.28/0.42 straddle the 0.30 out-of-five boundary, so neither grid can publish.
+    tier = _tier([_s("a", "Forum")])  # M2
+    pub = compose_mayoral_quantity_publication(
+        CLOSE_RESULT,
+        tier,
+        race_has_incumbent=True,
+        variants=[
+            _variant("base", "0.28", "0.27", "0.29"),
+            _variant("tail-high", "0.42", "0.41", "0.43"),  # different coarse band
         ],
     )
     assert pub.availability is Availability.UNAVAILABLE

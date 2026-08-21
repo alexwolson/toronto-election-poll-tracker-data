@@ -4,6 +4,7 @@ import pytest
 
 from backend.model.publication import (
     PROBABILITY_BAND_GRID,
+    PROBABILITY_BAND_GRID_FIVE,
     ErrorInterval,
     SensitivityVariant,
     band_for,
@@ -37,6 +38,31 @@ def test_grid_matches_adr_0006_verbatim() -> None:
         assert band.upper_inclusive is incl
         assert band.label == label
         assert band.frequency_statement == freq
+
+
+def test_five_grid_matches_adr_0049_verbatim() -> None:
+    # 6 half-open out-of-five bands, closed only at 100; "N in 5" wording (ADR 0049).
+    expected = [
+        ("0", "0.10", False, "0–<10%", "less than 1 in 5"),
+        ("0.10", "0.30", False, "10–<30%", "about 1 in 5"),
+        ("0.30", "0.50", False, "30–<50%", "about 2 in 5"),
+        ("0.50", "0.70", False, "50–<70%", "about 3 in 5"),
+        ("0.70", "0.90", False, "70–<90%", "about 4 in 5"),
+        ("0.90", "1", True, "90–100%", "more than 4 in 5"),
+    ]
+    assert len(PROBABILITY_BAND_GRID_FIVE) == 6
+    for band, (lo, hi, incl, label, freq) in zip(PROBABILITY_BAND_GRID_FIVE, expected):
+        assert band.lower == D(lo)
+        assert band.upper == D(hi)
+        assert band.upper_inclusive is incl
+        assert band.label == label
+        assert band.frequency_statement == freq
+
+
+def test_band_for_selects_the_coarse_grid_when_asked() -> None:
+    assert band_for(D("0.62"), PROBABILITY_BAND_GRID_FIVE).label == "50–<70%"
+    assert band_for(D("0.09"), PROBABILITY_BAND_GRID_FIVE).label == "0–<10%"
+    assert band_for(D("1"), PROBABILITY_BAND_GRID_FIVE).label == "90–100%"
 
 
 def test_band_for_is_half_open_and_closed_only_at_one() -> None:
@@ -85,11 +111,27 @@ def test_publishes_when_variants_agree_and_intervals_strictly_inside() -> None:
     assert decision.reason == ""
 
 
-def test_unavailable_when_variants_disagree_on_band() -> None:
+def test_falls_back_to_the_coarse_band_when_variants_agree_only_there() -> None:
+    # ADR 0049: 0.53 and 0.57 disagree on the out-of-ten band (45–<55 vs 55–<65)
+    # but both sit in the out-of-five band 50–<70, so the quantity publishes there.
     decision = evaluate_band_stability(
         [
             _variant("primary", "0.53", "0.51", "0.54"),
-            _variant("incumbency", "0.57", "0.56", "0.58"),  # different band
+            _variant("incumbency", "0.57", "0.56", "0.58"),
+        ]
+    )
+    assert decision.is_published
+    assert decision.band.label == "50–<70%"
+    assert decision.band.frequency_statement == "about 3 in 5"
+
+
+def test_unavailable_when_variants_straddle_the_coarse_band_too() -> None:
+    # 0.28 and 0.42 disagree at both resolutions (they straddle the 0.30 out-of-five
+    # boundary), so even the coarse grid cannot publish — fail-closed holds.
+    decision = evaluate_band_stability(
+        [
+            _variant("primary", "0.28", "0.27", "0.29"),
+            _variant("incumbency", "0.42", "0.41", "0.43"),
         ]
     )
     assert not decision.is_published

@@ -88,10 +88,34 @@ PROBABILITY_BAND_GRID: Final[tuple[ProbabilityBand, ...]] = (
 )
 
 
-def band_for(probability: Decimal | float | str) -> ProbabilityBand:
+# Coarse out-of-five grid (ADR 0049): the same shape at half the resolution, with
+# "N in 5" frequency wording. The finest-stable-band rule publishes an out-of-ten
+# band when every variant agrees at that resolution and falls back to this coarser
+# grid when they agree only here — a true, robust statement at the resolution the
+# evidence supports, rather than nothing. Frozen (ADR 0005).
+PROBABILITY_BAND_GRID_FIVE: Final[tuple[ProbabilityBand, ...]] = (
+    _band("0", "0.10", False, "0–<10%", "less than 1 in 5"),
+    _band("0.10", "0.30", False, "10–<30%", "about 1 in 5"),
+    _band("0.30", "0.50", False, "30–<50%", "about 2 in 5"),
+    _band("0.50", "0.70", False, "50–<70%", "about 3 in 5"),
+    _band("0.70", "0.90", False, "70–<90%", "about 4 in 5"),
+    _band("0.90", "1", True, "90–100%", "more than 4 in 5"),
+)
+
+# Finest first: the gate returns the first grid on which every variant agrees.
+_BAND_GRIDS: Final[tuple[tuple[ProbabilityBand, ...], ...]] = (
+    PROBABILITY_BAND_GRID,
+    PROBABILITY_BAND_GRID_FIVE,
+)
+
+
+def band_for(
+    probability: Decimal | float | str,
+    grid: tuple[ProbabilityBand, ...] = PROBABILITY_BAND_GRID,
+) -> ProbabilityBand:
     """Map an exact probability in [0, 1] to its half-open Probability Band."""
     p = _as_probability(probability)
-    for band in PROBABILITY_BAND_GRID:
+    for band in grid:
         if band.contains(p):
             return band
     raise AssertionError(  # pragma: no cover - grid covers [0, 1] exhaustively
@@ -180,10 +204,36 @@ def _interval_within_band(interval: ErrorInterval, band: ProbabilityBand) -> boo
     return lower_ok and upper_ok
 
 
+def _consensus_on_grid(
+    variants: tuple[SensitivityVariant, ...],
+    grid: tuple[ProbabilityBand, ...],
+) -> tuple[ProbabilityBand | None, str]:
+    """The consensus band on one grid if every variant lands in it with its 99%
+    interval inside; otherwise (None, the first disagreement's reason)."""
+    consensus = band_for(variants[0].probability, grid)
+    for variant in variants:
+        band = band_for(variant.probability, grid)
+        if band != consensus:
+            return None, (
+                f"variant {variant.label!r} lands in {band.label}, not "
+                f"{consensus.label}"
+            )
+    for variant in variants:
+        assert variant.error_interval is not None  # runnable => interval present
+        if not _interval_within_band(variant.error_interval, consensus):
+            return None, (
+                f"variant {variant.label!r} 99% error interval touches a band boundary"
+            )
+    return consensus, ""
+
+
 def evaluate_band_stability(
     variants: Iterable[SensitivityVariant],
 ) -> PublicationDecision:
-    """Apply the ADR 0018 Band Stability Gate to a quantity's variants."""
+    """Apply the ADR 0018 Band Stability Gate at the finest resolution that holds:
+    the out-of-ten grid, then the coarser out-of-five grid (ADR 0049). A quantity
+    publishes the finest band on which every variant agrees (with its 99% interval
+    inside); if even the coarse grid is straddled, it is Forecast Unavailable."""
     variants = tuple(variants)
     if not variants:
         return _unavailable("no sensitivity variants supplied")
@@ -192,20 +242,9 @@ def evaluate_band_stability(
         if not variant.can_run():
             return _unavailable(f"variant {variant.label!r} could not be computed")
 
-    bands = [band_for(variant.probability) for variant in variants]
-    consensus = bands[0]
-    for variant, band in zip(variants, bands):
-        if band != consensus:
-            return _unavailable(
-                f"variant {variant.label!r} lands in {band.label}, not "
-                f"{consensus.label}"
-            )
-
-    for variant in variants:
-        assert variant.error_interval is not None  # runnable => interval present
-        if not _interval_within_band(variant.error_interval, consensus):
-            return _unavailable(
-                f"variant {variant.label!r} 99% error interval touches a band boundary"
-            )
-
-    return PublicationDecision(band=consensus, reason="")
+    reason = ""
+    for grid in _BAND_GRIDS:
+        band, reason = _consensus_on_grid(variants, grid)
+        if band is not None:
+            return PublicationDecision(band=band, reason="")
+    return _unavailable(reason)
