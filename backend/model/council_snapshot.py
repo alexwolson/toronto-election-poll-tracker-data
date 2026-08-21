@@ -17,6 +17,7 @@ from backend.model.council_biography import (
 )
 from backend.model.council_hints import (
     CandidacyRecord,
+    CandidateFeatures,
     FiredHint,
     PastElection,
     SignalSource,
@@ -43,7 +44,7 @@ from backend.model.council_race_card import (
     race_exposure_triggers,
 )
 
-COUNCIL_RACE_CARD_SCHEMA_VERSION = 3
+COUNCIL_RACE_CARD_SCHEMA_VERSION = 5
 
 
 def _race_candidate_hints(
@@ -59,11 +60,19 @@ def _race_candidate_hints(
     incumbent's, so their prior council record is correctly excluded.
     """
     incumbent_pid = resolve_person_id(race.incumbent.name, "", name_variants)
-    features: dict[str, object] = {}
+    features: dict[str, CandidateFeatures] = {}
     for candidate in race.candidates:
         person_id = resolve_person_id(candidate.display_name, "", name_variants)
         if person_id is None or person_id not in history_by_person:
-            features[candidate.display_name] = None
+            # An unresolved candidate has unknown history, not a measured zero.
+            # Keep a placeholder so opponent-derived Open-contest signals can be
+            # computed ward-wide instead of appearing only under linked people.
+            features[candidate.display_name] = candidate_features(
+                [],
+                name=candidate.display_name,
+                is_sitting_incumbent=False,
+                history_confirmed=False,
+            )
             continue
         features[candidate.display_name] = candidate_features(
             history_by_person[person_id],
@@ -74,14 +83,10 @@ def _race_candidate_hints(
     fired: dict[str, tuple[FiredHint, ...]] = {}
     for candidate in race.candidates:
         own = features[candidate.display_name]
-        if own is None:
-            fired[candidate.display_name] = ()
-            continue
         opponents = [
             features[other.display_name]
             for other in race.candidates
             if other.display_name != candidate.display_name
-            and features[other.display_name] is not None
         ]
         fired[candidate.display_name] = fire_candidate_hints(
             own, opponents, is_open_contest=race.is_open_seat, hints=hints

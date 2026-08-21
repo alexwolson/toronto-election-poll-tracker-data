@@ -54,11 +54,12 @@ def test_a_safe_incumbent_fires_no_triggers() -> None:
 
 def test_triggers_are_gated_off_for_open_seats() -> None:
     _, races = _fixtures()
-    # An incumbent race passes its triggers through unchanged.
-    assert race_exposure_triggers(races["11"]) == exposure_triggers(
-        races["11"].incumbent
+    # An incumbent race passes its triggers through unchanged (ward 11 is now an
+    # open seat after Saxe left, so ward 20's running incumbent Kandavel anchors this).
+    assert race_exposure_triggers(races["20"]) == exposure_triggers(
+        races["20"].incumbent
     )
-    assert race_exposure_triggers(races["11"])  # non-empty
+    assert race_exposure_triggers(races["20"])  # non-empty
     # An open seat suppresses triggers even when the incumbent's numbers fire.
     firing = WardIncumbent(
         ward="99",
@@ -115,14 +116,15 @@ def test_prior_result_uses_the_latest_contest_including_by_elections() -> None:
     assert prior["11"].year == 2022
 
 
-def test_competitiveness_facts_flag_two_prior_winners() -> None:
+def test_competitiveness_facts_count_prior_ward_winners() -> None:
     results, races = _fixtures()
     prior = build_prior_results(results)
     facts = derive_competitiveness_facts(races["11"], prior.get("11"))
     assert facts.field_size == len(races["11"].candidates)
-    # Saxe (won 2022) and Layton (won 2018) both won this 25-ward seat.
-    assert facts.candidates_who_won_this_ward == 2
-    assert facts.both_won_this_ward is True
+    # Saxe (won 2022) re-registered in ward 14, leaving Layton (won 2018) as the
+    # only prior winner of this seat still in the ward 11 field.
+    assert facts.candidates_who_won_this_ward == 1
+    assert facts.both_won_this_ward is False
     assert facts.prior_margin_votes == 123
 
 

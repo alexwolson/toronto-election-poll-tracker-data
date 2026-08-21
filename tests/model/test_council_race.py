@@ -32,10 +32,11 @@ def test_every_ward_has_a_race_with_an_incumbent() -> None:
 def test_open_seats_are_derived_from_the_fresh_field() -> None:
     races = _races()
     open_wards = {ward for ward, race in races.items() if race.is_open_seat}
-    # Field-derived: Perks (4), Fletcher (14), Bradford (19) are all absent from
-    # the current registered field. Fletcher is the one the is_running flag misses.
-    assert open_wards == {"4", "14", "19"}
-    assert races["11"].is_open_seat is False  # Saxe is in the field
+    # Field-derived from the certified final field: Perks (4), Fletcher (14),
+    # Bradford (19), and now Saxe (11) are absent from their own ward's field.
+    # Saxe re-registered in ward 14 and Fletcher never ran -> both open.
+    assert open_wards == {"4", "11", "14", "19"}
+    assert races["11"].is_open_seat is True  # Saxe re-registered out of ward 11
 
 
 def test_stale_incumbency_flag_is_surfaced_as_a_disagreement() -> None:
@@ -48,7 +49,9 @@ def test_stale_incumbency_flag_is_surfaced_as_a_disagreement() -> None:
     # Where field and flag agree, no disagreement is raised.
     assert races["4"].incumbency_flag_disagrees is False  # both say open
     assert races["19"].incumbency_flag_disagrees is False  # both say open
-    assert races["11"].incumbency_flag_disagrees is False  # both say running
+    # Ward 11: Saxe's CDI is_running flag is stale (she moved to ward 14), so the
+    # field-derived open seat disagrees with the flag -> surfaced for review.
+    assert races["11"].incumbency_flag_disagrees is True
 
 
 def test_incumbent_record_is_matched_to_a_biography() -> None:
@@ -67,7 +70,8 @@ def test_incumbent_record_is_matched_to_a_biography() -> None:
 
 def test_registered_candidate_is_matched_to_its_history() -> None:
     races = _races()
-    saxe = next(c for c in races["11"].candidates if "saxe" in c.display_name.lower())
+    # Saxe re-registered in ward 14; her registration still matches her history.
+    saxe = next(c for c in races["14"].candidates if "saxe" in c.display_name.lower())
     assert saxe.candidate_id == "per_4569490f5d825a0ca8c7320b499d8090"
     assert saxe.biography is not None
     assert saxe.biography.most_recent_win.year == 2022

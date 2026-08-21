@@ -50,11 +50,16 @@ def main() -> None:
     wards = snapshot["wards"]
     open_seats = [w for w, c in wards.items() if c["is_open_seat"]]
     polled = [w for w, c in wards.items() if c["ward_polls"]]
+    disagree = [w for w, c in wards.items() if c["incumbency_flag_disagrees"]]
     print(f"Council race cards written to {OUT}")
     print(
         f"  {len(wards)} wards | open seats: {sorted(open_seats, key=int)} "
         f"| with ward polls: {sorted(polled, key=int)}"
     )
+    if disagree:
+        # Field membership contradicts the CDI is_running flag: a departed/moved
+        # incumbent the flag hasn't caught up to. Review + refresh ward_defeatability.csv.
+        print(f"  incumbency flag disagrees (review): {sorted(disagree, key=int)}")
 
 
 if __name__ == "__main__":

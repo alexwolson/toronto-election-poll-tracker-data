@@ -1,17 +1,23 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "2.1.0",
   "purpose": "Historical frontend context only; not a prediction or model input.",
   "person_identity": "Use the upstream persistent person_id; never match by name.",
   "history_scope": {
-    "non_council_office_types": [
-      "mayor",
-      "mp",
-      "mpp",
-      "trustee"
+    "allowed_race_history_scopes": [
+      "one explicitly named Office type",
+      "all confirmed elected-office races"
     ],
+    "all_past_race_office_types": [
+      "councillor",
+      "mayor",
+      "trustee",
+      "mp",
+      "mpp"
+    ],
+    "all_past_race_definition": "Every confirmed Candidacy with election_date before the subject Contest, including wins and losses.",
+    "disallowed_aggregate_scope": "Do not use all-races-except-council or add council races only for Returning councillors.",
     "returning_councillor": "A candidate with a strictly earlier council victory who is not a council incumbent immediately before the subject election; prior ward is irrelevant.",
-    "sitting_incumbent_is_returning_councillor": false,
-    "combined_prior_elected_office": "At least one confirmed prior non-council victory, or Returning councillor."
+    "sitting_incumbent_is_returning_councillor": false
   },
   "temporal_rule": {
     "prior": "election_date < subject council election_date",
@@ -21,28 +27,42 @@
     "definition": "elected == True",
     "acclamations_count_as_victories": true
   },
-  "margin_rule": {
-    "unit": "Vote-share proportion; catalog estimates convert effects to percentage points.",
-    "winner": "candidate vote_share - runner_up vote_share",
-    "loser": "candidate vote_share - elected winner vote_share",
+  "all_past_race_margin_rule": {
+    "definition": "Signed vote-share margin in the most recent qualifying race: an elected candidate's share minus the runner-up's share; an unelected candidate's share minus the elected candidate's share.",
     "losses_are_negative": true,
     "acclamation_without_runner_up": null,
-    "own_non_council_value": "Margin from the most recent qualifying prior non-council Candidacy.",
-    "opponent_non_council_value": "Maximum of each opponent's most recent qualifying non-council margin.",
-    "own_combined_value": "Margin from the latest qualifying non-council Candidacy or, for a Returning councillor only, prior council Candidacy. Latest is chosen by election_date.",
-    "opponent_combined_value": "Maximum of each opponent's own_combined_value; sitting incumbents' prior council results are excluded."
+    "missing_is_zero": false
   },
-  "continuous_display_rule": {
+  "race_history_display_rule": {
     "missing_is_zero": false,
-    "own_margin": "Fire only when most_recent_prior_elected_margin is not null.",
-    "opponent_margin": "Fire only when strongest_opponent_prior_elected_margin is not null.",
-    "victory_count": "Fire only when prior_elected_candidacy_count > 0; zero is valid only after a confirmed qualifying prior Candidacy."
+    "any_all_past_race": "Fire only for a candidate in an Open contest or a non-incumbent facing an Incumbent, who is not a Returning councillor, when all_prior_candidacy_count > 0.",
+    "multiple_all_past_races": "Use the same Candidate regime and Returning-councillor exclusions, and fire when all_prior_candidacy_count >= 2.",
+    "any_all_past_race_victory": "Fire only for a candidate in an Open contest or a non-incumbent facing an Incumbent, who is not a Returning councillor, when all_prior_candidacy_count > 0 and all_prior_victory_count > 0.",
+    "most_recent_all_past_race_was_victory": "Use the same Candidate regime and Returning-councillor exclusions, require all_prior_candidacy_count > 0, and fire when the most recent qualifying race has elected == True.",
+    "most_recent_all_past_race_margin": "Use the same Candidate regime and Returning-councillor exclusions and expose the non-null signed margin from the most recent qualifying race.",
+    "prior_mpp_race": "Use the same Candidate regime and Returning-councillor exclusions and fire when prior_office_types_contested contains mpp.",
+    "prior_unsuccessful_council_run": "Use the same Candidate regime and Returning-councillor exclusions and fire when prior_council_run_without_victory == true. Publish both comparison rows in display_group prior_unsuccessful_council_run_context together.",
+    "incumbent_opponent_recent_margin": "Fire only for an Incumbent when opponent_history_complete == true. For each opponent, derive the signed margin in that opponent's most recent qualifying race, then expose the maximum non-null margin across the Opponent field.",
+    "returning_councillor_in_open_contest": "Fire when candidate_regime == open_contest and returning_councillor == true. Use evidence_tier consistent_small_sample and show the four-Contest sample size.",
+    "facing_returning_councillor_in_open_contest": "Fire when candidate_regime == open_contest and any_returning_councillor_opponent == true. Use evidence_tier consistent_small_sample and show the four-Contest sample size.",
+    "zero_wins_hint": "Do not publish.",
+    "per_additional_victory_hint": "Do not publish.",
+    "visible_history_parity": "all_prior_candidacy_count must equal the candidate's complete visible confirmed race history before the subject Contest."
   },
   "display_rule": {
     "include_frontend_copy": true,
     "include_numeric_estimate_and_unit": true,
     "include_evidence_tier": true,
+    "include_sample_size": true,
     "frame_as_historical_context": true,
-    "frame_as_prediction": false
+    "frame_as_prediction": false,
+    "independent_effect_required": false,
+    "paired_display_groups_must_be_complete": true
+  },
+  "publication_rule": {
+    "standard": "A clear historical association under the stated adjusted comparison, with Benjamini-Hochberg q < 0.05 across the reader-readable screen.",
+    "independent_conditional_effect_required": false,
+    "small_sample_tier": "consistent_small_sample is permitted only for the two explicitly reviewed Returning-councillor Open-contest flags, which have four independent Contests, three same-direction elections, clear clustered intervals, and supplemental leave-one-Contest-out and permutation support.",
+    "suggestive_or_method_sensitive_rows_publish": false
   }
 }
