@@ -1,4 +1,4 @@
-"""Frozen Mayoral publication-gate registry (ADR 0003, 0005, 0032, 0033).
+"""Frozen Mayoral publication-gate registry (ADR 0003, 0005, 0032, 0033, 0046).
 
 Publication gates are frozen by model version (ADR 0005): the required evidence
 tier per public quantity and the historical-unlock counts are fixed here before
@@ -34,8 +34,13 @@ INCUMBENT_DEFEAT = "incumbent_defeat"
 CHALLENGER_WIN = "challenger_win"
 
 # Frozen with the model version (ADR 0005). Bump on any gate change and rerun the
-# complete historical evaluation.
-MAYORAL_GATE_REGISTRY_VERSION = "2026-08-19"
+# complete historical evaluation. Bumped for ADR 0046 (final-field tier boundary):
+# the historical unlock counts below are RETAINED PENDING a recompute, not proven
+# unchanged — field-consistency both adds pre-close settled-field polls and drops
+# post-close subset-field ones, so the recount is non-monotonic. Expected to stay
+# clear of the three-cycle floor, but the per-cycle recompute (needs each cycle's
+# viable field) is a documented follow-up (ADR 0046).
+MAYORAL_GATE_REGISTRY_VERSION = "2026-08-20"
 
 # Required current-cycle evidence tier per quantity (ADR 0033 floors).
 MAYORAL_QUANTITY_REQUIRED_TIER: dict[str, MayoralEvidenceTier] = {

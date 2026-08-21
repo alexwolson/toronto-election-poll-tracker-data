@@ -1,35 +1,32 @@
-from datetime import UTC, date, datetime
-
 from backend.model.mayoral_evidence_tier import (
     MayoralEvidenceTier,
     MayoralPollSampleEvidence,
     classify_mayoral_evidence_tier,
 )
 
-# The 2026 Final Ballot becomes knowable at nomination close (ADR 0002/0033).
-NOMINATION_CLOSE = datetime(2026, 8, 21, 18, 0, tzinfo=UTC)
+# The 2026 certified viable field, known once nominations close (ADR 0002/0033/0046).
+FINAL_FIELD = frozenset({"chow", "bradford", "alexander"})
 
 
-def _sample(sample_id, pollster, fieldwork_end, measured=("chow", "bradford")):
+def _sample(sample_id, pollster, measured=("chow", "bradford", "alexander")):
     return MayoralPollSampleEvidence(
         sample_id=sample_id,
         pollster=pollster,
-        fieldwork_end=fieldwork_end,
         measured_candidates=frozenset(measured),
     )
 
 
-def _classify(samples):
-    return classify_mayoral_evidence_tier(samples, nomination_close=NOMINATION_CLOSE)
+def _classify(samples, final_field=FINAL_FIELD):
+    return classify_mayoral_evidence_tier(samples, final_field=final_field)
 
 
-def test_tier_labels_are_the_adr_0033_wording_verbatim() -> None:
+def test_tier_labels_are_the_adr_0033_wording() -> None:
     assert MayoralEvidenceTier.M0_STRUCTURAL.label == "M0 — Structural Only"
     assert MayoralEvidenceTier.M1_PRE_FINAL.label == "M1 — Pre-Final Polling"
-    assert MayoralEvidenceTier.M2_POST_FINAL.label == "M2 — Post-Final Polling"
+    assert MayoralEvidenceTier.M2_POST_FINAL.label == "M2 — Final-Field Polling"
     assert (
         MayoralEvidenceTier.M3_REPLICATED_POST_FINAL.label
-        == "M3 — Replicated Post-Final Polling"
+        == "M3 — Replicated Final-Field Polling"
     )
 
 
@@ -41,96 +38,85 @@ def test_no_qualifying_poll_is_structural_only() -> None:
     assert not result.challenger_win_eligible("bradford")
 
 
-def test_pre_final_polling_only_is_m1_and_unlocks_nothing() -> None:
-    # Every 2026 poll today is pre-Final (nominations close 2026-08-21).
+def test_before_certification_the_field_is_unknown_and_nothing_is_final_field() -> None:
+    # final_field is None until the Final Ballot is certified: samples exist but
+    # none can be final-field, so the cycle caps at M1 and unlocks nothing.
     samples = [
-        _sample("a", "Forum Research", date(2026, 8, 5)),
-        _sample("b", "Liaison Strategies", date(2026, 8, 7)),
+        _sample("a", "Forum Research"),
+        _sample("b", "Liaison Strategies"),
+    ]
+    result = _classify(samples, final_field=None)
+    assert result.tier is MayoralEvidenceTier.M1_PRE_FINAL
+    assert not result.close_result_eligible
+    assert not result.challenger_win_eligible("bradford")
+    assert result.final_field_sample_ids == ()
+
+
+def test_poll_missing_a_viable_candidate_is_not_final_field() -> None:
+    # A poll fielded before Alexander entered measured only {chow, bradford};
+    # it does not measure the certified field and stays M1.
+    samples = [
+        _sample("a", "Liaison Strategies", ("chow", "bradford")),
+        _sample("b", "Mainstreet Research", ("chow", "bradford")),
     ]
     result = _classify(samples)
     assert result.tier is MayoralEvidenceTier.M1_PRE_FINAL
-    assert not result.close_result_eligible
-    assert not result.incumbent_defeat_eligible
-    assert not result.challenger_win_eligible("bradford")
-    assert result.post_final_sample_ids == ()
+    assert result.final_field_sample_ids == ()
 
 
-def test_one_post_final_sample_reaches_m2_and_unlocks_close_and_defeat() -> None:
+def test_poll_measuring_a_dropped_out_candidate_is_not_final_field() -> None:
+    # A poll that individually measured a candidate absent from the final ballot
+    # (e.g. Tory) reflects a stale field and is not final-field.
+    samples = [_sample("a", "Liaison Strategies", ("chow", "bradford", "tory"))]
+    result = _classify(samples)
+    assert result.tier is MayoralEvidenceTier.M1_PRE_FINAL
+
+
+def test_one_final_field_sample_reaches_m2_and_unlocks_close_and_defeat() -> None:
     samples = [
-        _sample("a", "Forum Research", date(2026, 8, 5)),  # pre-Final
-        _sample("b", "Liaison Strategies", date(2026, 9, 20)),  # post-Final
+        _sample("a", "Liaison Strategies", ("chow", "bradford")),  # pre-field
+        _sample("b", "Forum Research"),  # measures the certified field
     ]
     result = _classify(samples)
     assert result.tier is MayoralEvidenceTier.M2_POST_FINAL
     assert result.close_result_eligible
     assert result.incumbent_defeat_eligible
     assert result.challenger_win_eligible("bradford") is False  # needs M3
-    assert result.post_final_sample_ids == ("b",)
+    assert result.final_field_sample_ids == ("b",)
 
 
-def test_boundary_day_sample_overlaps_and_counts_as_post_final() -> None:
-    # A sample whose fieldwork ends ON nomination-close day overlaps the 18:00
-    # boundary and is post-Final; one ending the day before is pre-Final.
-    on_day = _classify([_sample("x", "Forum Research", date(2026, 8, 21))])
-    assert on_day.tier is MayoralEvidenceTier.M2_POST_FINAL
-    day_before = _classify([_sample("y", "Forum Research", date(2026, 8, 20))])
-    assert day_before.tier is MayoralEvidenceTier.M1_PRE_FINAL
-
-
-def test_datetime_precision_is_compared_against_the_intra_day_boundary() -> None:
-    before = _classify(
-        [_sample("x", "Forum", datetime(2026, 8, 21, 12, 0, tzinfo=UTC))]
-    )
-    assert before.tier is MayoralEvidenceTier.M1_PRE_FINAL  # noon < 18:00
-    after = _classify([_sample("y", "Forum", datetime(2026, 8, 21, 19, 0, tzinfo=UTC))])
-    assert after.tier is MayoralEvidenceTier.M2_POST_FINAL  # 19:00 > 18:00
-
-
-def test_replicated_post_final_reaches_m3_and_unlocks_measured_challenger() -> None:
+def test_replicated_final_field_reaches_m3_and_unlocks_measured_challenger() -> None:
+    # Exactly the 2026 case: three settled-field samples across two pollsters.
     samples = [
-        _sample("a", "Forum Research", date(2026, 9, 15), ("chow", "bradford")),
-        _sample("b", "Liaison Strategies", date(2026, 9, 20), ("chow", "bradford")),
-        _sample(
-            "c", "Mainstreet", date(2026, 8, 10), ("chow", "bradford")
-        ),  # pre-Final
+        _sample("forum", "Forum Research"),
+        _sample("liaison-aug5", "Liaison Strategies"),
+        _sample("liaison-aug20", "Liaison Strategies"),
     ]
     result = _classify(samples)
-    # 3 samples, 3 pollsters, 2 post-Final -> M3.
     assert result.tier is MayoralEvidenceTier.M3_REPLICATED_POST_FINAL
     assert result.close_result_eligible
     assert result.challenger_win_eligible("bradford") is True
+    assert result.challenger_win_eligible("alexander") is True
 
 
-def test_m3_field_but_challenger_measured_in_only_two_is_not_win_eligible() -> None:
-    samples = [
-        _sample("a", "Forum Research", date(2026, 9, 15), ("chow", "bradford")),
-        _sample("b", "Liaison Strategies", date(2026, 9, 20), ("chow", "bradford")),
-        _sample("c", "Mainstreet", date(2026, 9, 22), ("chow", "alexander")),
-    ]
-    result = _classify(samples)
-    assert result.tier is MayoralEvidenceTier.M3_REPLICATED_POST_FINAL
-    assert result.challenger_win_eligible("bradford") is False  # measured in only 2
-    assert result.challenger_win_eligible("alexander") is False  # measured in only 1
-
-
-def test_three_post_final_from_one_pollster_stays_m2() -> None:
+def test_three_final_field_from_one_pollster_stays_m2() -> None:
     # Replication requires at least two pollsters; multiple samples from one do not.
     samples = [
-        _sample("a", "Forum Research", date(2026, 9, 15)),
-        _sample("b", "Forum Research", date(2026, 9, 18)),
-        _sample("c", "Forum Research", date(2026, 9, 20)),
+        _sample("a", "Liaison Strategies"),
+        _sample("b", "Liaison Strategies"),
+        _sample("c", "Liaison Strategies"),
     ]
     result = _classify(samples)
     assert result.tier is MayoralEvidenceTier.M2_POST_FINAL
     assert result.challenger_win_eligible("bradford") is False
 
 
-def test_challenger_win_needs_two_post_final_among_its_measurements() -> None:
-    # Three samples measuring bradford across two pollsters, but only ONE post-Final.
+def test_challenger_win_needs_two_final_field_among_its_measurements() -> None:
+    # Three samples measuring bradford across two pollsters, but only ONE final-field.
     samples = [
-        _sample("a", "Forum Research", date(2026, 9, 15)),  # post-Final
-        _sample("b", "Liaison Strategies", date(2026, 8, 1)),  # pre-Final
-        _sample("c", "Mainstreet", date(2026, 8, 3)),  # pre-Final
+        _sample("a", "Forum Research"),  # final-field
+        _sample("b", "Liaison Strategies", ("chow", "bradford")),  # not final-field
+        _sample("c", "Mainstreet Research", ("chow", "bradford")),  # not final-field
     ]
     result = _classify(samples)
     assert result.challenger_win_eligible("bradford") is False

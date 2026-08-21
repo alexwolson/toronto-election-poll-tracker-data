@@ -1,5 +1,3 @@
-from datetime import UTC, date, datetime
-
 from backend.model.mayoral_evidence_tier import (
     MayoralEvidenceTier,
     MayoralPollSampleEvidence,
@@ -16,15 +14,15 @@ from backend.model.mayoral_publication_gates import (
     mayoral_quantity_gate_status,
 )
 
-NOM = datetime(2026, 8, 21, 18, 0, tzinfo=UTC)
+FINAL_FIELD = frozenset({"chow", "bradford", "alexander"})
 
 
 def _tier(samples):
-    return classify_mayoral_evidence_tier(samples, nomination_close=NOM)
+    return classify_mayoral_evidence_tier(samples, final_field=FINAL_FIELD)
 
 
-def _s(sid, pollster, end, measured=("chow", "bradford")):
-    return MayoralPollSampleEvidence(sid, pollster, end, frozenset(measured))
+def _s(sid, pollster, measured=("chow", "bradford", "alexander")):
+    return MayoralPollSampleEvidence(sid, pollster, frozenset(measured))
 
 
 def test_required_tiers_follow_adr_0033_floors() -> None:
@@ -55,7 +53,7 @@ def test_frozen_history_counts_clear_the_three_cycle_floor() -> None:
 
 
 def test_incumbent_defeat_is_not_applicable_in_an_open_seat() -> None:
-    tier = _tier([_s("a", "Forum", date(2026, 9, 20))])  # M2
+    tier = _tier([_s("a", "Forum")])  # M2
     status = mayoral_quantity_gate_status(
         INCUMBENT_DEFEAT, tier, race_has_incumbent=False
     )
@@ -63,7 +61,7 @@ def test_incumbent_defeat_is_not_applicable_in_an_open_seat() -> None:
 
 
 def test_m2_unlocks_close_and_incumbent_defeat_when_incumbent_runs() -> None:
-    tier = _tier([_s("a", "Forum", date(2026, 9, 20))])  # M2
+    tier = _tier([_s("a", "Forum")])  # M2
     assert (
         mayoral_quantity_gate_status(CLOSE_RESULT, tier, race_has_incumbent=True)
         is QuantityGateStatus.UNLOCKED
@@ -75,7 +73,7 @@ def test_m2_unlocks_close_and_incumbent_defeat_when_incumbent_runs() -> None:
 
 
 def test_pre_final_tier_is_too_low_for_any_predictive_quantity() -> None:
-    tier = _tier([_s("a", "Forum", date(2026, 8, 5))])  # M1
+    tier = _tier([_s("a", "Forum", ("chow", "bradford"))])  # M1 (not final-field)
     assert (
         mayoral_quantity_gate_status(CLOSE_RESULT, tier, race_has_incumbent=True)
         is QuantityGateStatus.TIER_TOO_LOW
@@ -83,10 +81,13 @@ def test_pre_final_tier_is_too_low_for_any_predictive_quantity() -> None:
 
 
 def test_challenger_win_needs_m3_for_that_challenger() -> None:
+    # Two final-field samples measure the whole field; a third, non-final-field
+    # sample measures only chow+bradford. So bradford is measured in three samples
+    # (two final-field), but alexander in only two.
     samples = [
-        _s("a", "Forum", date(2026, 9, 15), ("chow", "bradford")),
-        _s("b", "Liaison", date(2026, 9, 20), ("chow", "bradford")),
-        _s("c", "Mainstreet", date(2026, 9, 22), ("chow", "bradford")),
+        _s("a", "Forum"),
+        _s("b", "Liaison"),
+        _s("c", "Mainstreet", ("chow", "bradford")),
     ]
     tier = _tier(samples)
     assert (
@@ -95,7 +96,7 @@ def test_challenger_win_needs_m3_for_that_challenger() -> None:
         )
         is QuantityGateStatus.UNLOCKED
     )
-    # alexander is not individually measured -> tier too low for that challenger.
+    # alexander is measured in only two samples -> tier too low for that challenger.
     assert (
         mayoral_quantity_gate_status(
             CHALLENGER_WIN, tier, race_has_incumbent=True, candidate_id="alexander"
