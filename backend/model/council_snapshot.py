@@ -18,9 +18,11 @@ from backend.model.council_biography import (
 from backend.model.council_hints import (
     CandidacyRecord,
     FiredHint,
+    PastElection,
     SupportedHint,
     candidate_features,
     fire_candidate_hints,
+    past_election_history,
     resolve_person_id,
 )
 from backend.model.council_race import (
@@ -39,7 +41,7 @@ from backend.model.council_race_card import (
     race_exposure_triggers,
 )
 
-COUNCIL_RACE_CARD_SCHEMA_VERSION = 2
+COUNCIL_RACE_CARD_SCHEMA_VERSION = 3
 
 
 def _race_candidate_hints(
@@ -82,6 +84,27 @@ def _race_candidate_hints(
             own, opponents, is_open_contest=race.is_open_seat, hints=hints
         )
     return fired
+
+
+def _race_candidate_offices(
+    race: CouncilRace,
+    history_by_person: dict[str, list[CandidacyRecord]],
+    name_variants: dict[str, set[frozenset[str]]],
+) -> dict[str, tuple[PastElection, ...]]:
+    """Past election history per candidate display name (ADR 0050), from the same
+    generous all-offices person resolution the hints use — independent of the
+    council-only biography match, so a former MP/MPP/trustee with no council
+    history still gets a history."""
+    offices: dict[str, tuple[PastElection, ...]] = {}
+    for candidate in race.candidates:
+        person_id = resolve_person_id(candidate.display_name, "", name_variants)
+        if person_id is None or person_id not in history_by_person:
+            offices[candidate.display_name] = ()
+            continue
+        offices[candidate.display_name] = past_election_history(
+            history_by_person[person_id]
+        )
+    return offices
 
 
 def load_ward_names(path: str | Path) -> dict[str, str]:
@@ -147,8 +170,25 @@ def _hint_card(hint: FiredHint) -> dict:
     }
 
 
+def _past_election_card(election: PastElection) -> dict:
+    return {
+        "year": election.year,
+        "election_date": election.election_date,
+        "office_type": election.office_type,
+        "represented_body": election.represented_body,
+        "district_name": election.district_name,
+        "party_name": election.party_name,
+        "result": election.result,
+        "vote_share": election.vote_share,
+        "rank": election.rank,
+        "field_size": election.field_size,
+    }
+
+
 def _candidate_card(
-    candidate: RaceCandidate, hints: tuple[FiredHint, ...] = ()
+    candidate: RaceCandidate,
+    hints: tuple[FiredHint, ...] = (),
+    past_elections: tuple[PastElection, ...] = (),
 ) -> dict:
     bio = candidate.biography
     return {
@@ -160,6 +200,7 @@ def _candidate_card(
         "council_wins": bio.council_wins if bio else 0,
         "biography": _biography_card(bio),
         "historical_hints": [_hint_card(h) for h in hints],
+        "past_elections": [_past_election_card(e) for e in past_elections],
     }
 
 
@@ -210,6 +251,7 @@ def _race_card(
     ward_polls: tuple[WardPollReading, ...],
     ward_name: str | None,
     candidate_hints: dict[str, tuple[FiredHint, ...]],
+    candidate_offices: dict[str, tuple[PastElection, ...]],
 ) -> dict:
     facts = derive_competitiveness_facts(race, prior)
     triggers = race_exposure_triggers(race)
@@ -221,7 +263,11 @@ def _race_card(
         "incumbency_flag_disagrees": race.incumbency_flag_disagrees,
         "incumbent": _incumbent_card(race.incumbent, triggers),
         "candidates": [
-            _candidate_card(c, candidate_hints.get(c.display_name, ()))
+            _candidate_card(
+                c,
+                candidate_hints.get(c.display_name, ()),
+                candidate_offices.get(c.display_name, ()),
+            )
             for c in race.candidates
         ],
         "prior_result": _prior_card(prior),
@@ -261,6 +307,12 @@ def build_council_snapshot(
             race, history_by_person, name_variants, supported_hints
         )
 
+    def ward_offices(race: CouncilRace) -> dict[str, tuple[PastElection, ...]]:
+        # Independent of supported_hints: past elections need only the canonical.
+        if not history_by_person:
+            return {}
+        return _race_candidate_offices(race, history_by_person, name_variants)
+
     wards = {
         ward: _race_card(
             race,
@@ -268,6 +320,7 @@ def build_council_snapshot(
             ward_poll_readings.get(ward, ()),
             names.get(ward),
             ward_hints(race),
+            ward_offices(race),
         )
         for ward, race in races.items()
     }

@@ -113,28 +113,33 @@ class PriorResult:
 
 def build_prior_results(
     results: tuple[CouncilElectionResult, ...],
-    year: int = 2022,
     boundary_era: str = CURRENT_BOUNDARY_ERA,
 ) -> dict[str, PriorResult]:
+    """Each ward's most recent completed council contest in the current boundary
+    era — the latest general *or* by-election — so "Last election" agrees with the
+    incumbent's most recent win. Winner, runner-up, shares, field size, and the
+    derived margins all come from that single contest."""
     by_ward: dict[str, list[CouncilElectionResult]] = {}
     for row in results:
-        if row.election_year == year and row.boundary_era == boundary_era:
+        if row.boundary_era == boundary_era:
             by_ward.setdefault(row.ward, []).append(row)
     prior: dict[str, PriorResult] = {}
     for ward, rows in by_ward.items():
-        ordered = sorted(rows, key=lambda r: r.votes, reverse=True)
+        latest_year = max(r.election_year for r in rows)
+        contest = [r for r in rows if r.election_year == latest_year]
+        ordered = sorted(contest, key=lambda r: r.votes, reverse=True)
         winner = ordered[0]
         runner_up = ordered[1] if len(ordered) > 1 else None
         prior[ward] = PriorResult(
             ward=ward,
-            year=year,
+            year=latest_year,
             winner_name=winner.candidate_name,
             winner_votes=winner.votes,
             winner_share=winner.vote_share,
             runner_up_name=runner_up.candidate_name if runner_up else None,
             runner_up_votes=runner_up.votes if runner_up else None,
             runner_up_share=runner_up.vote_share if runner_up else None,
-            field_size=len(rows),
+            field_size=len(contest),
         )
     return prior
 

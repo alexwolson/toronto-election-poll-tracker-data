@@ -95,6 +95,12 @@ class CandidacyRecord:
     is_win: bool
     vote_share: float
     margin: float | None  # signed vote-share margin; None for acclamation w/o runner-up
+    contest_id: str = ""
+    district_name: str = ""  # riding/ward; blank for some rows
+    party_name: str = ""  # blank for non-partisan (municipal) races
+    represented_body: str = ""  # e.g. canada_house_of_commons, toronto_city_council
+    vote_rank: int | None = None  # 1 == first; where they placed
+    field_size: int | None = None  # candidates in the contest
 
 
 def load_officeholding_history(
@@ -145,6 +151,12 @@ def load_officeholding_history(
                 is_win=row["elected"] == "True" or row["acclaimed"] == "True",
                 vote_share=share,
                 margin=margin,
+                contest_id=row["contest_id"],
+                district_name=row.get("district_name", "").strip(),
+                party_name=row.get("party_name", "").strip(),
+                represented_body=row.get("represented_body", "").strip(),
+                vote_rank=_int(row.get("vote_rank")),
+                field_size=_int(row.get("n_candidates")),
             )
         )
         tokens = _name_tokens(row["candidate_name"])
@@ -156,6 +168,16 @@ def load_officeholding_history(
 def _share(row: dict[str, str]) -> float | None:
     value = row["vote_share"].strip()
     return float(value) if value else None
+
+
+def _int(value: str | None) -> int | None:
+    text = (value or "").strip()
+    if not text:
+        return None
+    try:
+        return int(text)
+    except ValueError:
+        return None
 
 
 def resolve_person_id(
@@ -210,6 +232,58 @@ def candidate_features(
         prior_elected_victory_count=sum(1 for r in qualifying if r.is_win),
         most_recent_prior_elected_margin=most_recent.margin if most_recent else None,
     )
+
+
+@dataclass(frozen=True, slots=True)
+class PastElection:
+    """One prior candidacy for the descriptive candidate history (ADR 0050)."""
+
+    year: int
+    election_date: str  # full ISO date; the ordering key (year is for display)
+    office_type: str
+    represented_body: str
+    district_name: str | None
+    party_name: str | None  # None for non-partisan (municipal) races
+    result: str  # "won" | "lost"
+    vote_share: float | None
+    rank: int | None  # placement, 1 == first
+    field_size: int | None  # candidates in the contest
+
+
+def past_election_history(records: list[CandidacyRecord]) -> tuple[PastElection, ...]:
+    """Every past candidacy (won and lost), most recent first, one row per contest.
+
+    A ranked-ballot contest appears as several rows for one candidate (intermediate
+    rounds); collapse each contest to a single race — won if any round is a win,
+    taking the strongest round's share. Party/district are None where the source
+    leaves them blank (municipal races carry no party)."""
+    by_contest: dict[str, list[CandidacyRecord]] = defaultdict(list)
+    for record in records:
+        by_contest[record.contest_id].append(record)
+    elections: list[PastElection] = []
+    for group in by_contest.values():
+        head = group[0]
+        shares = [r.vote_share for r in group if r.vote_share is not None]
+        ranks = [r.vote_rank for r in group if r.vote_rank is not None]
+        sizes = [r.field_size for r in group if r.field_size is not None]
+        elections.append(
+            PastElection(
+                year=int(head.election_date[:4]),
+                election_date=head.election_date,
+                office_type=head.office_type,
+                represented_body=head.represented_body,
+                district_name=head.district_name or None,
+                party_name=head.party_name or None,
+                result="won" if any(r.is_win for r in group) else "lost",
+                vote_share=max(shares) if shares else None,
+                rank=min(ranks) if ranks else None,  # best (final) placement
+                field_size=max(sizes) if sizes else None,
+            )
+        )
+    # Full-date descending: same-year races order by their actual dates (ISO
+    # dates sort lexically == chronologically).
+    elections.sort(key=lambda e: e.election_date, reverse=True)
+    return tuple(elections)
 
 
 @dataclass(frozen=True, slots=True)

@@ -100,6 +100,21 @@ def test_prior_result_gives_the_last_winning_margin() -> None:
     assert w11.margin_share < 0.01
 
 
+def test_prior_result_uses_the_latest_contest_including_by_elections() -> None:
+    results, _ = _fixtures()
+    prior = build_prior_results(results)
+    # Ward 20 held a 2023 by-election (Kandavel), more recent than the 2022 general.
+    assert prior["20"].year == 2023
+    assert prior["20"].winner_name == "Parthi Kandavel"
+    assert prior["20"].field_size == 23
+    # Ward 25's 2025 by-election (Shan) and Ward 15's 2024 by-election.
+    assert prior["25"].year == 2025
+    assert prior["25"].winner_name == "Neethan Shan"
+    assert prior["15"].year == 2024
+    # A ward with no later contest still shows its 2022 general.
+    assert prior["11"].year == 2022
+
+
 def test_competitiveness_facts_flag_two_prior_winners() -> None:
     results, races = _fixtures()
     prior = build_prior_results(results)

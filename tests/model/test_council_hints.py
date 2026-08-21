@@ -6,6 +6,7 @@ from backend.model.council_hints import (
     candidate_features,
     fire_candidate_hints,
     load_supported_hints,
+    past_election_history,
     resolve_person_id,
 )
 
@@ -154,3 +155,118 @@ def test_resolver_matches_across_middle_names() -> None:
 def test_resolver_returns_none_when_ambiguous_or_absent() -> None:
     assert resolve_person_id("John", "Smith", _VARIANTS) is None  # two person_ids
     assert resolve_person_id("Nobody", "Here", _VARIANTS) is None
+
+
+# --- past election history (all offices, won and lost) ----------------------
+
+
+def _cand(
+    contest,
+    office,
+    date,
+    win,
+    share,
+    *,
+    district="",
+    party="",
+    body="",
+    rank=None,
+    field_size=None,
+):
+    return CandidacyRecord(
+        "p1",
+        office,
+        date,
+        win,
+        share,
+        None,
+        contest_id=contest,
+        district_name=district,
+        party_name=party,
+        represented_body=body,
+        vote_rank=rank,
+        field_size=field_size,
+    )
+
+
+def test_past_election_history_lists_all_candidacies_recent_first() -> None:
+    records = [
+        _cand(
+            "c_mpp14",
+            "mpp",
+            "2014-06-12",
+            True,
+            0.40,
+            district="Trinity-Spadina",
+            party="Liberal",
+            body="ontario_legislative_assembly",
+        ),
+        _cand(
+            "c_mp21",
+            "mp",
+            "2021-09-20",
+            True,
+            0.45,
+            district="Don Valley North",
+            party="Liberal",
+            body="canada_house_of_commons",
+        ),
+        _cand(
+            "c_coun18",
+            "councillor",
+            "2018-10-22",
+            False,
+            0.20,
+            district="Ward 5",
+            body="toronto_city_council",
+        ),
+    ]
+    history = past_election_history(records)
+    assert [e.year for e in history] == [2021, 2018, 2014]  # most recent first
+    mp = history[0]
+    assert mp.office_type == "mp"
+    assert mp.district_name == "Don Valley North"
+    assert mp.party_name == "Liberal"
+    assert mp.result == "won"
+    council = next(e for e in history if e.office_type == "councillor")
+    assert council.result == "lost"
+    assert council.party_name is None  # municipal races are non-partisan
+
+
+def test_past_election_history_collapses_ranked_ballot_rounds() -> None:
+    # A single contest split across rounds (composite ballot) is one race.
+    records = [
+        _cand("c1", "mayor", "2018-10-22", False, 0.30, body="x"),
+        _cand("c1", "mayor", "2018-10-22", True, 0.52, body="x"),
+    ]
+    history = past_election_history(records)
+    assert len(history) == 1
+    assert history[0].result == "won"
+    assert history[0].vote_share == 0.52
+
+
+def test_past_election_history_empty_for_no_records() -> None:
+    assert past_election_history([]) == ()
+
+
+def test_past_election_history_carries_rank_and_field_size() -> None:
+    # A loss should say where they placed (2nd vs 11th) and out of how many.
+    records = [
+        _cand("c1", "councillor", "2018-10-22", False, 0.20, rank=2, field_size=11),
+    ]
+    history = past_election_history(records)
+    assert history[0].result == "lost"
+    assert history[0].rank == 2
+    assert history[0].field_size == 11
+
+
+def test_past_election_history_orders_same_year_by_full_date() -> None:
+    # Supplied provincial-first, but the October council race is more recent than
+    # the June provincial one — order must follow the full date, not the year.
+    records = [
+        _cand("c_mpp", "mpp", "2022-06-02", False, 0.30, rank=3, field_size=6),
+        _cand("c_coun", "councillor", "2022-10-24", True, 0.52),
+    ]
+    history = past_election_history(records)
+    assert [e.office_type for e in history] == ["councillor", "mpp"]
+    assert history[0].election_date == "2022-10-24"
