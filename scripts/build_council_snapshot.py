@@ -18,6 +18,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from backend.model.council_biography import load_council_results
+from backend.model.council_hints import (
+    load_officeholding_history,
+    load_supported_hints,
+)
 from backend.model.council_race import load_registered_field, load_ward_incumbency
 from backend.model.council_race_card import load_ward_poll_readings
 from backend.model.council_snapshot import build_council_snapshot, load_ward_names
@@ -27,12 +31,17 @@ OUT = ROOT / "data" / "processed" / "council_race_cards.json"
 
 
 def main() -> None:
+    canonical = RAW / "canonical" / "election_results.csv"
     snapshot = build_council_snapshot(
         load_ward_incumbency(RAW / "defeatability" / "ward_defeatability.csv"),
         load_registered_field(RAW / "candidates" / "councillor_registered.csv"),
-        load_council_results(RAW / "canonical" / "election_results.csv"),
+        load_council_results(canonical),
         load_ward_poll_readings(RAW / "polls" / "ward_poll_readings.csv"),
         ward_names=load_ward_names(RAW / "defeatability" / "data-qT4Kx.csv"),
+        officeholding=load_officeholding_history(canonical),
+        supported_hints=load_supported_hints(
+            RAW / "hints" / "supported_historical_hints.csv"
+        ),
     )
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with OUT.open("w", encoding="utf-8") as handle:

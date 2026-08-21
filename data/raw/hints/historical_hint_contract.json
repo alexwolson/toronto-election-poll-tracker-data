@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.1.0",
+  "purpose": "Historical frontend context only; not a prediction or model input.",
+  "person_identity": "Use the upstream persistent person_id; never match by name.",
+  "history_scope": {
+    "non_council_office_types": [
+      "mayor",
+      "mp",
+      "mpp",
+      "trustee"
+    ],
+    "returning_councillor": "A candidate with a strictly earlier council victory who is not a council incumbent immediately before the subject election; prior ward is irrelevant.",
+    "sitting_incumbent_is_returning_councillor": false,
+    "combined_prior_elected_office": "At least one confirmed prior non-council victory, or Returning councillor."
+  },
+  "temporal_rule": {
+    "prior": "election_date < subject council election_date",
+    "most_recent": "Maximum election_date among qualifying prior Candidacies."
+  },
+  "elected_rule": {
+    "definition": "elected == True",
+    "acclamations_count_as_victories": true
+  },
+  "margin_rule": {
+    "unit": "Vote-share proportion; catalog estimates convert effects to percentage points.",
+    "winner": "candidate vote_share - runner_up vote_share",
+    "loser": "candidate vote_share - elected winner vote_share",
+    "losses_are_negative": true,
+    "acclamation_without_runner_up": null,
+    "own_non_council_value": "Margin from the most recent qualifying prior non-council Candidacy.",
+    "opponent_non_council_value": "Maximum of each opponent's most recent qualifying non-council margin.",
+    "own_combined_value": "Margin from the latest qualifying non-council Candidacy or, for a Returning councillor only, prior council Candidacy. Latest is chosen by election_date.",
+    "opponent_combined_value": "Maximum of each opponent's own_combined_value; sitting incumbents' prior council results are excluded."
+  },
+  "continuous_display_rule": {
+    "missing_is_zero": false,
+    "own_margin": "Fire only when most_recent_prior_elected_margin is not null.",
+    "opponent_margin": "Fire only when strongest_opponent_prior_elected_margin is not null.",
+    "victory_count": "Fire only when prior_elected_candidacy_count > 0; zero is valid only after a confirmed qualifying prior Candidacy."
+  },
+  "display_rule": {
+    "include_frontend_copy": true,
+    "include_numeric_estimate_and_unit": true,
+    "include_evidence_tier": true,
+    "frame_as_historical_context": true,
+    "frame_as_prediction": false
+  }
+}
