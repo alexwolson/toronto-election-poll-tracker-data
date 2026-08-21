@@ -39,6 +39,7 @@ from backend.model.council_race_card import (
     WardPollReading,
     build_prior_results,
     derive_competitiveness_facts,
+    parse_new_voter_margin,
     race_exposure_triggers,
 )
 
@@ -155,6 +156,10 @@ def _incumbent_card(
         "council_wins": bio.council_wins if bio else 0,
         "most_recent_win": _appearance(win) if win else None,
         "exposure_triggers": [{"key": t.key, "copy": t.copy} for t in triggers],
+        # CDI component values, for concrete ward-fact explanations (ticket 05)
+        "vote_share": incumbent.vote_share,
+        "electorate_share": incumbent.electorate_share,
+        "new_voter_margin": parse_new_voter_margin(incumbent.notes),
     }
 
 

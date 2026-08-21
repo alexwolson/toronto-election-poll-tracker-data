@@ -41,6 +41,7 @@ class WardIncumbent:
     vote_share: float | None
     notes: str
     biography: CandidateBiography | None
+    electorate_share: float | None = None  # incumbent votes as a share of electors
 
 
 @dataclass(frozen=True, slots=True)
@@ -164,6 +165,7 @@ def build_council_races(
             vote_share=_to_float(row.get("vote_share", "")),
             notes=row.get("notes", ""),
             biography=match(_name_tokens(row["councillor_name"])),
+            electorate_share=_to_float(row.get("electorate_share", "")),
         )
         candidates = []
         field_token_sets = []

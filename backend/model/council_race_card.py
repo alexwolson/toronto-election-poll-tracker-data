@@ -55,7 +55,7 @@ _HIGH_EXPOSURE = ExposureTrigger(
 )
 
 
-def _parse_new_voter_margin(notes: str) -> int | None:
+def parse_new_voter_margin(notes: str) -> int | None:
     match = re.search(r"New Voter Margin:\s*([+-]?\d+)", notes)
     return int(match.group(1)) if match else None
 
@@ -68,7 +68,7 @@ def exposure_triggers(incumbent: WardIncumbent) -> tuple[ExposureTrigger, ...]:
         and incumbent.vote_share < _NARROW_WIN_MAX_SHARE
     ):
         triggers.append(_NARROW_PRIOR_WIN)
-    new_voter_margin = _parse_new_voter_margin(incumbent.notes)
+    new_voter_margin = parse_new_voter_margin(incumbent.notes)
     if new_voter_margin is not None and new_voter_margin > 0:
         triggers.append(_WARD_GROWTH)
     if (
