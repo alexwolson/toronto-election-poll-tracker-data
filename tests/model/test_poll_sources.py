@@ -735,11 +735,11 @@ def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 31
-    assert len(bundle.poll_sample_documents) == 31
-    assert len(bundle.poll_samples) == 25
-    assert len(bundle.poll_readings) == 57
-    assert len(bundle.poll_responses) == 251
+    assert len(bundle.source_documents) == 32
+    assert len(bundle.poll_sample_documents) == 32
+    assert len(bundle.poll_samples) == 26
+    assert len(bundle.poll_readings) == 59
+    assert len(bundle.poll_responses) == 260
 
     documents = {
         document.source_document_id: document
@@ -770,8 +770,8 @@ def test_tracked_current_poll_source_inventory() -> None:
         if sample.geography_type == "citywide"
     }
     recovered_citywide_ids = set(citywide_samples) - {"abacus-2026-01-27"}
-    assert len(citywide_samples) == 19
-    assert len(recovered_citywide_ids) == 18
+    assert len(citywide_samples) == 20
+    assert len(recovered_citywide_ids) == 19
     assert all(
         citywide_samples[sample_id].extraction_status == "extracted"
         for sample_id in recovered_citywide_ids
@@ -788,14 +788,14 @@ def test_tracked_current_poll_source_inventory() -> None:
         if samples[readings[response.poll_reading_id].poll_sample_id].geography_type
         == "citywide"
     ]
-    assert len(citywide_readings) == 44
-    assert len(citywide_responses) == 202
+    assert len(citywide_readings) == 46
+    assert len(citywide_responses) == 211
     assert sum(
         reading.reading_purpose == "general_vote_intention"
         for reading in citywide_readings
-    ) == 43
+    ) == 45
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 24
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 25
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -815,6 +815,7 @@ def test_tracked_current_poll_source_inventory() -> None:
         "liaison-2026-07-26",
         "forum-2026-07-29",
         "liaison-2026-08-05",
+        "liaison-2026-08-16",
     ]
     ordered_reading_samples = list(
         dict.fromkeys(reading.poll_sample_id for reading in citywide_readings)

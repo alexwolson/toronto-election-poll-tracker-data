@@ -57,14 +57,21 @@ def _count(path: Path) -> int:
         return sum(1 for _ in csv.DictReader(handle))
 
 
-def ingest_poll_source(spec: object, *, bundle_dir: str | Path) -> dict[str, int]:
-    """Append one poll's rows to the bundle and validate the audited contract.
+def ingest_poll_source(
+    spec: object,
+    *,
+    bundle_dir: str | Path,
+    require_audited_sources: bool = True,
+) -> dict[str, int]:
+    """Append one poll's rows to the bundle and validate the contract.
 
     ``spec`` maps each of the five table names to a list of row dicts holding
     only the non-blank fields; any schema column absent from a row is written
     blank.  Returns the new per-table row counts.  Raises and leaves every CSV
     unchanged on any structural or contract violation, so ingestion is
-    all-or-nothing.
+    all-or-nothing.  ``require_audited_sources`` is True for the fully-audited
+    historical corpus; the current-cycle bundle carries explicit gap statuses
+    (e.g. a blocked sample) and validates in manifest mode (False).
     """
 
     bundle_dir = Path(bundle_dir)
@@ -82,7 +89,9 @@ def ingest_poll_source(spec: object, *, bundle_dir: str | Path) -> dict[str, int
     try:
         for table in TABLES:
             _append_rows(bundle_dir / f"{table}.csv", spec[table])
-        load_poll_source_bundle(str(bundle_dir), require_audited_sources=True)
+        load_poll_source_bundle(
+            str(bundle_dir), require_audited_sources=require_audited_sources
+        )
     except Exception:
         for table, data in snapshots.items():
             (bundle_dir / f"{table}.csv").write_bytes(data)
