@@ -19,11 +19,14 @@ def _manifest(live_cycle, summary=None):
 
 
 def test_final_ballot_certification_follows_the_explicit_flag_not_the_clock() -> None:
-    # The committed config withholds certification until the maintainer confirms.
-    assert LIVE_CYCLE["field_certified"] is False
-    assert _manifest(LIVE_CYCLE)["election"]["final_ballot_certified"] is False
+    # Certification tracks the explicit flag in both directions, not the clock.
+    uncertified = {**LIVE_CYCLE, "field_certified": False}
+    assert _manifest(uncertified)["election"]["final_ballot_certified"] is False
     certified = {**LIVE_CYCLE, "field_certified": True}
     assert _manifest(certified)["election"]["final_ballot_certified"] is True
+    # The committed config is certified for the 2026 go-live.
+    assert LIVE_CYCLE["field_certified"] is True
+    assert _manifest(LIVE_CYCLE)["election"]["final_ballot_certified"] is True
 
 
 def test_manifest_indexes_all_four_feeds() -> None:
