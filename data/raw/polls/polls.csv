@@ -1,4 +1,5 @@
 poll_id,firm,date_conducted,date_published,sample_size,methodology,field_tested,alexander,bailao,bradford,chow,furey,ford,mendicino,tory,other,notes
+liaison-2026-09-05,Liaison Strategies,2026-09-05,2026-09-09,1000,IVR,"alexander,bradford,chow,other",0.10,,0.39,0.50,,,,,0.02,"Decided and leaning voters; published whole-point shares total 101% due to rounding."
 pallas-2026-08-21,Pallas Data,2026-08-21,2026-08-21,808,IVR,"alexander,bradford,chow,other",0.08,,0.39,0.5,,,,,0.03,
 liaison-2026-08-16,Liaison Strategies,2026-08-16,2026-08-16,1000,IVR,"alexander,bradford,chow,other",0.1089,,0.3762,0.4851,,,,,0.0297,
 liaison-2026-08-05,Liaison Strategies,2026-08-05,2026-08-05,1000,IVR,"alexander,bradford,chow,other",0.1,,0.4,0.47,,,,,0.03,

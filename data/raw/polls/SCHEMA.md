@@ -1,15 +1,15 @@
-# Poll source contract (model-neutral; not yet consumed by the live model)
+# Poll source contract (audited model input)
 
-These five CSVs normalize newly acquired poll evidence without changing or
-feeding `polls.csv`, `ward_poll_readings.csv`, the live snapshot, or any legacy
-model input. The tracked current-cycle inventory contains 33 source documents,
-33 document/sample links, 27 respondent samples, 62 total readings, and 274
-response rows. Twenty citywide mayoral samples have completed extraction into
-49 dependent readings and 225 response rows; the unrecovered Abacus sample is
-explicitly `blocked` with no invented reading. Six Council samples contribute
-the other 13 Council/ward-mayoral readings and 49 response rows. The 49 mayoral
-readings are alternate questions, fields, denominators, or transformations from
-20 sample units, not 49 polls.
+These five CSVs normalize newly acquired poll evidence. Polling releases pass
+them to Backend as live forecast inputs; `polls.csv` separately drives the
+descriptive public archive. The tracked current-cycle inventory contains 34
+source documents, 34 document/sample links, 28 respondent samples, 64 total
+readings, and 283 response rows. Twenty-one citywide mayoral samples have
+completed extraction into 51 dependent readings and 234 response rows; the
+unrecovered Abacus sample is explicitly `blocked` with no invented reading. Six
+Council samples contribute the other 13 Council/ward-mayoral readings and 49
+response rows. The 51 mayoral readings are alternate questions, fields,
+denominators, or transformations from 21 sample units, not 51 polls.
 The identities are deliberately separate:
 
 - a **source document** is one physical or known-but-unretrieved artifact;
@@ -216,7 +216,9 @@ Older rows leave columns for candidates who weren't tested blank (empty cell, no
 
 ## Validation rules
 
-- All share columns (candidate columns + `undecided`) per row must sum to ≤ 1.0
+- Preserve published shares without renormalizing. Complete whole-point rows may
+  total from 0.99 through 1.01 because of rounding; other complete rows must sum
+  to ≤ 1.0
 - Every key listed in `field_tested` must have a corresponding column in the CSV
 - Every share column that has a value in a given row must be listed in `field_tested` for that row
 - `date_conducted` must be ≤ `date_published`
