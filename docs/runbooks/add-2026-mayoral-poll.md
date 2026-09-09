@@ -1,0 +1,309 @@
+# Add and Publish a 2026 Mayoral Poll
+
+This is the operational sequence for moving one new **citywide Toronto mayoral
+poll** from source evidence to production. Run commands from the repository named
+in each section. A poll-only update reuses the current stable Results release; it
+does not create a Results release.
+
+## 0. Establish the source and immutable inputs
+
+Use the pollster's first-party release/table book. Retain the source artifact under
+the gitignored `data/source_documents/`, render and inspect every page, and record
+its URL, retrieval timestamp, MIME type, size, SHA-256, page/sheet count, access
+class, redistribution status, and visual-QA status. `passed` means every page and
+every extracted value was visually checked; public availability is not permission
+to redistribute the file ([`data/raw/polls/SCHEMA.md:36-64`](../../data/raw/polls/SCHEMA.md#L36-L64),
+[`data/.gitignore:12-18`](../../.gitignore#L12-L18)). Preserve published values and
+rounding; do not normalize them.
+
+For a PDF, `tmp/new-poll-documents.json` can use the `doc_id`, `cycle`, `firm`,
+`publisher_url`, `retrieval_url`, and `local_path` fields consumed by the prep
+script; fetch, hash, and render it with:
+
+```bash
+uv run python scripts/ingest_prep.py tmp/new-poll-documents.json
+```
+
+The script renders every page at 175 DPI and emits computed metadata, but visual
+inspection and the `visual_qa_status=passed` attestation remain human gates
+([`scripts/ingest_prep.py:24-87`](../../scripts/ingest_prep.py#L24-L87)).
+
+Choose the stable Results tag already in production (for example the tag in the
+current `dist/release_manifest.json`) and download its complete release:
+
+```bash
+RESULTS_TAG=results-YYYY-MM-DD.N
+RUN_ROOT="$(mktemp -d)"
+gh release download "$RESULTS_TAG" \
+  --repo alexwolson/toronto-election-results --dir "$RUN_ROOT/results"
+```
+
+Required access: the source document (including any legitimate licensed access),
+network access, and authenticated `gh` (`gh auth login` or `GH_TOKEN`) for release
+publication. The Results release must contain `release_manifest.json`,
+`person_aliases.json`, and `election_results.csv`; Polling refuses a different
+repository or an unknown 2026 contest ([`polling_data/release_bundle.py:55-114`](../../polling_data/release_bundle.py#L55-L114)).
+If a named candidate is absent from the Results aliases, stop: publish a corrected
+Results release first, then use that new tag throughout the chain.
+
+## 1. Ingest in the Polling repository
+
+Add one coherent sample to all five tables in `data/raw/polls/`:
+
+1. `source_documents.csv`: one row per physical artifact.
+2. `poll_sample_documents.csv`: link every artifact and respondent sample.
+3. `poll_samples.csv`: one row per independently recruited sample, with
+   `election_cycle_id=toronto-2026`, `geography_type=citywide`,
+   `geography_id=toronto`, fieldwork/publication dates, collection mode, recruited
+   size, and `extraction_status=extracted`.
+4. `poll_readings.csv`: one row per question/scenario/denominator, always linked to
+   the sample and an auditable page/table locator.
+5. `poll_responses.csv`: every published option, keeping candidates, other,
+   undecided, refusals, and non-voters distinct. A candidate uses a stable local
+   key, canonical display name, source-exact `response_label`, and an explicit
+   observation status.
+
+The complete field definitions and relational/rounding rules are authoritative
+([`data/raw/polls/SCHEMA.md:78-184`](../../data/raw/polls/SCHEMA.md#L78-L184)). When
+using a five-section JSON spec, append atomically with the tested core (the shipped
+CLI is historical-only):
+
+```bash
+uv run python -c 'import json; from backend.model.poll_ingest import ingest_poll_source; print(ingest_poll_source(json.load(open("tmp/new-poll.json")), bundle_dir="data/raw/polls", require_audited_sources=False))'
+```
+
+The core restores all five CSVs after any contract failure
+([`backend/model/poll_ingest.py:60-99`](../../backend/model/poll_ingest.py#L60-L99)).
+If local artifacts for the full current corpus are present, also run:
+
+```bash
+uv run python -c 'from backend.model.poll_sources import load_poll_source_bundle, verify_poll_source_artifacts; b=load_poll_source_bundle("data/raw/polls"); verify_poll_source_artifacts(b, ".")'
+```
+
+Separately add **one representative published reading** to `data/raw/polls/polls.csv`.
+This legacy-shaped table, not the five-table model input, generates the descriptive
+poll archive. Use the decided/leaning topline when that is the established public
+comparison; leave untested candidates blank, list every populated share key in
+`field_tested`, and keep the row total at or below 1.0
+unless published whole-point rounding produces a complete total from 0.99 through
+1.01. Preserve those published values rather than renormalizing them
+([`data/raw/polls/SCHEMA.md:188-224`](../../data/raw/polls/SCHEMA.md#L188-L224)).
+Cross-check this row's firm, dates, method, field, shares, and notes against the
+audited sample immediately before commit. Do not run `scripts/fetch_polls.py` as
+part of manual ingestion: it treats Wikipedia as authoritative and silently
+replaces a colliding `poll_id` ([`scripts/fetch_polls.py:372-411`](../../scripts/fetch_polls.py#L372-L411)).
+If it is run later, diff every collision against the audited tables.
+
+Update the intentional inventory/order/latest guards and the inventory prose:
+
+- counts, citywide order, and poll-specific facts in
+  [`tests/model/test_poll_sources.py:738-835`](../../tests/model/test_poll_sources.py#L738-L835);
+- newest poll, field, and latest share in
+  [`tests/model/test_mayoral_polling_feed.py:12-35`](../../tests/model/test_mayoral_polling_feed.py#L12-L35);
+- the opening counts in [`data/raw/polls/SCHEMA.md:3-12`](../../data/raw/polls/SCHEMA.md#L3-L12).
+
+Run `uv run pytest -q`, review the diff, and commit the Polling changes. Do **not**
+include source bytes, `tmp/`, or `dist/`.
+
+## 2. Build, pin, and publish Polling
+
+From a clean, up-to-date, committed Polling `main` tree:
+
+```bash
+uv run python scripts/refresh_all.py \
+  --results-bundle "$RUN_ROOT/results" --results-release "$RESULTS_TAG"
+jq '.dependencies.results,.feeds,.assets' dist/release_manifest.json
+POLLING_TAG=polling-YYYY-MM-DD.N
+```
+
+Before publishing, run:
+
+```bash
+gh release view "$POLLING_TAG" \
+  --repo alexwolson/toronto-election-poll-tracker-data
+```
+
+Publication should proceed only when that exact tag does not already exist.
+
+```bash
+uv run python -m polling_data.release_bundle publish "$POLLING_TAG" --bundle dist
+```
+
+The refresh reruns the full test suite, canonicalizes contest IDs and candidate
+names against Results, builds `mayoral_polling.json`, hashes every asset, and pins
+the exact Results tag, source commit, and manifest hash
+([`scripts/refresh_all.py:26-53`](../../scripts/refresh_all.py#L26-L53),
+[`polling_data/release_bundle.py:207-281`](../../polling_data/release_bundle.py#L207-L281)).
+Publication refuses a dirty tree, a dirty-built bundle, or a bundle built from a
+different commit, then creates a stable GitHub Release with all files
+([`polling_data/release_bundle.py:311-366`](../../polling_data/release_bundle.py#L311-L366)).
+The publisher does not pass `--target`, so do not publish from a feature branch:
+the GitHub tag target and manifest `source_commit` could diverge.
+
+Download the release into a fresh directory and verify every declared asset:
+
+```bash
+mkdir "$RUN_ROOT/polling"
+gh release download "$POLLING_TAG" \
+  --repo alexwolson/toronto-election-poll-tracker-data --dir "$RUN_ROOT/polling"
+(cd "$RUN_ROOT/polling" && \
+  jq -r '.assets[] | "\(.sha256)  \(.filename)"' release_manifest.json | shasum -a 256 -c -)
+uv run python -c 'import csv,sys; bad=[r["poll_reading_id"] for r in csv.DictReader(open(sys.argv[1])) if r["response_kind"]=="candidate" and not r["person_id"]]; assert not bad, bad' \
+  "$RUN_ROOT/polling/poll_responses.csv"
+```
+
+## 3. Rerun and publish the Backend model
+
+No Backend source edit is normally required. From its clean, up-to-date `main`
+checkout:
+
+```bash
+cd ../toronto-election-poll-tracker-backend
+uv run python scripts/refresh_all.py \
+  --results-bundle "$RUN_ROOT/results" \
+  --polling-bundle "$RUN_ROOT/polling" \
+  --results-release "$RESULTS_TAG" --polling-release "$POLLING_TAG"
+jq '{evidence_tier,final_field_samples,candidate_win,close_result,incumbent_defeat}' \
+  dist/mayoral_forecast.json
+jq '.dependencies,.feeds,.assets' dist/release_manifest.json
+BACKEND_TAG=backend-YYYY-MM-DD.N
+```
+
+Before publishing, confirm the Backend tag is unused:
+
+```bash
+gh release view "$BACKEND_TAG" \
+  --repo alexwolson/toronto-election-poll-tracker-backend
+```
+
+Publish, then download and verify the immutable output:
+
+```bash
+uv run python -m backend.release_bundle publish "$BACKEND_TAG" --bundle dist
+mkdir "$RUN_ROOT/backend"
+gh release download "$BACKEND_TAG" \
+  --repo alexwolson/toronto-election-poll-tracker-backend --dir "$RUN_ROOT/backend"
+(cd "$RUN_ROOT/backend" && \
+  jq -r '.assets[] | "\(.sha256)  \(.filename)"' release_manifest.json | shasum -a 256 -c -)
+```
+
+This validates the Polling→Results pin, hydrates exact inputs, runs all Backend
+tests, rebuilds mayoral/council/trustee feeds, and creates a Backend manifest that
+pins both upstream releases
+([`scripts/refresh_all.py:28-110`](../../../toronto-election-poll-tracker-backend/scripts/refresh_all.py#L28-L110),
+[`backend/release_bundle.py:25-94`](../../../toronto-election-poll-tracker-backend/backend/release_bundle.py#L25-L94)).
+The verification commands download and checksum the Backend release before promotion.
+
+Model verification is substantive, not just “command succeeded.” Confirm the new
+sample appears in `final_field_samples` **only if** its measured candidate set
+equals the certified three-person `viable_field`; otherwise it remains descriptive
+evidence and does not affect the forecast
+([`backend/model/mayoral_forecast_feed.py:296-351`](../../../toronto-election-poll-tracker-backend/backend/model/mayoral_forecast_feed.py#L296-L351)).
+The measured set is the union of named candidates across **all** readings for the
+sample, so one alternate scenario containing an extra candidate excludes the whole
+sample from final-field modelling
+([`backend/model/mayoral_forecast_feed.py:275-329`](../../../toronto-election-poll-tracker-backend/backend/model/mayoral_forecast_feed.py#L275-L329)).
+Review every availability/band change: the model selects at most one maximal,
+highest-priority eligible reading per sample and rejects tied endpoint readings
+([`backend/model/mayoral_endpoint.py:373-438`](../../../toronto-election-poll-tracker-backend/backend/model/mayoral_endpoint.py#L373-L438));
+publication can be withdrawn when any sensitivity variant crosses a band boundary.
+
+## 4. Resolve, verify, and deploy the Frontend
+
+Do not hand-copy production feeds into `fixtures/`. Those are offline contract/dev
+fixtures and change only when a test scenario or feed contract intentionally
+changes; ordinary production resolution writes the gitignored `.release-data/`
+([`fixtures/README.md:10-18`](../../../toronto-election-poll-tracker/fixtures/README.md#L10-L18),
+[`frontend .gitignore:38-41`](../../../toronto-election-poll-tracker/.gitignore#L38-L41)).
+
+After the new Backend release is the latest stable release, preflight from the
+clean, up-to-date Frontend `main` repository:
+
+```bash
+cd ../toronto-election-poll-tracker
+npm test
+npm run lint
+npm run vercel-build
+jq . .release-data/source_manifest.json
+```
+
+`vercel-build` resolves **only the latest stable Backend release**, follows its
+exact Results and Polling tags, verifies upstream manifest hashes and downloaded
+feed checksums, writes the resolved feeds and source manifest, then statically
+builds with `FEED_LOCAL_DIR=.release-data`
+([`package.json:5-11`](../../../toronto-election-poll-tracker/package.json#L5-L11),
+[`scripts/resolve-releases.mjs:30-121`](../../../toronto-election-poll-tracker/scripts/resolve-releases.mjs#L30-L121)).
+Confirm the source manifest names `$BACKEND_TAG`, `$POLLING_TAG`, and `$RESULTS_TAG`;
+abort if an unintended newer Backend release won the `/latest` race. Then
+inspect `out/` at `/`, `/polls/`, `/candidates/`, `/wards/`, and `/how-it-works/`.
+
+Promote deliberately with authenticated Vercel CLI access (linked project or
+`VERCEL_TOKEN`):
+
+```bash
+vercel --prod
+```
+
+Verify the deployed pages above and `/data/source-manifest.json`; confirm the new
+poll metadata/shares, the forecast evidence date/sample list, and the three pinned
+tags. The production action and dependency order are defined as manual
+([`three-repo architecture:103-120`](../../../toronto-election-poll-tracker/docs/superpowers/specs/2026-08-26-three-repo-data-architecture-design.md#L103-L120)).
+
+## Failure and rollback rules
+
+- **Never overwrite a release asset or reuse a tag.** Publish a corrected Polling
+  release, then a new Backend release pinning it. Existing releases are the audit
+  trail.
+- A bad poll can alter or withdraw published probability bands because sensitivity
+  gates are rerun. Stop before Backend publication if changes are not understood.
+- If Backend was published but not deployed, leave it immutable and publish a
+  corrected later release; ensure the corrected release is latest before building.
+- If deployed, immediately promote the prior known-good Vercel deployment. Then
+  issue corrected Polling and Backend releases; do not mutate old ones
+  ([`implementation plan:360-366`](../../../toronto-election-poll-tracker/docs/superpowers/plans/2026-08-26-three-repo-data-architecture.md#L360-L366)).
+
+## Known implementation gaps and stale guidance
+
+1. `scripts/ingest_poll_source.py`, `ingest_prep.py`, `poll_extract.workflow.js`,
+   and `build_poll_specs.py` are hard-coded or documented for the historical
+   corpus; there is no current-cycle end-to-end ingestion CLI. Use the core or
+   carefully edit the five current tables. The source schema's opening claim that
+   the five-table contract is “not yet consumed by the live model” is stale: the
+   Backend loads it directly.
+2. Polling name canonicalization currently leaves an unmatched candidate as a
+   blank `person_id` rather than failing ([`release_bundle.py:117-131`](../../polling_data/release_bundle.py#L117-L131)).
+   That contradicts the architecture's “every named response references a known
+   canonical person” gate. Inspect released `poll_responses.csv` for blank
+   `person_id` on every candidate row before Backend publication.
+3. Producer publish commands do not perform post-upload verification; the fresh
+   download/checksum step above is mandatory operator work.
+4. Release builders accept any nonblank tag string, so the
+   `results|polling|backend-YYYY-MM-DD.N` convention and tag-uniqueness check are
+   operator-enforced rather than validated.
+5. [`docs/v2-release.md`](../../../toronto-election-poll-tracker/docs/v2-release.md)
+   and [`.env.local.example`](../../../toronto-election-poll-tracker/.env.local.example)
+   describe the superseded raw-GitHub/`NEXT_PUBLIC_DATA_REVISION` path. Production
+   now uses GitHub Releases through `vercel-build`.
+6. The architecture says malformed production feeds fail closed, but mayoral
+   forecast, polling, council, candidates, and manifest loaders still have fallback
+   states; only trustee cards use `loadRequiredFeed`
+   ([`src/lib/feeds.ts:154-155`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L154-L155),
+   [`src/lib/feeds.ts:513-532`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L513-L532),
+   [`src/lib/feeds.ts:577-595`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L577-L595)).
+   Therefore visual smoke checks are a release gate, not optional polish.
+7. The resolver's GitHub requests are unauthenticated, so a build can hit public
+   API rate limits; it currently has no token-header path
+   ([`scripts/resolve-releases.mjs:16-27`](../../../toronto-election-poll-tracker/scripts/resolve-releases.mjs#L16-L27)).
+8. The generated deployment source manifest records repository, tag, and source
+   commit, but not the schema versions/checksums promised by the architecture
+   ([`scripts/resolve-releases.mjs:93-117`](../../../toronto-election-poll-tracker/scripts/resolve-releases.mjs#L93-L117)).
+9. In the current Pallas row, `polls.csv` says publication was August 21 while the
+   audited sample says August 25. Treat this as known descriptive-feed drift to fix
+   before using the current files as a template. The release builder also maps an
+   `other` share to `response:other` but its `field_tested` entry to
+   `unresolved:other` ([`polling_data/release_bundle.py:154-179`](../../polling_data/release_bundle.py#L154-L179));
+   the Frontend's shallow poll validator does not detect the mismatch
+   ([`src/lib/feeds.ts:517-532`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L517-L532)).
+10. Backend `refresh_all.py` runs `python -m pytest`, not Ruff. The current
+    repository-wide `ruff check` and `ruff format --check` baselines are not green;
+    clear that debt separately before making lint a release gate.
