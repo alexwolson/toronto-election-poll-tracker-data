@@ -4,19 +4,24 @@
 Given a JSON spec holding the five source-contract sections (the values I extract
 by hand from a document), for each source document it fetches the artifact if
 missing, computes sha256 / byte-size / page-count, then appends the rows via the
-tested ``ingest_poll_source`` core (all-or-nothing, audited-validated), verifies
-the artifact bytes, runs ``reconstruct --check``, and prints the new inventory
-counts.
+tested ``ingest_poll_source`` core (all-or-nothing, contract-validated), verifies
+the artifact bytes, and prints the new inventory counts. Historical ingestion
+also runs ``reconstruct --check``.
 
 It never parses a PDF for numbers, never sets ``visual_qa_status`` (that stays a
 deliberate attestation in the spec, per the SCHEMA full-document standard), and
 never edits the legacy crosswalk mapping.
 
-Usage:  uv run scripts/ingest_poll_source.py path/to/spec.json
+Usage:
+  uv run scripts/ingest_poll_source.py current-cycle path/to/spec.json
+  uv run scripts/ingest_poll_source.py historical path/to/spec.json
+
+The one-argument historical form remains supported for compatibility.
 """
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import subprocess
@@ -26,13 +31,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from backend.model.poll_ingest import ingest_poll_source
+from backend.model.poll_ingest import TABLES, ingest_poll_source
 from backend.model.poll_sources import (
     load_poll_source_bundle,
     verify_poll_source_artifacts,
 )
 
-BUNDLE = ROOT / "data/raw/polls/historical_mayoral"
+HISTORICAL_BUNDLE = Path("data/raw/polls/historical_mayoral")
+CURRENT_CYCLE_BUNDLE = Path("data/raw/polls")
 
 
 def _page_count(pdf: Path) -> str:
@@ -45,8 +51,17 @@ def _page_count(pdf: Path) -> str:
     raise SystemExit(f"could not read page count from {pdf}")
 
 
-def _prepare_document(doc: dict) -> None:
-    local = ROOT / doc["local_path"]
+def _prepare_document(doc: dict, root: Path) -> None:
+    if doc.get("retrieval_status") != "retrieved":
+        print(f"  {doc['source_document_id']}: no retrieved artifact to verify")
+        return
+
+    local_path = doc.get("local_path")
+    if not local_path:
+        raise SystemExit(
+            f"{doc['source_document_id']}: retrieved document has no local_path"
+        )
+    local = root / local_path
     if not local.exists():
         url = doc.get("retrieval_url") or doc.get("publisher_url")
         if not url:
@@ -67,31 +82,77 @@ def _prepare_document(doc: dict) -> None:
     )
 
 
-def main() -> None:
-    if len(sys.argv) != 2:
-        raise SystemExit("usage: ingest_poll_source.py <spec.json>")
-    spec = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-    for doc in spec.get("source_documents", []):
-        _prepare_document(doc)
+def _parse_args(argv: list[str] | None) -> tuple[str, Path]:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("mode", choices=("current-cycle", "historical"))
+    parser.add_argument("spec", type=Path, help="path to the five-section JSON spec")
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    if len(arguments) == 1 and arguments[0] not in {"-h", "--help"}:
+        arguments.insert(0, "historical")
+    args = parser.parse_args(arguments)
+    return args.mode, args.spec
 
-    counts = ingest_poll_source(spec, bundle_dir=BUNDLE)
 
-    bundle = load_poll_source_bundle(str(BUNDLE), require_audited_sources=True)
-    verify_poll_source_artifacts(bundle, ROOT)
-    subprocess.run(
-        [sys.executable, "scripts/reconstruct_historical_mayoral.py", "--check"],
-        cwd=ROOT,
-        check=True,
-    )
-
-    print("\ningested and validated. new bundle counts:")
-    for name, value in counts.items():
-        print(f"  {name}: {value}")
+def _print_next_steps(mode: str) -> None:
+    if mode == "current-cycle":
+        print("\nnext validation commands:")
+        print("  uv run python -m pytest -q")
+        print(
+            "  uv run python scripts/refresh_all.py --results-bundle "
+            '"$RUN_ROOT/results" --results-release "$RESULTS_TAG"'
+        )
+        return
     print(
         "\nnext (deliberate, manual): bump the inventory count-assertions to these "
         "totals; and to retire legacy proxies, add _MAPPED_LEGACY_READINGS entries "
         "then run reconstruct --write."
     )
+
+
+def main(argv: list[str] | None = None, *, root: Path = ROOT) -> None:
+    mode, spec_path = _parse_args(argv)
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    for doc in spec.get("source_documents", []):
+        _prepare_document(doc, root)
+
+    current_cycle = mode == "current-cycle"
+    bundle_dir = root / (CURRENT_CYCLE_BUNDLE if current_cycle else HISTORICAL_BUNDLE)
+    snapshots = {
+        table: (bundle_dir / f"{table}.csv").read_bytes() for table in TABLES
+    }
+    try:
+        counts = ingest_poll_source(
+            spec,
+            bundle_dir=bundle_dir,
+            require_audited_sources=not current_cycle,
+        )
+        bundle = load_poll_source_bundle(
+            str(bundle_dir), require_audited_sources=not current_cycle
+        )
+        if current_cycle:
+            document_ids = {
+                document["source_document_id"]
+                for document in spec["source_documents"]
+            }
+            verify_poll_source_artifacts(
+                bundle, root, source_document_ids=document_ids
+            )
+        else:
+            verify_poll_source_artifacts(bundle, root)
+            subprocess.run(
+                [sys.executable, "scripts/reconstruct_historical_mayoral.py", "--check"],
+                cwd=root,
+                check=True,
+            )
+    except Exception:
+        for table, data in snapshots.items():
+            (bundle_dir / f"{table}.csv").write_bytes(data)
+        raise
+
+    print("\ningested and validated. new bundle counts:")
+    for name, value in counts.items():
+        print(f"  {name}: {value}")
+    _print_next_steps(mode)
 
 
 if __name__ == "__main__":
