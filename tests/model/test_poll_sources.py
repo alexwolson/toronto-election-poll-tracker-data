@@ -739,11 +739,11 @@ def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 34
-    assert len(bundle.poll_sample_documents) == 34
-    assert len(bundle.poll_samples) == 28
-    assert len(bundle.poll_readings) == 64
-    assert len(bundle.poll_responses) == 283
+    assert len(bundle.source_documents) == 35
+    assert len(bundle.poll_sample_documents) == 35
+    assert len(bundle.poll_samples) == 29
+    assert len(bundle.poll_readings) == 67
+    assert len(bundle.poll_responses) == 300
 
     documents = {
         document.source_document_id: document for document in bundle.source_documents
@@ -799,7 +799,7 @@ def test_tracked_current_poll_source_inventory() -> None:
         == 50
     )
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 27
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 28
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -957,6 +957,27 @@ def test_tracked_current_poll_source_inventory() -> None:
         if reading.poll_sample_id == "forum_w11_20260812"
     ]
     assert len(ward_11_readings) == 3
+
+    ward_20_august = samples["forum_w20_20260818"]
+    assert ward_20_august.recruited_sample_size == 269
+    assert ward_20_august.publication_date.isoformat() == "2026-08-20"
+    assert len(readings_by_sample[ward_20_august.poll_sample_id]) == 3
+    tory_jr = readings["forum_w20_20260818_council_tory_jr"]
+    assert tory_jr.unweighted_base == 211
+    assert tory_jr.weighted_base == Decimal(207)
+    tory_jr_shares = {
+        response.candidate_id or response.response_option_id: response.share
+        for response in bundle.poll_responses
+        if response.poll_reading_id == tory_jr.poll_reading_id
+    }
+    assert tory_jr_shares == {
+        "parthi-kandavel": Decimal("0.19"),
+        "philip-mills": Decimal("0.03"),
+        "kevin-rupasinghe": Decimal("0.24"),
+        "mohammad-ali-reza": Decimal("0.02"),
+        "john-tory-jr": Decimal("0.38"),
+        "other": Decimal("0.13"),
+    }
 
     layton_reading = readings["forum_w11_20260812_council_layton"]
     assert layton_reading.unweighted_base == 385
