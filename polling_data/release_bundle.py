@@ -54,7 +54,7 @@ def _write_csv(path: Path, rows: list[dict[str, str]], columns: list[str]) -> No
 
 def _load_results_dependency(
     results_bundle: Path,
-) -> tuple[dict, dict[str, str], dict[str, str]]:
+) -> tuple[dict, dict[str, tuple[str, ...]], dict[str, str]]:
     manifest_path = results_bundle / "release_manifest.json"
     aliases_path = results_bundle / "person_aliases.json"
     results_path = results_bundle / "election_results.csv"
@@ -66,10 +66,22 @@ def _load_results_dependency(
         raise ValueError("Results manifest names an unexpected repository")
 
     aliases = json.loads(aliases_path.read_text(encoding="utf-8"))
+    alias_ids: dict[str, set[str]] = {}
+    ambiguous_aliases: set[str] = set()
+    for row in aliases["aliases"]:
+        key = _name_key(row.get("normalized_name", ""))
+        if not key:
+            continue
+        alias_ids.setdefault(key, set())
+        if not row.get("is_unambiguous") or not row.get("person_id"):
+            ambiguous_aliases.add(key)
+        else:
+            alias_ids[key].add(row["person_id"])
     people = {
-        row["normalized_name"]: row["person_id"]
-        for row in aliases["aliases"]
-        if row.get("is_unambiguous") and row.get("person_id")
+        key: tuple(sorted(ids))
+        if key not in ambiguous_aliases and len(ids) == 1
+        else ()
+        for key, ids in alias_ids.items()
     }
 
     contests: dict[str, str] = {}
@@ -115,19 +127,35 @@ def _canonical_poll_readings(
 
 
 def _canonical_poll_responses(
-    source: Path, people: dict[str, str]
+    source: Path, people: dict[str, tuple[str, ...]]
 ) -> tuple[list[dict[str, str]], list[str]]:
     rows = _read_csv(source)
     source_columns = list(rows[0]) if rows else []
     columns = [column for column in source_columns if column != "candidate_id"]
     insertion = columns.index("candidate_name")
     columns[insertion:insertion] = ["person_id", "source_candidate_id"]
+    identity_failures: list[str] = []
     for row in rows:
         source_id = row.pop("candidate_id", "")
         row["source_candidate_id"] = source_id
         row["person_id"] = ""
-        if row["response_kind"] == "candidate" and row["candidate_name"]:
-            row["person_id"] = people.get(_name_key(row["candidate_name"]), "")
+        if row["response_kind"] != "candidate":
+            continue
+        candidate_name = row["candidate_name"]
+        matches = people.get(_name_key(candidate_name)) if candidate_name else None
+        if matches is None or len(matches) != 1:
+            reason = "absent" if matches is None else "ambiguous"
+            identity_failures.append(
+                f"({reason}) poll_reading_id={row['poll_reading_id']!r}, "
+                f"source_candidate_id={source_id!r}, candidate_name={candidate_name!r}"
+            )
+            continue
+        row["person_id"] = matches[0]
+    if identity_failures:
+        raise ValueError(
+            "poll candidate identities did not resolve to exactly one Results person: "
+            + "; ".join(identity_failures)
+        )
     return rows, columns
 
 
@@ -139,8 +167,9 @@ def _build_mayoral_polling_feed(
     candidate_keys: dict[str, set[str]] = {}
     for row in responses:
         if row["response_kind"] == "candidate" and row["source_candidate_id"]:
-            key = row["person_id"] or f"unresolved:{row['source_candidate_id']}"
-            candidate_keys.setdefault(row["source_candidate_id"], set()).add(key)
+            candidate_keys.setdefault(row["source_candidate_id"], set()).add(
+                row["person_id"]
+            )
     conflicting = {
         key: values for key, values in candidate_keys.items() if len(values) > 1
     }
@@ -160,10 +189,16 @@ def _build_mayoral_polling_feed(
             output_key = resolved.get(key, f"response:{key}")
             shares[output_key] = float(value)
         tested = [
-            resolved.get(key, f"unresolved:{key}")
+            resolved.get(key, f"response:{key}")
             for key in row["field_tested"].split(",")
             if key
         ]
+        if set(tested) != set(shares):
+            raise ValueError(
+                f"poll field_tested/share key mismatch: poll_id={row['poll_id']!r}, "
+                f"missing_from_field_tested={sorted(set(shares) - set(tested))!r}, "
+                f"missing_from_shares={sorted(set(tested) - set(shares))!r}"
+            )
         polls.append(
             {
                 "poll_id": row["poll_id"],
