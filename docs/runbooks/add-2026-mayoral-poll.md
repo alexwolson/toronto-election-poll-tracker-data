@@ -67,17 +67,18 @@ Add one coherent sample to all five tables in `data/raw/polls/`:
    observation status.
 
 The complete field definitions and relational/rounding rules are authoritative
-([`data/raw/polls/SCHEMA.md:78-184`](../../data/raw/polls/SCHEMA.md#L78-L184)). When
-using a five-section JSON spec, append atomically with the tested core (the shipped
-CLI is historical-only):
+([`data/raw/polls/SCHEMA.md`](../../data/raw/polls/SCHEMA.md)). When using a
+five-section JSON spec, append atomically with the supported current-cycle command:
 
 ```bash
-uv run python -c 'import json; from backend.model.poll_ingest import ingest_poll_source; print(ingest_poll_source(json.load(open("tmp/new-poll.json")), bundle_dir="data/raw/polls", require_audited_sources=False))'
+uv run python scripts/ingest_poll_source.py current-cycle tmp/new-poll.json
 ```
 
-The core restores all five CSVs after any contract failure
-([`backend/model/poll_ingest.py:60-99`](../../backend/model/poll_ingest.py#L60-L99)).
-If local artifacts for the full current corpus are present, also run:
+The command computes and checks available artifact metadata without assigning
+`visual_qa_status`, validates with `require_audited_sources=False`, prints the new
+inventory counts and downstream checks, and restores all five CSVs after any
+contract or artifact failure. If local artifacts for the full current corpus are
+present, optionally verify the complete archive too:
 
 ```bash
 uv run python -c 'from backend.model.poll_sources import load_poll_source_bundle, verify_poll_source_artifacts; b=load_poll_source_bundle("data/raw/polls"); verify_poll_source_artifacts(b, ".")'
@@ -267,33 +268,27 @@ tags. The production action and dependency order are defined as manual
 
 ## Known implementation gaps and stale guidance
 
-1. `scripts/ingest_poll_source.py`, `ingest_prep.py`, `poll_extract.workflow.js`,
-   and `build_poll_specs.py` are hard-coded or documented for the historical
-   corpus; there is no current-cycle end-to-end ingestion CLI. Use the core or
-   carefully edit the five current tables. The source schema's opening claim that
-   the five-table contract is “not yet consumed by the live model” is stale: the
-   Backend loads it directly.
-2. Producer publish commands do not perform post-upload verification; the fresh
+1. Producer publish commands do not perform post-upload verification; the fresh
    download/checksum step above is mandatory operator work.
-3. Release builders accept any nonblank tag string, so the
+2. Release builders accept any nonblank tag string, so the
    `results|polling|backend-YYYY-MM-DD.N` convention and tag-uniqueness check are
    operator-enforced rather than validated.
-4. The architecture says malformed production feeds fail closed, but mayoral
+3. The architecture says malformed production feeds fail closed, but mayoral
    forecast, polling, council, candidates, and manifest loaders still have fallback
    states; only trustee cards use `loadRequiredFeed`
    ([`src/lib/feeds.ts:154-155`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L154-L155),
    [`src/lib/feeds.ts:513-532`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L513-L532),
    [`src/lib/feeds.ts:577-595`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L577-L595)).
    Therefore visual smoke checks are a release gate, not optional polish.
-5. The resolver's GitHub requests are unauthenticated, so a build can hit public
+4. The resolver's GitHub requests are unauthenticated, so a build can hit public
    API rate limits; it currently has no token-header path
    ([`scripts/resolve-releases.mjs:16-27`](../../../toronto-election-poll-tracker/scripts/resolve-releases.mjs#L16-L27)).
-6. The generated deployment source manifest records repository, tag, and source
+5. The generated deployment source manifest records repository, tag, and source
    commit, but not the schema versions/checksums promised by the architecture
    ([`scripts/resolve-releases.mjs:93-117`](../../../toronto-election-poll-tracker/scripts/resolve-releases.mjs#L93-L117)).
-7. In the current Pallas row, `polls.csv` says publication was August 21 while the
+6. In the current Pallas row, `polls.csv` says publication was August 21 while the
    audited sample says August 25. Treat this as known descriptive-feed drift to fix
    before using the current files as a template.
-8. Backend `refresh_all.py` runs `python -m pytest`, not Ruff. The current
+7. Backend `refresh_all.py` runs `python -m pytest`, not Ruff. The current
     repository-wide `ruff check` and `ruff format --check` baselines are not green;
     clear that debt separately before making lint a release gate.

@@ -21,6 +21,24 @@ The identities are deliberately separate:
 - every reading with the same `poll_sample_id` is dependent evidence, never
   another Distinct Poll Sample.
 
+## Current-cycle ingestion
+
+Represent one new poll as a JSON object containing the five table sections, then
+append it with the supported current-cycle command:
+
+```bash
+uv run python scripts/ingest_poll_source.py current-cycle tmp/new-poll.json
+```
+
+The command targets this directory, validates in manifest mode
+(`require_audited_sources=False`), and restores all five CSVs if ingestion or
+artifact verification fails. It fetches a missing artifact when the spec supplies
+a URL, computes its byte size and checksum, and verifies each retrieved artifact
+named by the spec. Intentionally unretrieved documents remain explicit gaps. The
+command never assigns `visual_qa_status`; `passed` remains a human attestation
+made only after full-document inspection. Historical ingestion remains available
+as `scripts/ingest_poll_source.py historical <spec.json>`.
+
 `load_poll_source_bundle()` requires exact headers and validates without silent
 coercion. Default manifest mode permits retrieval and extraction gaps when
 their statuses are explicit. `require_audited_sources=True` additionally

@@ -15,6 +15,7 @@ import csv
 import hashlib
 import re
 import zipfile
+from collections.abc import Collection
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
@@ -388,18 +389,33 @@ def load_poll_source_bundle(
 
 
 def verify_poll_source_artifacts(
-    bundle: PollSourceBundle, project_root: str | Path
+    bundle: PollSourceBundle,
+    project_root: str | Path,
+    *,
+    source_document_ids: Collection[str] | None = None,
 ) -> None:
     """Verify retrieved local artifacts against their tracked manifest metadata.
 
     Existence, containment below ``data/source_documents``, byte size, SHA-256,
     and practical file signatures are checked. Acquisition gaps are skipped
-    because they intentionally have no complete local artifact.
+    because they intentionally have no complete local artifact. When
+    ``source_document_ids`` is provided, only that declared subset is checked.
     """
+
+    selected_ids = set(source_document_ids) if source_document_ids is not None else None
+    if selected_ids is not None:
+        known_ids = {document.source_document_id for document in bundle.source_documents}
+        unknown_ids = selected_ids - known_ids
+        if unknown_ids:
+            raise PollSourceContractError(
+                f"cannot verify unknown source documents: {sorted(unknown_ids)}"
+            )
 
     root = Path(project_root).resolve()
     corpus_root = (root / "data" / "source_documents").resolve()
     for document in bundle.source_documents:
+        if selected_ids is not None and document.source_document_id not in selected_ids:
+            continue
         if document.retrieval_status != "retrieved":
             continue
 
