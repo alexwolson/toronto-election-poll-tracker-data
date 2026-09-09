@@ -43,8 +43,11 @@ network access, and authenticated `gh` (`gh auth login` or `GH_TOKEN`) for relea
 publication. The Results release must contain `release_manifest.json`,
 `person_aliases.json`, and `election_results.csv`; Polling refuses a different
 repository or an unknown 2026 contest ([`polling_data/release_bundle.py:55-114`](../../polling_data/release_bundle.py#L55-L114)).
-If a named candidate is absent from the Results aliases, stop: publish a corrected
-Results release first, then use that new tag throughout the chain.
+Every candidate response must resolve by canonical name to exactly one Results
+person. The Polling build fails closed on absent or ambiguous aliases and reports
+the reading ID, source candidate ID, and candidate name. If the gate fails,
+publish a corrected Results release first, then use that new tag throughout the
+chain.
 
 ## 1. Ingest in the Polling repository
 
@@ -270,40 +273,27 @@ tags. The production action and dependency order are defined as manual
    carefully edit the five current tables. The source schema's opening claim that
    the five-table contract is “not yet consumed by the live model” is stale: the
    Backend loads it directly.
-2. Polling name canonicalization currently leaves an unmatched candidate as a
-   blank `person_id` rather than failing ([`release_bundle.py:117-131`](../../polling_data/release_bundle.py#L117-L131)).
-   That contradicts the architecture's “every named response references a known
-   canonical person” gate. Inspect released `poll_responses.csv` for blank
-   `person_id` on every candidate row before Backend publication.
-3. Producer publish commands do not perform post-upload verification; the fresh
+2. Producer publish commands do not perform post-upload verification; the fresh
    download/checksum step above is mandatory operator work.
-4. Release builders accept any nonblank tag string, so the
+3. Release builders accept any nonblank tag string, so the
    `results|polling|backend-YYYY-MM-DD.N` convention and tag-uniqueness check are
    operator-enforced rather than validated.
-5. [`docs/v2-release.md`](../../../toronto-election-poll-tracker/docs/v2-release.md)
-   and [`.env.local.example`](../../../toronto-election-poll-tracker/.env.local.example)
-   describe the superseded raw-GitHub/`NEXT_PUBLIC_DATA_REVISION` path. Production
-   now uses GitHub Releases through `vercel-build`.
-6. The architecture says malformed production feeds fail closed, but mayoral
+4. The architecture says malformed production feeds fail closed, but mayoral
    forecast, polling, council, candidates, and manifest loaders still have fallback
    states; only trustee cards use `loadRequiredFeed`
    ([`src/lib/feeds.ts:154-155`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L154-L155),
    [`src/lib/feeds.ts:513-532`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L513-L532),
    [`src/lib/feeds.ts:577-595`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L577-L595)).
    Therefore visual smoke checks are a release gate, not optional polish.
-7. The resolver's GitHub requests are unauthenticated, so a build can hit public
+5. The resolver's GitHub requests are unauthenticated, so a build can hit public
    API rate limits; it currently has no token-header path
    ([`scripts/resolve-releases.mjs:16-27`](../../../toronto-election-poll-tracker/scripts/resolve-releases.mjs#L16-L27)).
-8. The generated deployment source manifest records repository, tag, and source
+6. The generated deployment source manifest records repository, tag, and source
    commit, but not the schema versions/checksums promised by the architecture
    ([`scripts/resolve-releases.mjs:93-117`](../../../toronto-election-poll-tracker/scripts/resolve-releases.mjs#L93-L117)).
-9. In the current Pallas row, `polls.csv` says publication was August 21 while the
+7. In the current Pallas row, `polls.csv` says publication was August 21 while the
    audited sample says August 25. Treat this as known descriptive-feed drift to fix
-   before using the current files as a template. The release builder also maps an
-   `other` share to `response:other` but its `field_tested` entry to
-   `unresolved:other` ([`polling_data/release_bundle.py:154-179`](../../polling_data/release_bundle.py#L154-L179));
-   the Frontend's shallow poll validator does not detect the mismatch
-   ([`src/lib/feeds.ts:517-532`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L517-L532)).
-10. Backend `refresh_all.py` runs `python -m pytest`, not Ruff. The current
+   before using the current files as a template.
+8. Backend `refresh_all.py` runs `python -m pytest`, not Ruff. The current
     repository-wide `ruff check` and `ruff format --check` baselines are not green;
     clear that debt separately before making lint a release gate.
