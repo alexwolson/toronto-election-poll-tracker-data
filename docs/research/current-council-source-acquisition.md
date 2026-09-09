@@ -1,21 +1,23 @@
 # Acquisition audit: current 2026 Forum Council poll sources
 
-**Acquisition date:** 2026-08-17  
-**Scope:** Six publicly accessible first-party Forum Research respondent samples covering Toronto Wards 5, 11, 13, 19, and 20  
-**Purpose:** Preserve source provenance and extract source-faithful Council and ward-level mayoral Poll Readings without changing the live legacy poll inputs, snapshots, or forecast code
+**Acquisition dates:** 2026-08-17 and 2026-09-09
+**Scope:** Seven publicly accessible first-party Forum Research respondent samples covering Toronto Wards 5, 11, 13, 19, and 20
+**Purpose:** Preserve source provenance and extract source-faithful Council and ward-level mayoral Poll Readings for descriptive race cards without changing forecast code
 
 ## Result
 
-All six known PDFs were recovered directly from Forum Research over HTTPS. They are valid, unencrypted, text-based PDFs. The local copies live under the gitignored `data/source_documents/current_council/` directory. Their normalized document, sample, reading, and response records are now tracked in the five source-contract CSVs under `data/raw/polls/`.
+All seven known PDFs were recovered directly from Forum Research over HTTPS. They are valid, unencrypted, text-based PDFs. The local copies live under the gitignored `data/source_documents/current_council/` directory. Their normalized document, sample, reading, and response records are now tracked in the five source-contract CSVs under `data/raw/polls/`.
 
-The corpus contains **six parent respondent samples**, **13 dependent readings**, and **49 published option rows**:
+The corpus contains **seven parent respondent samples**, **16 dependent readings**, and **66 published option rows**:
 
 - five June samples or August samples contain both Council and ward-level mayoral readings, alternate Council scenarios, or both;
 - the August Ward 19 release contains one Council reading only;
+- the August Ward 20 release contains an ordinary ballot and two hypothetical
+  candidate-entry ballots from one respondent sample;
 - the June and August Ward 19 surveys are separate respondent samples and therefore real within-ward replication, but both are from Forum Research; and
 - multiple questions asked of one parent sample are not independent polls.
 
-This acquisition introduced a model-neutral source contract, schema documentation, and validation tests. It did **not** change or feed the live legacy `polls.csv`, `ward_poll_readings.csv`, processed snapshots, or forecast code.
+This acquisition introduced a model-neutral source contract, schema documentation, and validation tests. The September follow-up also adds the three August Ward 20 readings to `ward_poll_readings.csv` and the generated Council race-card snapshot as descriptive evidence. It does not add a Ward Polling Estimate or change forecast code.
 
 ## Acquired first-party documents
 
@@ -27,8 +29,9 @@ This acquisition introduced a model-neutral source contract, schema documentatio
 | Ward 19, Beaches-East York | 2026-06-22 to 2026-06-23 | 367 | [Forum PDF](https://www.forumresearch.com/news/attachments/490d62fe-a2c1-4987-992d-a1e162ce826f.pdf) | 3 | `49330e59afbef0074c4720cb9633c43becc220a08c9262c9879eddb55bc62488` |
 | Ward 19, Beaches-East York replication | 2026-08-11 to 2026-08-12 | 386 | [Forum PDF](https://www.forumresearch.com/news/attachments/bfc438f8-9618-4981-8413-d784810cd4b7.pdf) | 2 | `58c07def8aa1a6cc47c916c31fcbc3c9b2b47fedb7605ce5adaf18a43552e9a1` |
 | Ward 11, University-Rosedale | 2026-08-12 | 449 | [Forum PDF](https://www.forumresearch.com/news/attachments/5a055d21-dc54-4bfa-838d-efa840f9704a.pdf) | 4 | `6b0668ca9c61c12cb86ca37c9d4e8941d62c9f3f7b24ce5d8fe0da01b6a701c0` |
+| Ward 20, Scarborough Southwest | 2026-08-18 | 269 | [Forum PDF](https://www.forumresearch.com/news/attachments/dd2a6234-9756-4c92-b38f-2cf07b55a474.pdf) | 4 | `70e5d3b58db1309f5e0914551109e5b44fcfa0f0502742b2236671bab94ceaed` |
 
-The four June documents are dated June 24 in the releases, while their attachment `Last-Modified` timestamps and current Forum page/API availability are June 29. Both dates are retained because the documents do not establish that the files were publicly downloadable on June 24. The August documents and web availability are both dated August 13.
+The four June documents are dated June 24 in the releases, while their attachment `Last-Modified` timestamps and current Forum page/API availability are June 29. Both dates are retained because the documents do not establish that the files were publicly downloadable on June 24. The first two August documents and their web availability are dated August 13. The Ward 20 follow-up PDF is dated August 19, while Forum's API records `goLiveDateTimeUTC` as August 20 at 18:32:00 UTC; the verified publication date is therefore August 20.
 
 ## Source-faithful reading inventory
 
@@ -49,6 +52,9 @@ Percentages below are the published total column. They are not renormalized. `u/
 | Ward 11 Council, then-current field | Decided/leaning | 312 / 286 | Blanc 5; Fisher 8; Saxe 41; Yoon 9; Other 37 | Not published |
 | Ward 11 Council, hypothetical Layton field | Not reported; leaning follow-up printed | 385 / 386 | Blanc 6; Fisher 2; Layton 44; Saxe 17; Yoon 5; Other 26 | Not published |
 | Ward 11 mayor | Not reported; leaning follow-up printed | 414 / 353 | Chow 63; Bradford 25; Alexander 5; Other 7 | Not published |
+| Ward 20 August, ordinary field | Decided/leaning | 178 / 185 | Kandavel 33; Mills 9; Rupasinghe 27; Ali Reza 7; Other 25 | Not separately published |
+| Ward 20 August, hypothetical John Tory Jr. field | Decided/leaning | 211 / 207 | Kandavel 19; Mills 3; Rupasinghe 24; Ali Reza 2; Tory Jr. 38; Other 13 | Not separately published |
+| Ward 20 August, hypothetical Gary Crawford field | Decided/leaning | 204 / 207 | Kandavel 32; Mills 7; Rupasinghe 23; Ali Reza 2; Crawford 18; Other 17 | Not separately published |
 
 The tracked readings retain parent-sample IDs, reading IDs, exact fieldwork and release dates, question-text status, scenario labels, reading-specific bases, published table row order when present, response type, source locator, and caveats. The Wong-Tam result is explicitly `question_text_status=not_reported`: its release outcome prose is retained in notes without being recast as questionnaire wording, and no response-option order is inferred from prose. `Other` is explicitly typed as a Poll Residual, not as an Unmeasured Candidate Tail estimate.
 
@@ -63,15 +69,17 @@ The tracked readings retain parent-sample IDs, reading IDs, exact fieldwork and 
 7. **Some undecided/base relationships are not reconstructible from the release.** Ward 11 publishes no undecided percentage. The August Ward 19 release reports 23% undecided, while its two reading bases do not provide a documented conversion rule that should be reverse-engineered.
 8. **The June Council questions say “by-election.”** This wording is retained verbatim even though the project concerns the 2026 regular election. It is a questionnaire-comparability fact, not a typo for the extractor to repair.
 9. **The PDFs do not establish full tested-option order or questionnaire routing.** Published table row order is retained only as published row order; it is not asserted to be the IVR presentation order.
+10. **The August Ward 20 age weights are unusually large.** In the ordinary-field decided/leaning base, 2 respondents age 18–24 are weighted to 16, 7 respondents age 25–34 to 46, and 114 respondents age 65+ down to 31. The two hypothetical readings show similar shifts. Forum publishes neither a design effect nor an effective sample size, so none is invented; the age cells and reading bases are preserved for readers to assess.
+11. **All three August Ward 20 fields differ from the final ballot.** Philip Mills is named but is absent from the final registered field, and five final candidates are represented only by `Other`. John Tory Jr. and Gary Crawford are explicitly hypothetical and are not registered candidates. The readings remain useful descriptive ballot tests, but they are not current-field estimates.
 
 ## QA performed
 
 - Each URL returned HTTP 200 with `Content-Type: application/pdf`.
-- `file` and Poppler identified six valid, unencrypted PDF 1.7 documents totalling 18 pages.
+- `file` and Poppler identified seven valid, unencrypted PDF 1.7 documents totalling 22 pages.
 - SHA-256 and byte size were recalculated after download and rechecked against every manifest row.
-- `pdftotext -layout` produced non-empty text for every document, from 5,779 to 10,889 characters.
-- Every page was rendered to PNG at 110 DPI with Poppler and visually inspected. Tables, footnotes, headings, page numbers, and methodology text were legible; no clipping, missing glyphs, black boxes, or other rendering defects were found.
-- The option-level CSV parses as 49 rows grouped into 13 readings and six parent samples. Reading totals reproduce the published rounding: 0.99, 1.00, or 1.01 as applicable.
+- `pdftotext -layout` produced non-empty text for every document.
+- Every page was rendered to PNG at 110 DPI or higher with Poppler and visually inspected. Tables, footnotes, headings, page numbers, and methodology text were legible; no clipping, missing glyphs, black boxes, or other rendering defects were found.
+- The option-level CSV parses as 66 rows grouped into 16 readings and seven parent samples. Reading totals reproduce the published rounding: 0.99, 1.00, or 1.01 as applicable.
 
 ## Access and reuse
 

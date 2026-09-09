@@ -215,3 +215,14 @@ def test_open_seat_with_a_ward_poll_still_lists_it() -> None:
         p["candidates"][0]["candidate_name"] == "Nate Erskine-Smith"
         for p in w["ward_polls"]
     )
+
+
+def test_ward_20_snapshot_lists_all_forum_readings_without_an_estimate() -> None:
+    w = _snapshot()["wards"]["20"]
+    assert len(w["ward_polls"]) == 4
+    assert {poll["poll_id"] for poll in w["ward_polls"]} >= {
+        "forum-ward20-2026-08-18-current",
+        "forum-ward20-2026-08-18-tory-jr",
+        "forum-ward20-2026-08-18-crawford",
+    }
+    assert "polling_estimate" not in w

@@ -178,6 +178,32 @@ def test_ward_11_carries_both_forum_scenarios() -> None:
     assert saxe.is_incumbent and saxe.share == 0.17
 
 
+def test_ward_20_carries_the_august_forum_scenarios_as_dependent_readings() -> None:
+    readings = load_ward_poll_readings(WARD_POLLS)
+    w20 = readings["20"]
+    assert len(w20) == 4
+
+    august = [reading for reading in w20 if reading.date_conducted == "2026-08-18"]
+    assert len(august) == 3
+    assert all(reading.sample_size == 269 for reading in august)
+    assert all(reading.ballot_status == "different_candidate_field" for reading in august)
+
+    current = next(reading for reading in august if reading.poll_id.endswith("current"))
+    assert current.candidates[0].candidate_id == "kandavel"
+    assert current.candidates[0].share == 0.33
+
+    tory_jr = next(reading for reading in august if reading.poll_id.endswith("tory-jr"))
+    assert tory_jr.candidates[0].candidate_id == "tory-jr"
+    assert tory_jr.candidates[0].share == 0.38
+    assert tory_jr.candidates[0].registration_status == "unregistered"
+
+    crawford = next(
+        reading for reading in august if reading.poll_id.endswith("crawford")
+    )
+    assert crawford.candidates[0].candidate_id == "kandavel"
+    assert next(c for c in crawford.candidates if c.candidate_id == "crawford").share == 0.18
+
+
 def test_ward_poll_names_the_candidates_first_and_residual_last() -> None:
     readings = load_ward_poll_readings(WARD_POLLS)
     order = [c.candidate_id for c in readings["13"][0].candidates]

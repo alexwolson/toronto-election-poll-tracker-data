@@ -2,12 +2,12 @@
 
 These five CSVs normalize newly acquired poll evidence. Polling releases pass
 them to Backend as live forecast inputs; `polls.csv` separately drives the
-descriptive public archive. The tracked current-cycle inventory contains 34
-source documents, 34 document/sample links, 28 respondent samples, 64 total
-readings, and 283 response rows. Twenty-one citywide mayoral samples have
+descriptive public archive. The tracked current-cycle inventory contains 35
+source documents, 35 document/sample links, 29 respondent samples, 67 total
+readings, and 300 response rows. Twenty-one citywide mayoral samples have
 completed extraction into 51 dependent readings and 234 response rows; the
-unrecovered Abacus sample is explicitly `blocked` with no invented reading. Six
-Council samples contribute the other 13 Council/ward-mayoral readings and 49
+unrecovered Abacus sample is explicitly `blocked` with no invented reading. Seven
+Council samples contribute the other 16 Council/ward-mayoral readings and 66
 response rows. The 51 mayoral readings are alternate questions, fields,
 denominators, or transformations from 21 sample units, not 51 polls.
 The identities are deliberately separate:
