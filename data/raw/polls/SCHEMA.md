@@ -1,8 +1,9 @@
 # Poll source contract (audited model input)
 
 These five CSVs normalize newly acquired poll evidence. Polling releases pass
-them to Backend as live forecast inputs; `polls.csv` separately drives the
-descriptive public archive. The tracked current-cycle inventory contains 35
+them to Backend as live forecast inputs. `descriptive_poll_readings.csv` chooses
+one source-audited reading for the descriptive public archive, and `polls.csv`
+is generated from that selection. The tracked current-cycle inventory contains 35
 source documents, 35 document/sample links, 29 respondent samples, 67 total
 readings, and 300 response rows. Twenty-one citywide mayoral samples have
 completed extraction into 51 dependent readings and 234 response rows; the
@@ -10,6 +11,10 @@ unrecovered Abacus sample is explicitly `blocked` with no invented reading. Seve
 Council samples contribute the other 16 Council/ward-mayoral readings and 66
 response rows. The 51 mayoral readings are alternate questions, fields,
 denominators, or transformations from 21 sample units, not 51 polls.
+Twenty complete general vote-intention readings are explicitly selected for the
+public archive. The blocked Abacus sample and Canada Pulse's `context_only`
+candidate-consideration reading are retained in the source contract but excluded
+from that horse-race view.
 The identities are deliberately separate:
 
 - a **source document** is one physical or known-but-unretrieved artifact;
@@ -203,19 +208,42 @@ without permitting arbitrary discrepancies.
 
 ---
 
-# polls.csv Schema (legacy live input)
+# Descriptive public poll archive
 
-One row per published **citywide** mayoral poll. Ward-level subsamples do not
-belong here (they would bias the citywide average toward that ward's lean) —
-record their reported response options in `ward_poll_readings.csv` and list
-their poll_id in `EXCLUDED_POLL_IDS`
-in `scripts/fetch_polls.py` so the Wikipedia fetch doesn't re-add them.
+## descriptive_poll_readings.csv
+
+One row per extracted Toronto 2026 citywide sample that contains at least one
+complete `general_vote_intention` mayoral reading. `poll_sample_id` is unique,
+and `poll_reading_id` must belong to that sample. The selected reading becomes
+the sample's **Representative Poll Reading** in the public archive.
+
+Selection is explicit because source reports often publish several dependent
+fields or denominators and no general algorithm can identify the editorially
+representative one without changing meaning. Alternate readings remain intact
+in `poll_readings.csv` and `poll_responses.csv`; they are never counted as
+additional polls. Blocked samples and samples containing only `context_only`,
+conditional, or routed readings have no selection and do not enter the public
+horse-race archive.
+
+| Column | Type | Required | Description |
+|---|---|---|---|
+| `poll_sample_id` | normalized string | yes | One eligible citywide respondent sample |
+| `poll_reading_id` | normalized string | yes | Its complete, general vote-intention Representative Poll Reading |
+
+## polls.csv
+
+One generated row per Representative Poll Reading. Regenerate it with
+`uv run python scripts/sync_descriptive_polls.py`; never edit it independently.
+The generator copies pollster, fieldwork end, publication date, recruited sample
+size, and collection mode from `poll_samples.csv`, and copies the exact numeric
+response shares and field from the selected normalized reading. It performs no
+renormalization. Ward samples never belong here.
 
 ## Fixed metadata columns
 
 | Column | Type | Required | Description |
 |---|---|---|---|
-| `poll_id` | string | yes | Unique identifier, e.g. `liaison-2025-11-01` |
+| `poll_id` | string | yes | The unique `poll_sample_id` |
 | `firm` | string | yes | Polling firm name |
 | `date_conducted` | YYYY-MM-DD | yes | Date range end if a range was reported |
 | `date_published` | YYYY-MM-DD | yes | Date the poll was publicly released |
@@ -224,24 +252,30 @@ in `scripts/fetch_polls.py` so the Wikipedia fetch doesn't re-add them.
 | `field_tested` | string | yes | Comma-separated list of candidate keys tested in this poll (must match column names exactly) |
 | `notes` | string | no | Anything noteworthy |
 
-## Candidate share columns
+## Response share columns
 
-Any numeric column not in the fixed metadata set above is treated as a candidate share column. Columns are added as candidates enter polling — there is no fixed set.
-
-Use the candidate's short lowercase key as the column name (matching the key used in `field_tested`). For example: `chow`, `bradford`, `bailao`, `tory`, `doe`. Add `undecided` for the undecided share — it is treated as a share column like any other.
+Any numeric column not in the fixed metadata set above is treated as a response
+share column. Candidate columns use `candidate_id`; non-candidate responses use
+their `response_kind`, such as `other`, `undecided`, or `would_not_vote`.
 
 Older rows leave columns for candidates who weren't tested blank (empty cell, not `0`).
 
 ## Validation rules
 
-- Preserve published shares without renormalizing. Complete whole-point rows may
-  total from 0.99 through 1.01 because of rounding; other complete rows must sum
-  to ≤ 1.0
+- Every row and value must exactly match the generated Representative Poll
+  Reading; Polling release construction fails on date, field, share, or inventory
+  drift
+- Preserve published shares without renormalizing
 - Every key listed in `field_tested` must have a corresponding column in the CSV
 - Every share column that has a value in a given row must be listed in `field_tested` for that row
 - `date_conducted` must be ≤ `date_published`
 - `sample_size` must be a positive integer if present
 - `poll_id` must be unique across all rows
+
+`scripts/fetch_polls.py` treats Wikipedia only as a discovery source. A new ID
+may be appended for later audit, but a collision with a curated ID is preserved
+only when every value is identical. Any differing collision stops before either
+`polls.csv` or its sidecar is written.
 
 ---
 

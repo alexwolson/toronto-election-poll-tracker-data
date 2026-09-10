@@ -15,6 +15,8 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
+from polling_data.descriptive_polls import validate_descriptive_polls
+
 RELEASE_MANIFEST_SCHEMA_VERSION = 1
 REPOSITORY = "alexwolson/toronto-election-poll-tracker-data"
 RESULTS_REPOSITORY = "alexwolson/toronto-election-results"
@@ -276,6 +278,7 @@ def build_polling_release_bundle(
             shutil.copy2(path, staging / path.name)
         readings, reading_columns = _canonical_poll_readings(required[0], contests)
         responses, response_columns = _canonical_poll_responses(required[1], people)
+        validate_descriptive_polls(source, source / "polls.csv")
         _write_csv(staging / "poll_readings.csv", readings, reading_columns)
         _write_csv(staging / "poll_responses.csv", responses, response_columns)
         polling_feed = _build_mayoral_polling_feed(source / "polls.csv", responses)
@@ -346,9 +349,7 @@ def _git(
     cwd: Path,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
 ) -> str:
-    result = runner(
-        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True
-    )
+    result = runner(["git", *args], cwd=cwd, check=True, capture_output=True, text=True)
     return result.stdout.strip()
 
 
@@ -374,7 +375,7 @@ def _verify_manifest_assets(directory: Path, manifest: dict) -> None:
     seen: set[str] = set()
     for record in assets:
         if not isinstance(record, dict):
-            raise RuntimeError("polling release manifest has an invalid asset record")
+            raise TypeError("polling release manifest has an invalid asset record")
         filename = record.get("filename")
         expected = record.get("sha256")
         if (
@@ -411,7 +412,9 @@ def _release_exists(
     error = f"{result.stdout}\n{result.stderr}".lower()
     if "release not found" in error or "http 404" in error:
         return False
-    raise RuntimeError(f"could not determine whether release {tag} exists: {error.strip()}")
+    raise RuntimeError(
+        f"could not determine whether release {tag} exists: {error.strip()}"
+    )
 
 
 def _verify_published_release(
@@ -444,11 +447,17 @@ def _verify_published_release(
             raise RuntimeError("published release is missing release_manifest.json")
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         if manifest.get("source_commit") != expected_source_commit:
-            raise RuntimeError("published release manifest source commit changed after upload")
+            raise RuntimeError(
+                "published release manifest source commit changed after upload"
+            )
         if _validate_results_pin(manifest) != expected_results_pin:
-            raise RuntimeError("published release manifest Results pin changed after upload")
+            raise RuntimeError(
+                "published release manifest Results pin changed after upload"
+            )
         if manifest_path.read_bytes() != local_manifest_path.read_bytes():
-            raise RuntimeError("published release manifest bytes differ from the uploaded bundle")
+            raise RuntimeError(
+                "published release manifest bytes differ from the uploaded bundle"
+            )
         _verify_manifest_assets(downloaded, manifest)
 
 
@@ -489,7 +498,10 @@ def publish_polling_release(
             f"source commit {head} is not the current remote main commit {remote_main[0]}"
         )
     if _git(
-        "ls-remote", "--tags", "origin", f"refs/tags/{tag}",
+        "ls-remote",
+        "--tags",
+        "origin",
+        f"refs/tags/{tag}",
         cwd=project,
         runner=runner,
     ):
@@ -511,9 +523,7 @@ def publish_polling_release(
                 "--title",
                 f"Toronto election polling {tag}",
                 "--generate-notes",
-                *sorted(
-                    str(path) for path in bundle_path.iterdir() if path.is_file()
-                ),
+                *sorted(str(path) for path in bundle_path.iterdir() if path.is_file()),
             ],
             cwd=project,
             check=True,

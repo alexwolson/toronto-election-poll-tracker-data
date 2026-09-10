@@ -84,19 +84,25 @@ present, optionally verify the complete archive too:
 uv run python -c 'from backend.model.poll_sources import load_poll_source_bundle, verify_poll_source_artifacts; b=load_poll_source_bundle("data/raw/polls"); verify_poll_source_artifacts(b, ".")'
 ```
 
-Separately add **one representative published reading** to `data/raw/polls/polls.csv`.
-This legacy-shaped table, not the five-table model input, generates the descriptive
-poll archive. Use the decided/leaning topline when that is the established public
-comparison; leave untested candidates blank, list every populated share key in
-`field_tested`, and keep the row total at or below 1.0
-unless published whole-point rounding produces a complete total from 0.99 through
-1.01. Preserve those published values rather than renormalizing them
-([`data/raw/polls/SCHEMA.md:188-224`](../../data/raw/polls/SCHEMA.md#L188-L224)).
-Cross-check this row's firm, dates, method, field, shares, and notes against the
-audited sample immediately before commit. Do not run `scripts/fetch_polls.py` as
-part of manual ingestion: it treats Wikipedia as authoritative and silently
-replaces a colliding `poll_id` ([`scripts/fetch_polls.py:372-411`](../../scripts/fetch_polls.py#L372-L411)).
-If it is run later, diff every collision against the audited tables.
+If the sample has a complete `general_vote_intention` mayoral reading, add exactly
+one `(poll_sample_id, poll_reading_id)` row to
+`data/raw/polls/descriptive_poll_readings.csv`. Choose the source's established
+public comparison, normally its decided or decided-and-leaning topline and the
+broadest contemporaneously relevant published field. This editorial selection is
+explicit because dependent alternate fields and denominators remain separate
+Poll Readings; they must never become additional polls.
+
+Regenerate and validate the public archive from that audited selection:
+
+```bash
+uv run python scripts/sync_descriptive_polls.py
+```
+
+The generator copies source dates, method, field, and exact shares without
+renormalizing. A blocked sample or one containing only `context_only`, conditional,
+or routed readings receives no selection. `scripts/fetch_polls.py` is a discovery
+aid only: it preserves an identical curated collision and stops without writing
+when any colliding date, share, field, or metadata differs.
 
 Update the intentional inventory/order/latest guards and the inventory prose:
 
@@ -164,22 +170,13 @@ jq '.dependencies,.feeds,.assets' dist/release_manifest.json
 BACKEND_TAG=backend-YYYY-MM-DD.N
 ```
 
-Before publishing, confirm the Backend tag is unused:
-
-```bash
-gh release view "$BACKEND_TAG" \
-  --repo alexwolson/toronto-election-poll-tracker-backend
-```
-
-Publish, then download and verify the immutable output:
+Publish the immutable output:
 
 ```bash
 uv run python -m backend.release_bundle publish "$BACKEND_TAG" --bundle dist
 mkdir "$RUN_ROOT/backend"
 gh release download "$BACKEND_TAG" \
   --repo alexwolson/toronto-election-poll-tracker-backend --dir "$RUN_ROOT/backend"
-(cd "$RUN_ROOT/backend" && \
-  jq -r '.assets[] | "\(.sha256)  \(.filename)"' release_manifest.json | shasum -a 256 -c -)
 ```
 
 This validates the Polling→Results pin, hydrates exact inputs, runs all Backend
@@ -187,7 +184,10 @@ tests, rebuilds mayoral/council/trustee feeds, and creates a Backend manifest th
 pins both upstream releases
 ([`scripts/refresh_all.py:28-110`](../../../toronto-election-poll-tracker-backend/scripts/refresh_all.py#L28-L110),
 [`backend/release_bundle.py:25-94`](../../../toronto-election-poll-tracker-backend/backend/release_bundle.py#L25-L94)).
-The verification commands download and checksum the Backend release before promotion.
+The publisher validates the tag, remote `main` target and both upstream pins,
+then downloads and checks the released manifest and every asset before reporting
+success. A failure or partial upload consumes the tag; publish corrections under
+a new tag.
 
 Model verification is substantive, not just “command succeeded.” Confirm the new
 sample appears in `final_field_samples` **only if** its measured candidate set
@@ -259,9 +259,6 @@ tags. The production action and dependency order are defined as manual
 
 ## Known implementation gaps and stale guidance
 
-1. In the current Pallas row, `polls.csv` says publication was August 21 while the
-   audited sample says August 25. Treat this as known descriptive-feed drift to fix
-   before using the current files as a template.
-2. Backend `refresh_all.py` runs `python -m pytest`, not Ruff. The current
+1. Backend `refresh_all.py` runs `python -m pytest`, not Ruff. The current
     repository-wide `ruff check` and `ruff format --check` baselines are not green;
     clear that debt separately before making lint a release gate.

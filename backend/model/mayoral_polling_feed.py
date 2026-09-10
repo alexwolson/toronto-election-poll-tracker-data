@@ -1,10 +1,10 @@
 """Descriptive mayoral polling feed for the frontend package (INT).
 
-Purely descriptive: the current-cycle citywide mayoral polls exactly as recorded
-in ``polls.csv`` (the Wikipedia-fed series), plus each candidate's reported share
-over time. There is **no fitted average or pool model** — that layer is retired
-(ADR 0044) and this feed makes no modelling claim. It is separate from the
-forecast feed, which fits the endpoint on the audited poll bundle.
+Purely descriptive: one source-audited Representative Poll Reading per eligible
+current-cycle citywide sample, generated into ``polls.csv``, plus each candidate's
+reported share over time. There is **no fitted average or pool model** — that layer
+is retired (ADR 0044) and this feed makes no modelling claim. It is separate from
+the forecast feed, which fits the endpoint on the full audited poll bundle.
 """
 
 from __future__ import annotations
