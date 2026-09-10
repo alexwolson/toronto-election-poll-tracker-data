@@ -256,9 +256,3 @@ tags. The production action and dependency order are defined as manual
 - If deployed, immediately promote the prior known-good Vercel deployment. Then
   issue corrected Polling and Backend releases; do not mutate old ones
   ([`implementation plan:360-366`](../../../toronto-election-poll-tracker/docs/superpowers/plans/2026-08-26-three-repo-data-architecture.md#L360-L366)).
-
-## Known implementation gaps and stale guidance
-
-1. Backend `refresh_all.py` runs `python -m pytest`, not Ruff. The current
-    repository-wide `ruff check` and `ruff format --check` baselines are not green;
-    clear that debt separately before making lint a release gate.
