@@ -371,6 +371,39 @@ def test_write_output_only_present_candidate_cols(fp, tmp_path):
     assert "bailao" not in df.columns
 
 
+def test_write_output_preserves_an_identical_curated_collision(fp, tmp_path):
+    fp.write_output(MINIMAL_ROWS, tmp_path)
+    before = (tmp_path / "polls.csv").read_bytes()
+
+    fp.write_output(MINIMAL_ROWS, tmp_path)
+
+    assert (tmp_path / "polls.csv").read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    ("field", "replacement"),
+    [
+        ("date_published", "2026-04-14"),
+        ("chow", 0.45),
+        ("field_tested", "bradford,chow"),
+    ],
+)
+def test_write_output_stops_on_different_curated_collision(
+    fp, tmp_path, field, replacement
+):
+    fp.write_output(MINIMAL_ROWS, tmp_path)
+    csv_before = (tmp_path / "polls.csv").read_bytes()
+    sidecar_before = (tmp_path / "polls.json").read_bytes()
+    changed = dict(MINIMAL_ROWS[0])
+    changed[field] = replacement
+
+    with pytest.raises(ValueError, match=rf"collision.*{field}.*refusing to overwrite"):
+        fp.write_output([changed], tmp_path)
+
+    assert (tmp_path / "polls.csv").read_bytes() == csv_before
+    assert (tmp_path / "polls.json").read_bytes() == sidecar_before
+
+
 LIVE_WP_HTML = """
 <html><body>
 <table class="wikitable"><tbody>

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Fetch Toronto 2026 mayoral election polls from Wikipedia.
+"""Fetch Toronto 2026 mayoral election poll leads from Wikipedia.
 
 Fetches polling tables from the Wikipedia article via the Wikimedia REST API
-and writes a clean polls.csv to data/raw/polls/, replacing any existing file.
-Wikipedia is treated as authoritative.
+and adds previously unseen rows to ``polls.csv``. Existing curated rows are
+immutable: an identical collision is preserved and any differing collision
+stops without writing. Wikipedia is a discovery source, not source evidence.
 
 Outputs:
   data/raw/polls/polls.csv  -- all polls from Wikipedia
@@ -373,24 +374,51 @@ def write_output(rows: list[dict], output_dir: Path) -> None:
     """Merge new Wikipedia rows with existing polls.csv and write output.
 
     New polls (by poll_id) are added; polls no longer on Wikipedia are preserved
-    as historical data. Wikipedia is authoritative for poll values — if a poll_id
-    exists in both, the Wikipedia version wins.
+    as historical data. An existing poll is never replaced from Wikipedia.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "polls.csv"
 
     incoming = pd.DataFrame(rows)
+    if incoming["poll_id"].duplicated().any():
+        duplicates = sorted(incoming.loc[incoming["poll_id"].duplicated(), "poll_id"])
+        raise ValueError(f"duplicate incoming poll_id values: {duplicates!r}")
 
     if csv_path.exists():
         existing = pd.read_csv(csv_path)
-        # Drop any rows from existing that are being superseded by Wikipedia
-        existing = existing[~existing["poll_id"].isin(incoming["poll_id"])]
-        merged = pd.concat([existing, incoming], ignore_index=True)
+        if existing["poll_id"].duplicated().any():
+            duplicates = sorted(
+                existing.loc[existing["poll_id"].duplicated(), "poll_id"]
+            )
+            raise ValueError(f"duplicate curated poll_id values: {duplicates!r}")
+        collisions = set(existing["poll_id"]) & set(incoming["poll_id"])
+        for poll_id in sorted(collisions):
+            current = existing.loc[existing["poll_id"] == poll_id].iloc[0].to_dict()
+            proposed = incoming.loc[incoming["poll_id"] == poll_id].iloc[0].to_dict()
+            differences = []
+            for field in sorted(set(current) | set(proposed)):
+                current_value = current.get(field)
+                proposed_value = proposed.get(field)
+                current_value = None if pd.isna(current_value) else current_value
+                proposed_value = None if pd.isna(proposed_value) else proposed_value
+                if isinstance(current_value, str):
+                    current_value = current_value.strip() or None
+                if isinstance(proposed_value, str):
+                    proposed_value = proposed_value.strip() or None
+                if current_value != proposed_value:
+                    differences.append(field)
+            if differences:
+                raise ValueError(
+                    f"Wikipedia poll_id collision differs from curated data for {poll_id!r}: "
+                    f"fields={differences!r}; refusing to overwrite polls.csv"
+                )
+        new_rows = incoming[~incoming["poll_id"].isin(collisions)]
+        merged = pd.concat([existing, new_rows], ignore_index=True)
         merged = merged.sort_values("date_published", ascending=False).reset_index(
             drop=True
         )
         print(
-            f"  Preserved {len(existing)} historical polls, merged {len(incoming)} from Wikipedia"
+            f"  Preserved {len(existing)} curated polls, added {len(new_rows)} from Wikipedia"
         )
     else:
         merged = incoming

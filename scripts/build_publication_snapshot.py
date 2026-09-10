@@ -34,6 +34,7 @@ from backend.model.publication_manifest import (
     build_publication_manifest,
     load_live_cycle,
 )
+from polling_data.descriptive_polls import validate_descriptive_polls
 
 
 def _publication_summary(forecast: dict) -> dict:
@@ -63,6 +64,7 @@ def _write(name: str, payload: dict) -> None:
 def main() -> None:
     as_of = datetime.now(ZoneInfo("America/Toronto")).date().isoformat()
 
+    validate_descriptive_polls(RAW / "polls", RAW / "polls" / "polls.csv")
     polling = build_mayoral_polling_feed(RAW / "polls" / "polls.csv")
     _write("mayoral_polling.json", polling)
 

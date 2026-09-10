@@ -7,6 +7,13 @@ from pathlib import Path
 
 import pytest
 
+from backend.model.poll_sources import (
+    POLL_READING_COLUMNS,
+    POLL_RESPONSE_COLUMNS,
+    POLL_SAMPLE_COLUMNS,
+    POLL_SAMPLE_DOCUMENT_COLUMNS,
+    SOURCE_DOCUMENT_COLUMNS,
+)
 from polling_data.release_bundle import (
     build_polling_release_bundle,
     publish_polling_release,
@@ -31,13 +38,7 @@ def _release_inputs(tmp_path, *, aliases, responses, field_tested="chow,other"):
             }
         )
     )
-    (results / "person_aliases.json").write_text(
-        json.dumps(
-            {
-                "aliases": aliases
-            }
-        )
-    )
+    (results / "person_aliases.json").write_text(json.dumps({"aliases": aliases}))
     _write_csv(
         results / "election_results.csv",
         [
@@ -62,14 +63,141 @@ def _release_inputs(tmp_path, *, aliases, responses, field_tested="chow,other"):
     source = tmp_path / "polls"
     source.mkdir()
     _write_csv(
+        source / "source_documents.csv",
+        SOURCE_DOCUMENT_COLUMNS,
+        [
+            {
+                "source_document_id": "document",
+                "document_role": "release",
+                "publisher_url": "https://example.test/release",
+                "retrieval_url": "",
+                "retrieval_status": "not_retrieved",
+                "retrieved_at": "",
+                "media_type": "",
+                "sha256": "",
+                "local_path": "",
+                "byte_size": "",
+                "page_count": "",
+                "sheet_count": "",
+                "text_layer_status": "",
+                "visual_qa_status": "not_applicable",
+                "access_class": "public",
+                "redistribution_status": "unknown",
+                "reuse_terms_url": "",
+                "notes": "Synthetic test source is intentionally not retrieved.",
+            }
+        ],
+    )
+    _write_csv(
+        source / "poll_sample_documents.csv",
+        POLL_SAMPLE_DOCUMENT_COLUMNS,
+        [
+            {
+                "poll_sample_id": "poll",
+                "source_document_id": "document",
+                "sample_locator": "",
+                "notes": "",
+            }
+        ],
+    )
+    _write_csv(
+        source / "poll_samples.csv",
+        POLL_SAMPLE_COLUMNS,
+        [
+            {
+                "poll_sample_id": "poll",
+                "election_cycle_id": "toronto-2026",
+                "pollster": "Pollster",
+                "sponsor": "",
+                "geography_type": "citywide",
+                "geography_id": "toronto",
+                "fieldwork_start": "2026-08-20",
+                "fieldwork_end": "2026-08-20",
+                "publication_date": "2026-08-21",
+                "publication_at": "",
+                "publication_time_precision": "date_only",
+                "evidence_available_at": "2026-08-22T00:00:00-04:00",
+                "collection_mode": "online",
+                "recruited_sample_size": "500",
+                "extraction_status": "extracted",
+                "notes": "",
+            }
+        ],
+    )
+    _write_csv(
         source / "poll_readings.csv",
-        ["poll_reading_id", "contest_id"],
-        [{"poll_reading_id": "reading", "contest_id": "toronto-mayor-2026"}],
+        POLL_READING_COLUMNS,
+        [
+            {
+                "poll_reading_id": "reading",
+                "poll_sample_id": "poll",
+                "source_document_id": "document",
+                "source_locator": "table 1",
+                "contest_type": "mayoral",
+                "contest_id": "toronto-mayor-2026",
+                "question_order_status": "not_reported",
+                "question_order": "",
+                "document_display_order": "",
+                "question_text_status": "reported",
+                "question_text": "Who would you vote for?",
+                "scenario_label": "",
+                "population": "Toronto adults",
+                "turnout_screen": "none",
+                "turnout_screen_text": "",
+                "denominator_type": "all_respondents",
+                "denominator_text": "All respondents",
+                "unweighted_base_status": "reported",
+                "unweighted_base": "500",
+                "weighted_base_status": "not_reported",
+                "weighted_base": "",
+                "reported_base_status": "not_reported",
+                "reported_base": "",
+                "tested_choice_set_status": "complete",
+                "response_coverage": "complete",
+                "reported_share_unit": "proportion",
+                "reported_share_precision": "2",
+                "notes": "",
+                "reading_purpose": "general_vote_intention",
+            }
+        ],
+    )
+    normalized_responses = []
+    for index, response in enumerate(responses, start=1):
+        normalized_responses.append(
+            {
+                **response,
+                "response_option_id": f"candidate-{index}",
+                "candidate_observation_status": "individually_published",
+                "response_label": response["candidate_name"],
+                "option_order": str(index),
+                "reported_value": "0.5",
+                "notes": "",
+            }
+        )
+    normalized_responses.append(
+        {
+            "poll_reading_id": "reading",
+            "response_option_id": "other",
+            "response_kind": "other",
+            "candidate_id": "",
+            "candidate_name": "",
+            "candidate_observation_status": "",
+            "response_label": "Other",
+            "option_order": "2",
+            "reported_value": "0.5",
+            "share": "0.5",
+            "notes": "",
+        }
     )
     _write_csv(
         source / "poll_responses.csv",
-        ["poll_reading_id", "response_kind", "candidate_id", "candidate_name", "share"],
-        responses,
+        POLL_RESPONSE_COLUMNS,
+        normalized_responses,
+    )
+    _write_csv(
+        source / "descriptive_poll_readings.csv",
+        ["poll_sample_id", "poll_reading_id"],
+        [{"poll_sample_id": "poll", "poll_reading_id": "reading"}],
     )
     _write_csv(
         source / "polls.csv",
@@ -96,7 +224,7 @@ def _release_inputs(tmp_path, *, aliases, responses, field_tested="chow,other"):
                 "field_tested": field_tested,
                 "chow": "0.5",
                 "other": "0.5",
-                "notes": "",
+                "notes": "All respondents.",
             }
         ],
     )
@@ -158,9 +286,7 @@ def _publication_bundle(tmp_path, head):
             }
         ],
     }
-    (bundle / "release_manifest.json").write_text(
-        json.dumps(manifest, indent=2) + "\n"
-    )
+    (bundle / "release_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return project, bundle
 
 
@@ -180,7 +306,9 @@ def _publication_runner(
         if command == ["git", "status", "--porcelain"]:
             return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
         if command == ["git", "rev-parse", "HEAD"]:
-            return subprocess.CompletedProcess(command, 0, stdout=f"{head}\n", stderr="")
+            return subprocess.CompletedProcess(
+                command, 0, stdout=f"{head}\n", stderr=""
+            )
         if command == ["git", "ls-remote", "origin", "refs/heads/main"]:
             resolved = remote_head or head
             return subprocess.CompletedProcess(
@@ -236,9 +364,7 @@ def test_polling_release_uses_results_keys_and_pins_results(tmp_path):
     assert polling["schema_version"] == 2
     assert polling["latest"]["shares"] == {"per_chow": 0.5, "response:other": 0.5}
     assert polling["latest"]["field_tested"] == ["per_chow", "response:other"]
-    assert set(polling["latest"]["field_tested"]) == set(
-        polling["latest"]["shares"]
-    )
+    assert set(polling["latest"]["field_tested"]) == set(polling["latest"]["shares"])
 
     manifest = json.loads((output / "release_manifest.json").read_text())
     dependency = manifest["dependencies"]["results"]
@@ -264,9 +390,7 @@ def test_polling_release_rejects_absent_candidate_identity(tmp_path):
             tmp_path,
             aliases=[],
             responses=[
-                _candidate_response(
-                    "Unresolved Person", "unknown", "reading-unknown"
-                )
+                _candidate_response("Unresolved Person", "unknown", "reading-unknown")
             ],
         )
 
@@ -319,7 +443,7 @@ def test_polling_release_rejects_ambiguous_candidate_identity(tmp_path):
 def test_polling_release_rejects_field_tested_share_mismatch(tmp_path):
     with pytest.raises(
         ValueError,
-        match="poll field_tested/share key mismatch.*response:other",
+        match="descriptive poll drift.*field_tested.*chow,other",
     ):
         _build(
             tmp_path,
@@ -350,11 +474,11 @@ def test_publish_targets_remote_main_and_verifies_download(tmp_path, capsys):
     project, bundle = _publication_bundle(tmp_path, head)
     calls, runner = _publication_runner(bundle, head)
 
-    publish_polling_release(
-        "polling-2026-09-10.1", bundle, root=project, runner=runner
-    )
+    publish_polling_release("polling-2026-09-10.1", bundle, root=project, runner=runner)
 
-    create = next(command for command in calls if command[:3] == ["gh", "release", "create"])
+    create = next(
+        command for command in calls if command[:3] == ["gh", "release", "create"]
+    )
     assert create[create.index("--target") + 1] == head
     assert any(command[:3] == ["gh", "release", "download"] for command in calls)
     assert "published and verified polling release" in capsys.readouterr().out
@@ -399,9 +523,7 @@ def test_publish_reports_a_corrupt_download_as_a_consumed_tag(tmp_path):
     def corrupt_asset(destination):
         (destination / "mayoral_polling.json").write_text("corrupt\n")
 
-    _, runner = _publication_runner(
-        bundle, head, mutate_download=corrupt_asset
-    )
+    _, runner = _publication_runner(bundle, head, mutate_download=corrupt_asset)
 
     with pytest.raises(
         RuntimeError,
@@ -422,9 +544,7 @@ def test_publish_verifies_the_downloaded_results_pin(tmp_path):
         manifest["dependencies"]["results"]["release"] = "results-2026-09-10.9"
         path.write_text(json.dumps(manifest))
 
-    _, runner = _publication_runner(
-        bundle, head, mutate_download=change_results_pin
-    )
+    _, runner = _publication_runner(bundle, head, mutate_download=change_results_pin)
 
     with pytest.raises(
         RuntimeError,

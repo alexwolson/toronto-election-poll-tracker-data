@@ -104,6 +104,10 @@ _Avoid_: Calibration test, coverage test, significance test
 The reported result of one poll, retaining its tested ballot, population, denominator, fieldwork period, and undecided or residual responses. One eligible Poll Reading updates the Internal Outcome Distribution, but does not by itself make any forecast quantity available or satisfy the Candidate Win Probability gates.
 _Avoid_: Polling average, forecast
 
+**Representative Poll Reading**:
+The one complete, general vote-intention Poll Reading selected from a Distinct Poll Sample for the descriptive public poll archive. The selection preserves the source's published shares, field, denominator, and timing. Other readings from the same respondents remain available as dependent evidence but do not become additional public polls. A sample without a complete general vote-intention reading has no Representative Poll Reading.
+_Avoid_: Best poll, independent reading, poll average
+
 **Distinct Poll Sample**:
 A separately recruited qualifying survey sample with no disclosed overlap with another counted sample. This operational definition does not claim respondent-level independence that a public release cannot verify. Multiple ballot scenarios, questions, or denominators from the same respondents remain one sample and may enter together only when their dependence is represented. A Council challenger's Candidate Win Probability requires at least two Distinct Poll Samples from at least two pollsters, with that candidate individually measured in both, before its remaining Publication Gates are evaluated.
 _Avoid_: Independent sample, poll count, repeated release
