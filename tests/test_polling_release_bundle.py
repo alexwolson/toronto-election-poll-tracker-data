@@ -1,10 +1,16 @@
 import csv
 import hashlib
 import json
+import shutil
+import subprocess
+from pathlib import Path
 
 import pytest
 
-from polling_data.release_bundle import build_polling_release_bundle
+from polling_data.release_bundle import (
+    build_polling_release_bundle,
+    publish_polling_release,
+)
 
 
 def _write_csv(path, columns, rows):
@@ -124,6 +130,84 @@ def _candidate_response(name="Olivia Chow", candidate_id="chow", reading="readin
         "candidate_name": name,
         "share": "0.5",
     }
+
+
+def _publication_bundle(tmp_path, head):
+    project = tmp_path / "project"
+    bundle = project / "dist"
+    bundle.mkdir(parents=True)
+    asset = bundle / "mayoral_polling.json"
+    asset.write_text('{"schema_version":2}\n')
+    manifest = {
+        "schema_version": 1,
+        "repository": "alexwolson/toronto-election-poll-tracker-data",
+        "source_commit": head,
+        "source_dirty": False,
+        "dependencies": {
+            "results": {
+                "repository": "alexwolson/toronto-election-results",
+                "release": "results-2026-09-09.2",
+                "source_commit": "b" * 40,
+                "manifest_sha256": "c" * 64,
+            }
+        },
+        "assets": [
+            {
+                "filename": asset.name,
+                "sha256": hashlib.sha256(asset.read_bytes()).hexdigest(),
+            }
+        ],
+    }
+    (bundle / "release_manifest.json").write_text(
+        json.dumps(manifest, indent=2) + "\n"
+    )
+    return project, bundle
+
+
+def _publication_runner(
+    bundle,
+    head,
+    *,
+    remote_head=None,
+    tag_exists=False,
+    release_exists=False,
+    mutate_download=None,
+):
+    calls = []
+
+    def runner(command, **kwargs):
+        calls.append(command)
+        if command == ["git", "status", "--porcelain"]:
+            return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+        if command == ["git", "rev-parse", "HEAD"]:
+            return subprocess.CompletedProcess(command, 0, stdout=f"{head}\n", stderr="")
+        if command == ["git", "ls-remote", "origin", "refs/heads/main"]:
+            resolved = remote_head or head
+            return subprocess.CompletedProcess(
+                command, 0, stdout=f"{resolved}\trefs/heads/main\n", stderr=""
+            )
+        if command[:4] == ["git", "ls-remote", "--tags", "origin"]:
+            output = f"{'d' * 40}\t{command[-1]}\n" if tag_exists else ""
+            return subprocess.CompletedProcess(command, 0, stdout=output, stderr="")
+        if command[:3] == ["gh", "release", "view"]:
+            if release_exists:
+                return subprocess.CompletedProcess(
+                    command, 0, stdout='{"tagName":"existing"}\n', stderr=""
+                )
+            return subprocess.CompletedProcess(
+                command, 1, stdout="", stderr="release not found\n"
+            )
+        if command[:3] == ["gh", "release", "create"]:
+            return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+        if command[:3] == ["gh", "release", "download"]:
+            destination = Path(command[command.index("--dir") + 1])
+            shutil.copytree(bundle, destination, dirs_exist_ok=True)
+            if mutate_download:
+                mutate_download(destination)
+            return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+        raise AssertionError(f"unexpected command: {command}")
+
+    return calls, runner
 
 
 def test_polling_release_uses_results_keys_and_pins_results(tmp_path):
@@ -248,4 +332,104 @@ def test_polling_release_rejects_field_tested_share_mismatch(tmp_path):
             ],
             responses=[_candidate_response()],
             field_tested="chow",
+        )
+
+
+def test_publish_rejects_malformed_tag_before_running_commands(tmp_path):
+    def unexpected_runner(command, **kwargs):
+        raise AssertionError(f"should not run {command} with {kwargs}")
+
+    with pytest.raises(ValueError, match="polling-YYYY-MM-DD.N"):
+        publish_polling_release(
+            "polling-latest", tmp_path / "dist", root=tmp_path, runner=unexpected_runner
+        )
+
+
+def test_publish_targets_remote_main_and_verifies_download(tmp_path, capsys):
+    head = "a" * 40
+    project, bundle = _publication_bundle(tmp_path, head)
+    calls, runner = _publication_runner(bundle, head)
+
+    publish_polling_release(
+        "polling-2026-09-10.1", bundle, root=project, runner=runner
+    )
+
+    create = next(command for command in calls if command[:3] == ["gh", "release", "create"])
+    assert create[create.index("--target") + 1] == head
+    assert any(command[:3] == ["gh", "release", "download"] for command in calls)
+    assert "published and verified polling release" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("existing_kind", ["tag", "release"])
+def test_publish_rejects_an_existing_tag_or_release(tmp_path, existing_kind):
+    head = "a" * 40
+    project, bundle = _publication_bundle(tmp_path, head)
+    calls, runner = _publication_runner(
+        bundle,
+        head,
+        tag_exists=existing_kind == "tag",
+        release_exists=existing_kind == "release",
+    )
+
+    with pytest.raises(RuntimeError, match="already exists"):
+        publish_polling_release(
+            "polling-2026-09-10.1", bundle, root=project, runner=runner
+        )
+
+    assert not any(command[:3] == ["gh", "release", "create"] for command in calls)
+
+
+def test_publish_rejects_a_source_commit_other_than_remote_main(tmp_path):
+    head = "a" * 40
+    project, bundle = _publication_bundle(tmp_path, head)
+    calls, runner = _publication_runner(bundle, head, remote_head="d" * 40)
+
+    with pytest.raises(RuntimeError, match="not the current remote main commit"):
+        publish_polling_release(
+            "polling-2026-09-10.1", bundle, root=project, runner=runner
+        )
+
+    assert not any(command[:3] == ["gh", "release", "create"] for command in calls)
+
+
+def test_publish_reports_a_corrupt_download_as_a_consumed_tag(tmp_path):
+    head = "a" * 40
+    project, bundle = _publication_bundle(tmp_path, head)
+
+    def corrupt_asset(destination):
+        (destination / "mayoral_polling.json").write_text("corrupt\n")
+
+    _, runner = _publication_runner(
+        bundle, head, mutate_download=corrupt_asset
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="checksum mismatch.*never reuse this tag",
+    ):
+        publish_polling_release(
+            "polling-2026-09-10.1", bundle, root=project, runner=runner
+        )
+
+
+def test_publish_verifies_the_downloaded_results_pin(tmp_path):
+    head = "a" * 40
+    project, bundle = _publication_bundle(tmp_path, head)
+
+    def change_results_pin(destination):
+        path = destination / "release_manifest.json"
+        manifest = json.loads(path.read_text())
+        manifest["dependencies"]["results"]["release"] = "results-2026-09-10.9"
+        path.write_text(json.dumps(manifest))
+
+    _, runner = _publication_runner(
+        bundle, head, mutate_download=change_results_pin
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="Results pin changed after upload.*never reuse this tag",
+    ):
+        publish_polling_release(
+            "polling-2026-09-10.1", bundle, root=project, runner=runner
         )

@@ -120,15 +120,6 @@ jq '.dependencies.results,.feeds,.assets' dist/release_manifest.json
 POLLING_TAG=polling-YYYY-MM-DD.N
 ```
 
-Before publishing, run:
-
-```bash
-gh release view "$POLLING_TAG" \
-  --repo alexwolson/toronto-election-poll-tracker-data
-```
-
-Publication should proceed only when that exact tag does not already exist.
-
 ```bash
 uv run python -m polling_data.release_bundle publish "$POLLING_TAG" --bundle dist
 ```
@@ -138,22 +129,22 @@ names against Results, builds `mayoral_polling.json`, hashes every asset, and pi
 the exact Results tag, source commit, and manifest hash
 ([`scripts/refresh_all.py:26-53`](../../scripts/refresh_all.py#L26-L53),
 [`polling_data/release_bundle.py:207-281`](../../polling_data/release_bundle.py#L207-L281)).
-Publication refuses a dirty tree, a dirty-built bundle, or a bundle built from a
-different commit, then creates a stable GitHub Release with all files
-([`polling_data/release_bundle.py:311-366`](../../polling_data/release_bundle.py#L311-L366)).
-The publisher does not pass `--target`, so do not publish from a feature branch:
-the GitHub tag target and manifest `source_commit` could diverge.
+Publication validates the `polling-YYYY-MM-DD.N` tag, refuses an existing remote
+tag or GitHub Release, requires the bundle commit to equal the current remote
+`main`, and passes that exact commit to `gh release create --target`. It then
+downloads the completed release into a fresh temporary directory and verifies
+the released manifest bytes, source commit, Results pin, and every declared
+asset checksum. It reports success only after those checks pass.
 
-Download the release into a fresh directory and verify every declared asset:
+If creation or verification fails, inspect the named GitHub Release and remote
+tag. Keep any partial publication immutable and publish the correction under a
+new tag; never retry by reusing the failed tag. After success, download the
+verified release for the Backend build:
 
 ```bash
 mkdir "$RUN_ROOT/polling"
 gh release download "$POLLING_TAG" \
   --repo alexwolson/toronto-election-poll-tracker-data --dir "$RUN_ROOT/polling"
-(cd "$RUN_ROOT/polling" && \
-  jq -r '.assets[] | "\(.sha256)  \(.filename)"' release_manifest.json | shasum -a 256 -c -)
-uv run python -c 'import csv,sys; bad=[r["poll_reading_id"] for r in csv.DictReader(open(sys.argv[1])) if r["response_kind"]=="candidate" and not r["person_id"]]; assert not bad, bad' \
-  "$RUN_ROOT/polling/poll_responses.csv"
 ```
 
 ## 3. Rerun and publish the Backend model
@@ -227,25 +218,25 @@ clean, up-to-date Frontend `main` repository:
 cd ../toronto-election-poll-tracker
 npm test
 npm run lint
-npm run vercel-build
+BACKEND_RELEASE_TAG="$BACKEND_TAG" npm run vercel-build
 jq . .release-data/source_manifest.json
 ```
 
-`vercel-build` resolves **only the latest stable Backend release**, follows its
+`vercel-build` resolves the exact Backend release, follows its
 exact Results and Polling tags, verifies upstream manifest hashes and downloaded
 feed checksums, writes the resolved feeds and source manifest, then statically
 builds with `FEED_LOCAL_DIR=.release-data`
 ([`package.json:5-11`](../../../toronto-election-poll-tracker/package.json#L5-L11),
 [`scripts/resolve-releases.mjs:30-121`](../../../toronto-election-poll-tracker/scripts/resolve-releases.mjs#L30-L121)).
-Confirm the source manifest names `$BACKEND_TAG`, `$POLLING_TAG`, and `$RESULTS_TAG`;
-abort if an unintended newer Backend release won the `/latest` race. Then
-inspect `out/` at `/`, `/polls/`, `/candidates/`, `/wards/`, and `/how-it-works/`.
+Confirm the source manifest names `$BACKEND_TAG`, `$POLLING_TAG`, and `$RESULTS_TAG`.
+Then inspect `out/` at `/`, `/polls/`, `/candidates/`, `/wards/`, and
+`/how-it-works/`.
 
 Promote deliberately with authenticated Vercel CLI access (linked project or
 `VERCEL_TOKEN`):
 
 ```bash
-vercel --prod
+npm run deploy:production -- "$BACKEND_TAG"
 ```
 
 Verify the deployed pages above and `/data/source-manifest.json`; confirm the new
@@ -268,27 +259,9 @@ tags. The production action and dependency order are defined as manual
 
 ## Known implementation gaps and stale guidance
 
-1. Producer publish commands do not perform post-upload verification; the fresh
-   download/checksum step above is mandatory operator work.
-2. Release builders accept any nonblank tag string, so the
-   `results|polling|backend-YYYY-MM-DD.N` convention and tag-uniqueness check are
-   operator-enforced rather than validated.
-3. The architecture says malformed production feeds fail closed, but mayoral
-   forecast, polling, council, candidates, and manifest loaders still have fallback
-   states; only trustee cards use `loadRequiredFeed`
-   ([`src/lib/feeds.ts:154-155`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L154-L155),
-   [`src/lib/feeds.ts:513-532`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L513-L532),
-   [`src/lib/feeds.ts:577-595`](../../../toronto-election-poll-tracker/src/lib/feeds.ts#L577-L595)).
-   Therefore visual smoke checks are a release gate, not optional polish.
-4. The resolver's GitHub requests are unauthenticated, so a build can hit public
-   API rate limits; it currently has no token-header path
-   ([`scripts/resolve-releases.mjs:16-27`](../../../toronto-election-poll-tracker/scripts/resolve-releases.mjs#L16-L27)).
-5. The generated deployment source manifest records repository, tag, and source
-   commit, but not the schema versions/checksums promised by the architecture
-   ([`scripts/resolve-releases.mjs:93-117`](../../../toronto-election-poll-tracker/scripts/resolve-releases.mjs#L93-L117)).
-6. In the current Pallas row, `polls.csv` says publication was August 21 while the
+1. In the current Pallas row, `polls.csv` says publication was August 21 while the
    audited sample says August 25. Treat this as known descriptive-feed drift to fix
    before using the current files as a template.
-7. Backend `refresh_all.py` runs `python -m pytest`, not Ruff. The current
+2. Backend `refresh_all.py` runs `python -m pytest`, not Ruff. The current
     repository-wide `ruff check` and `ruff format --check` baselines are not green;
     clear that debt separately before making lint a release gate.

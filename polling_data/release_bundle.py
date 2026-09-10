@@ -6,16 +6,21 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import tempfile
 import unicodedata
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
 RELEASE_MANIFEST_SCHEMA_VERSION = 1
 REPOSITORY = "alexwolson/toronto-election-poll-tracker-data"
 RESULTS_REPOSITORY = "alexwolson/toronto-election-results"
+POLLING_TAG_PATTERN = re.compile(r"^polling-\d{4}-\d{2}-\d{2}\.\d+$")
+GIT_COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 _POLL_METADATA = {
     "poll_id",
     "firm",
@@ -336,42 +341,198 @@ def build_polling_release_bundle(
     return target
 
 
-def _git(*args: str, cwd: Path) -> str:
-    result = subprocess.run(
+def _git(
+    *args: str,
+    cwd: Path,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> str:
+    result = runner(
         ["git", *args], cwd=cwd, check=True, capture_output=True, text=True
     )
     return result.stdout.strip()
 
 
-def publish_polling_release(tag: str, bundle: str | Path, *, root: str | Path) -> None:
+def _validate_results_pin(manifest: dict) -> dict:
+    dependencies = manifest.get("dependencies")
+    pin = dependencies.get("results") if isinstance(dependencies, dict) else None
+    if (
+        not isinstance(pin, dict)
+        or pin.get("repository") != RESULTS_REPOSITORY
+        or not isinstance(pin.get("release"), str)
+        or not pin["release"].strip()
+        or not GIT_COMMIT_PATTERN.fullmatch(str(pin.get("source_commit", "")))
+        or not SHA256_PATTERN.fullmatch(str(pin.get("manifest_sha256", "")))
+    ):
+        raise RuntimeError("polling release manifest has an invalid Results pin")
+    return pin
+
+
+def _verify_manifest_assets(directory: Path, manifest: dict) -> None:
+    assets = manifest.get("assets")
+    if not isinstance(assets, list) or not assets:
+        raise RuntimeError("polling release manifest declares no assets")
+    seen: set[str] = set()
+    for record in assets:
+        if not isinstance(record, dict):
+            raise RuntimeError("polling release manifest has an invalid asset record")
+        filename = record.get("filename")
+        expected = record.get("sha256")
+        if (
+            not isinstance(filename, str)
+            or not filename
+            or Path(filename).name != filename
+            or filename in seen
+            or not SHA256_PATTERN.fullmatch(str(expected or ""))
+        ):
+            raise RuntimeError("polling release manifest has an invalid asset record")
+        seen.add(filename)
+        path = directory / filename
+        if not path.is_file():
+            raise RuntimeError(f"released asset is missing: {filename}")
+        if _sha256(path) != expected:
+            raise RuntimeError(f"released asset checksum mismatch: {filename}")
+
+
+def _release_exists(
+    tag: str,
+    *,
+    project: Path,
+    runner: Callable[..., subprocess.CompletedProcess[str]],
+) -> bool:
+    result = runner(
+        ["gh", "release", "view", tag, "--repo", REPOSITORY, "--json", "tagName"],
+        cwd=project,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0:
+        return True
+    error = f"{result.stdout}\n{result.stderr}".lower()
+    if "release not found" in error or "http 404" in error:
+        return False
+    raise RuntimeError(f"could not determine whether release {tag} exists: {error.strip()}")
+
+
+def _verify_published_release(
+    tag: str,
+    *,
+    project: Path,
+    local_manifest_path: Path,
+    expected_source_commit: str,
+    expected_results_pin: dict,
+    runner: Callable[..., subprocess.CompletedProcess[str]],
+) -> None:
+    with tempfile.TemporaryDirectory(prefix=f"verify-{tag}-") as tmp:
+        downloaded = Path(tmp)
+        runner(
+            [
+                "gh",
+                "release",
+                "download",
+                tag,
+                "--repo",
+                REPOSITORY,
+                "--dir",
+                str(downloaded),
+            ],
+            cwd=project,
+            check=True,
+        )
+        manifest_path = downloaded / "release_manifest.json"
+        if not manifest_path.is_file():
+            raise RuntimeError("published release is missing release_manifest.json")
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if manifest.get("source_commit") != expected_source_commit:
+            raise RuntimeError("published release manifest source commit changed after upload")
+        if _validate_results_pin(manifest) != expected_results_pin:
+            raise RuntimeError("published release manifest Results pin changed after upload")
+        if manifest_path.read_bytes() != local_manifest_path.read_bytes():
+            raise RuntimeError("published release manifest bytes differ from the uploaded bundle")
+        _verify_manifest_assets(downloaded, manifest)
+
+
+def publish_polling_release(
+    tag: str,
+    bundle: str | Path,
+    *,
+    root: str | Path,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> None:
+    if not POLLING_TAG_PATTERN.fullmatch(tag):
+        raise ValueError(
+            f"polling release tag must match polling-YYYY-MM-DD.N; received {tag!r}"
+        )
     project = Path(root)
-    if _git("status", "--porcelain", cwd=project):
+    if _git("status", "--porcelain", cwd=project, runner=runner):
         raise RuntimeError(
             "refusing to publish a polling release from a dirty working tree"
         )
     bundle_path = Path(bundle)
-    manifest = json.loads(
-        (bundle_path / "release_manifest.json").read_text(encoding="utf-8")
-    )
-    head = _git("rev-parse", "HEAD", cwd=project)
+    if not bundle_path.is_absolute():
+        bundle_path = project / bundle_path
+    manifest_path = bundle_path / "release_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    head = _git("rev-parse", "HEAD", cwd=project, runner=runner)
     if manifest.get("source_dirty") or manifest.get("source_commit") != head:
         raise RuntimeError("release bundle was not built from the current clean commit")
-    subprocess.run(
-        [
-            "gh",
-            "release",
-            "create",
-            tag,
-            "--repo",
-            REPOSITORY,
-            "--title",
-            f"Toronto election polling {tag}",
-            "--generate-notes",
-            *sorted(str(path) for path in bundle_path.iterdir() if path.is_file()),
-        ],
+    results_pin = _validate_results_pin(manifest)
+    _verify_manifest_assets(bundle_path, manifest)
+
+    remote_main = _git(
+        "ls-remote", "origin", "refs/heads/main", cwd=project, runner=runner
+    ).split()
+    if not remote_main or not GIT_COMMIT_PATTERN.fullmatch(remote_main[0]):
+        raise RuntimeError("could not resolve the remote main commit")
+    if head != remote_main[0]:
+        raise RuntimeError(
+            f"source commit {head} is not the current remote main commit {remote_main[0]}"
+        )
+    if _git(
+        "ls-remote", "--tags", "origin", f"refs/tags/{tag}",
         cwd=project,
-        check=True,
-    )
+        runner=runner,
+    ):
+        raise RuntimeError(f"remote tag already exists: {tag}")
+    if _release_exists(tag, project=project, runner=runner):
+        raise RuntimeError(f"GitHub release already exists: {tag}")
+
+    try:
+        runner(
+            [
+                "gh",
+                "release",
+                "create",
+                tag,
+                "--repo",
+                REPOSITORY,
+                "--target",
+                head,
+                "--title",
+                f"Toronto election polling {tag}",
+                "--generate-notes",
+                *sorted(
+                    str(path) for path in bundle_path.iterdir() if path.is_file()
+                ),
+            ],
+            cwd=project,
+            check=True,
+        )
+        _verify_published_release(
+            tag,
+            project=project,
+            local_manifest_path=manifest_path,
+            expected_source_commit=head,
+            expected_results_pin=results_pin,
+            runner=runner,
+        )
+    except Exception as error:
+        raise RuntimeError(
+            f"polling release {tag} failed or could not be verified: {error}. "
+            "Inspect the GitHub release and tag, keep any partial publication "
+            "immutable, and publish a correction under a new tag; never reuse this tag."
+        ) from error
+    print(f"published and verified polling release {tag} at source commit {head}")
 
 
 def main() -> None:
