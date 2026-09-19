@@ -42,10 +42,14 @@ class ForecastConfig:
     drift_sd: float = 0.035
     # Component 3: Alexander consolidation (directional). His soft vote fraction is drawn
     # uniformly across [soft_lo, soft_hi]; a small dropout/endorsement chance forces it high.
+    # soft_fraction_range is DATA-anchored: Mainstreet Sept 2026 (subscriber crosstab) measured
+    # ~29% of Alexander's voters as movable (might change / very likely / not sure) vs ~16-18%
+    # for Chow/Bradford -- so the floor is the self-reported ~0.29, the ceiling reflects strategic
+    # consolidation beyond self-report as he fades (the message test shows the race is persuadable).
     consolidation_candidate: str = "alexander"
     consolidation_target: str = "bradford"  # gets split_to_target of the moved vote
     consolidation_incumbent: str = "chow"  # gets split_to_incumbent
-    soft_fraction_range: tuple[float, float] = (0.30, 0.70)
+    soft_fraction_range: tuple[float, float] = (0.29, 0.55)
     split_to_target: float = 0.55  # rest (1 - target - incumbent) stays home
     split_to_incumbent: float = 0.20
     dropout_prob: float = 0.05

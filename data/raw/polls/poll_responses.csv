@@ -299,3 +299,16 @@ forum_w20_20260818_council_crawford,candidate-kevin-rupasinghe,candidate,kevin-r
 forum_w20_20260818_council_crawford,candidate-mohammad-ali-reza,candidate,mohammad-ali-reza,Mohammad Ali Reza,individually_published,Mohammad Ali Reza,4,2%,0.02,
 forum_w20_20260818_council_crawford,candidate-gary-crawford,candidate,gary-crawford,Gary Crawford,individually_published,Gary Crawford,5,18%,0.18,
 forum_w20_20260818_council_crawford,other,other,,,,Other,6,17%,0.17,"Other is a published poll response, not an Unmeasured Candidate Tail estimate."
+mainstreet_20260914_mayor_all,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,38.1%,0.381,
+mainstreet_20260914_mayor_all,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,31.4%,0.314,
+mainstreet_20260914_mayor_all,candidate-alexander,candidate,alexander,Chris Alexander,individually_published,Chris Alexander,3,8.0%,0.08,
+mainstreet_20260914_mayor_all,candidate-sarah-mcvie,candidate,sarah-mcvie,Sarah McVie,individually_published,Sarah McVie,4,2.1%,0.021,Registered active mayoral candidate (mayor_registered.csv); first appearance in the polling corpus.
+mainstreet_20260914_mayor_all,candidate-odessa-paloma-parker,candidate,odessa-paloma-parker,Odessa Paloma Parker,individually_published,Odessa Paloma Parker,5,1.6%,0.016,Registered active mayoral candidate (mayor_registered.csv); first appearance in the polling corpus.
+mainstreet_20260914_mayor_all,another-candidate,other,,,,Another candidate,6,2.0%,0.02,
+mainstreet_20260914_mayor_all,undecided,undecided,,,,Undecided,7,16.8%,0.168,
+mainstreet_20260914_mayor_decided,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,45.8%,0.458,
+mainstreet_20260914_mayor_decided,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,37.7%,0.377,
+mainstreet_20260914_mayor_decided,candidate-alexander,candidate,alexander,Chris Alexander,individually_published,Chris Alexander,3,9.6%,0.096,
+mainstreet_20260914_mayor_decided,candidate-sarah-mcvie,candidate,sarah-mcvie,Sarah McVie,individually_published,Sarah McVie,4,2.5%,0.025,
+mainstreet_20260914_mayor_decided,candidate-odessa-paloma-parker,candidate,odessa-paloma-parker,Odessa Paloma Parker,individually_published,Odessa Paloma Parker,5,1.9%,0.019,
+mainstreet_20260914_mayor_decided,another-candidate,other,,,,Another candidate,6,2.4%,0.024,

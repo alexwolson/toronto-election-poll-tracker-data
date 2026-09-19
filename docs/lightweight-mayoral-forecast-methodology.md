@@ -16,7 +16,8 @@ show *why* the challenger has a chance rather than emitting one opaque probabili
 - Current-cycle polls: `data/raw/polls/polls.csv`.
 - Viable field + election date: `data/raw/elections/live_cycle.json` (chow / bradford /
   alexander; election 2026-10-26; incumbent chow). Only polls covering the full viable field
-  are used (5 polls, Forum 2026-07-29 → Liaison 2026-09-05).
+  are used (6 polls, Forum 2026-07-29 → Mainstreet 2026-09-17; incl. Sarah McVie and Odessa
+  Paloma Parker as recorded minor candidates, folded into the residual for the three-way forecast).
 
 ## Method
 1. **Central support** = recency- and precision-weighted poll average (weight =
@@ -51,20 +52,41 @@ show *why* the challenger has a chance rather than emitting one opaque probabili
     would largely *disperse or stay home*, not consolidate. So the split is set to 55% Bradford
     (well below the forced-choice 76%) with 25% staying home. Formal dropout is treated as
     low-probability / low-impact (he can't leave the ballot post-Aug-21; "I'm not going anywhere").
+  - **Soft fraction — data-anchored** ← the Mainstreet Sept 2026 subscriber crosstab measures
+    Alexander's vote as materially softer: only **33% "completely certain"** (vs Chow 50.5% /
+    Bradford 47.5%) and **~29% movable** (might change / very likely / not sure) vs ~16–18% for the
+    majors. So the movable ("soft") fraction is drawn over **0.29–0.55**: floor at the self-reported
+    ~29%, ceiling for strategic consolidation as he fades. Note the nuance — his vote is *softer but
+    still ~two-thirds firm*, so the movable pool is a minority.
 
-## Result (as of 2026-09-19, 37 days out)
+## Result (as of 2026-09-19, 37 days out; polls through Mainstreet Sept 14–17)
 | Candidate | Share | Win probability | Band |
 |---|---|---|---|
-| Chow | 49 % | **~85.5 %** | 70–<90 % |
-| Bradford | 38 % | **~14.5 %** | 10–<30 % |
+| Chow | 46 % | **~84 %** | 70–<90 % |
+| Bradford | 38 % | **~16 %** | 10–<30 % |
 | Alexander | 10 % | **~0 %** | 0–<5 % |
 
-**Bradford's ~14.5% decomposes as** ≈ +4.7 pt polling error, +4.6 pt campaign drift, +5.2 pt
-Alexander consolidation. Chow–Bradford margin median +9 pt (90% CI [−5, +23]); close-result ~27%.
+**Bradford's ~16% decomposes as** ≈ +6.3 pt polling error, +5.0 pt campaign drift, +4.8 pt
+Alexander consolidation. Chow–Bradford margin median ~+8 pt; close-result ~29%. The fresh
+Mainstreet poll (Chow +8 decided) pulled the race tighter (Bradford up ~3 pt from 85.5/14.5);
+the certainty data (Alexander mostly firm) then nudged consolidation down ~1 pt.
+
+## Fundamentals / adversarial check (June 2026 subscriber report)
+The horse-race lead likely *overstates* Chow's security — an independent counterweight to the
+certainty finding above (which said her lead is firm). In June, Chow was **underwater on approval**
+(~41% approve / 56% disapprove, net −15), **46% of voters were "definitely not voting for" her**
+(vs only **25%** for Bradford — Bradford has far more headroom), and the city was **62% wrong-track**.
+The field has also restructured hugely since February (John Tory era → Alexander three-way),
+confirming high within-cycle volatility. These are **June (dated)** and September did *not* re-ask
+approval, so we have **no current fundamentals** — the key gap to fill from the next poll. Not
+hard-coded: used only to (a) cap confidence (argues against Chow much above ~85%), (b) corroborate
+component 3's Bradford-ward direction, and (c) note Chow's realistic ceiling ~54% (her p95 band
+~58% is a touch generous). Net effect: *higher confidence in ~84/16*, not a different number, since
+the weak-fundamentals and firm-certainty signals roughly cancel.
 
 ## Sensitivity & robustness
-- **Assumption variants** (published as schema-v3 sensitivity): stable → Chow ~96 %, central →
-  85.5 %, volatile → ~76 %. Variants scale the three components together.
+- **Assumption variants** (published as schema-v3 sensitivity): stable → Chow ~94 %, central →
+  ~84 %, volatile → ~75 %. Variants scale the three components together.
 - **Robust to data choices**: half-life 14–35 d, dropping the latest poll, only-3-latest, and
   leave-one-firm-out keep Chow in the mid-80s (checked on the prior lumped model; re-verify if
   parameters change materially).

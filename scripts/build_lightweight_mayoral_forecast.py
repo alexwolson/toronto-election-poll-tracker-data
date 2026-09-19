@@ -50,17 +50,17 @@ GRID5 = [
 # authoritative central calibration (evidence-based, see the methodology doc).
 VARIANTS = {
     "bridge-base": {},  # model defaults
-    "stable": {  # polls closer to gospel, quiet campaign, weak/sticky Alexander consolidation
+    "stable": {  # polls closer to gospel; Alexander's vote mostly firm (2/3 certain, Sept crosstab)
         "polling_error_sd": 0.035,
         "drift_sd": 0.020,
-        "soft_fraction_range": (0.10, 0.40),
+        "soft_fraction_range": (0.15, 0.35),
         "split_to_target": 0.45,
         "dropout_prob": 0.02,
     },
-    "volatile": {  # noisier polls, movement, stronger anti-Chow consolidation to Bradford
+    "volatile": {  # noisier polls, movement, strategic anti-Chow consolidation beyond self-report
         "polling_error_sd": 0.055,
         "drift_sd": 0.050,
-        "soft_fraction_range": (0.40, 0.80),
+        "soft_fraction_range": (0.35, 0.70),
         "split_to_target": 0.65,
         "dropout_prob": 0.10,
     },
