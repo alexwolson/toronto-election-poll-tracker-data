@@ -27,7 +27,7 @@ def test_tracked_archive_matches_audited_representative_readings() -> None:
     validate_descriptive_polls(SOURCE, SOURCE / "polls.csv")
     rows = _rows_by_id()
 
-    assert len(rows) == 20
+    assert len(rows) == 21
     assert "abacus-2026-01-27" not in rows
     assert "canadapulse-2025-10-06" not in rows
     assert not any("-v-" in poll_id for poll_id in rows)
