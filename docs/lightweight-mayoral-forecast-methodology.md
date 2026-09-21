@@ -1,5 +1,10 @@
 # Lightweight mayoral forecast — methodology
 
+> **Superseded (2026-09-21).** The published forecast is now produced by the compact joint
+> model in the Backend repository (ADR 0054, `docs/mayoral-forecast-methodology.md` there).
+> The runtime premise below was a hardware artifact: the heavy model ran at ~3 s/iteration
+> on CPU. This document is kept as the record of the forecast shipped in `backend-2026-09-21.3`.
+
 Built 2026-09-18/19 as the Sept-21 publication forecast after the heavy Monte-Carlo model
 proved too slow to fit in time (~100–140 s/iteration → weeks). This model is deliberately
 simple, transparent, and fits in ~0.1 s. Its distinguishing feature is that uncertainty is
