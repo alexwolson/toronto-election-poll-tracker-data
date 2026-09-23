@@ -150,7 +150,9 @@ def _denominator_label(reading: PollReading) -> str:
     if label:
         return label
     text = (reading.denominator_text or "").strip().strip("[]").strip().rstrip(".")
-    return f"{text[:1].upper()}{text[1:]}" if text else "Other"
+    if text:
+        return f"{text[:1].upper()}{text[1:]}"
+    return "Not stated" if reading.denominator_type == "not_reported" else "Other"
 
 
 def _public_note(reading: PollReading, shares: dict[str, Decimal]) -> str:

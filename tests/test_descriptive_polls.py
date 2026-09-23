@@ -40,6 +40,8 @@ def test_public_rows_state_their_denominator() -> None:
     assert rows["pallas-2026-08-21"]["denominator"] == "Decided and leaning voters"
     assert rows["ipsos-2026-09-08"]["denominator"] == "All respondents"
     assert rows["ipsos-2025-08-29"]["denominator"] == "All respondents"
+    # A reading whose denominator was never reported says so, rather than "Other".
+    assert rows["liaison-2026-02-02"]["denominator"] == "Not stated"
 
 
 def test_generation_reproduces_the_tracked_archive_exactly(tmp_path: Path) -> None:
