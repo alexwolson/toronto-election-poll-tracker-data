@@ -26,8 +26,15 @@ METADATA_COLUMNS = (
     "date_published",
     "sample_size",
     "methodology",
+    "denominator",
     "field_tested",
 )
+
+DENOMINATOR_LABELS = {
+    "decided_plus_leaners": "Decided and leaning voters",
+    "decided_only": "Decided voters",
+    "all_respondents": "All respondents",
+}
 
 
 class DescriptivePollContractError(ValueError):
@@ -136,6 +143,16 @@ def _selection_rows(
     return selected
 
 
+def _denominator_label(reading: PollReading) -> str:
+    """The public denominator label: the model's semantics where they are one of the
+    three standard cuts, otherwise the source's own wording."""
+    label = DENOMINATOR_LABELS.get(reading.denominator_semantics)
+    if label:
+        return label
+    text = (reading.denominator_text or "").strip().strip("[]").strip().rstrip(".")
+    return f"{text[:1].upper()}{text[1:]}" if text else "Other"
+
+
 def _public_note(reading: PollReading, shares: dict[str, Decimal]) -> str:
     parts: list[str] = []
     if reading.scenario_label:
@@ -176,6 +193,7 @@ def build_descriptive_poll_rows(
                 "date_published": sample.publication_date.isoformat(),
                 "sample_size": str(sample.recruited_sample_size or ""),
                 "methodology": sample.collection_mode,
+                "denominator": _denominator_label(reading),
                 "field_tested": ",".join(sorted(shares)),
                 "notes": _public_note(reading, shares),
             }

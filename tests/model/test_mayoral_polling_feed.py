@@ -38,12 +38,16 @@ def test_shares_carry_only_populated_candidates() -> None:
         "would_not_vote": 0.03,
     }
     assert set(latest.field_tested) == set(latest.shares)
+    assert latest.denominator == "All respondents"
+    assert "denominator" not in latest.shares
 
 
 def test_feed_exposes_latest_and_a_raw_per_candidate_trend() -> None:
     feed = build_mayoral_polling_feed(POLLS)
     assert feed["schema_version"] == 1
     assert feed["latest"]["poll_id"] == "ipsos-2026-09-08"
+    assert feed["latest"]["denominator"] == "All respondents"
+    assert "denominator" not in feed["candidates"]
     assert {"chow", "bradford", "alexander"} <= set(feed["candidates"])
     chow = feed["trend"]["chow"]
     assert [pt["date_conducted"] for pt in chow] == sorted(

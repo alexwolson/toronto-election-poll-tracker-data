@@ -30,6 +30,7 @@ _POLL_METADATA = {
     "date_published",
     "sample_size",
     "methodology",
+    "denominator",
     "field_tested",
     "notes",
 }
@@ -216,6 +217,7 @@ def _build_mayoral_polling_feed(
                 if row["sample_size"].strip()
                 else None,
                 "methodology": row["methodology"],
+                "denominator": row["denominator"],
                 "field_tested": tested,
                 "shares": shares,
                 "notes": row["notes"],

@@ -60,7 +60,9 @@ Add one coherent sample to all five tables in `data/raw/polls/`:
    `geography_id=toronto`, fieldwork/publication dates, collection mode, recruited
    size, and `extraction_status=extracted`.
 4. `poll_readings.csv`: one row per question/scenario/denominator, always linked to
-   the sample and an auditable page/table locator.
+   the sample and an auditable page/table locator, with `denominator_semantics`
+   set by hand (`decided_plus_leaners`, `decided_only`, `all_respondents`, or
+   `other`); the model ranks a sample's readings by it.
 5. `poll_responses.csv`: every published option, keeping candidates, other,
    undecided, refusals, and non-voters distinct. A candidate uses a stable local
    key, canonical display name, source-exact `response_label`, and an explicit

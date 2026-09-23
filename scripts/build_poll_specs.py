@@ -320,6 +320,10 @@ def _emit_reading(
             "turnout_screen": "none",
             "denominator_type": denom_type,
             "denominator_text": denom_text,
+            "denominator_semantics": {
+                "all_respondents": "all_respondents",
+                "decided_respondents": "decided_only",
+            }.get(denom_type, "other"),
             "unweighted_base_status": "not_reported",
             "weighted_base_status": "not_reported",
             "reported_base_status": base_status,

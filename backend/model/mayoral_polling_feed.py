@@ -23,6 +23,7 @@ _METADATA = frozenset(
         "date_published",
         "sample_size",
         "methodology",
+        "denominator",
         "field_tested",
         "notes",
     }
@@ -37,6 +38,7 @@ class MayoralPoll:
     date_published: str
     sample_size: int | None
     methodology: str
+    denominator: str
     field_tested: tuple[str, ...]
     shares: dict[str, float]
     notes: str
@@ -61,6 +63,7 @@ def load_mayoral_polls(path: str | Path) -> tuple[MayoralPoll, ...]:
                     date_published=row["date_published"],
                     sample_size=int(size) if size else None,
                     methodology=row["methodology"],
+                    denominator=row.get("denominator", ""),
                     field_tested=tuple(f for f in row["field_tested"].split(",") if f),
                     shares=shares,
                     notes=row["notes"],
@@ -103,6 +106,7 @@ def _poll_dict(poll: MayoralPoll) -> dict:
         "date_published": poll.date_published,
         "sample_size": poll.sample_size,
         "methodology": poll.methodology,
+        "denominator": poll.denominator,
         "field_tested": list(poll.field_tested),
         "shares": poll.shares,
         "notes": poll.notes,

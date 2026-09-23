@@ -90,6 +90,7 @@ def _valid_spec() -> dict[str, list[dict[str, str]]]:
         "turnout_screen": "none",
         "denominator_type": "all_respondents",
         "denominator_text": "[All Respondents]",
+        "denominator_semantics": "all_respondents",
         "unweighted_base_status": "not_reported",
         "weighted_base_status": "not_reported",
         "reported_base_status": "reported",

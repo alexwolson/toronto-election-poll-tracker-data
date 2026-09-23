@@ -80,6 +80,7 @@ def _valid_tables() -> dict[str, list[dict[str, str]]]:
         "turnout_screen_text": "Eligible to vote in Ward 13",
         "denominator_type": "all_respondents",
         "denominator_text": "All respondents",
+        "denominator_semantics": "all_respondents",
         "unweighted_base_status": "reported",
         "unweighted_base": "600",
         "weighted_base_status": "reported",
@@ -235,6 +236,27 @@ def test_loads_two_dependent_readings_as_one_distinct_sample(tmp_path: Path) -> 
     }
     assert bundle.poll_responses[0].share == Decimal("0.45")
     assert bundle.poll_readings[0].reading_purpose == "general_vote_intention"
+
+
+def test_denominator_semantics_is_required_and_consistent(tmp_path: Path) -> None:
+    tables = _valid_tables()
+    tables["poll_readings.csv"][0]["denominator_semantics"] = "likely_voters"
+    _write_bundle(tmp_path, tables)
+    with pytest.raises(PollSourceContractError, match="denominator_semantics"):
+        load_poll_source_bundle(tmp_path)
+
+    tables = _valid_tables()
+    # An all-respondents denominator cannot carry decided semantics.
+    tables["poll_readings.csv"][0]["denominator_semantics"] = "decided_only"
+    _write_bundle(tmp_path, tables)
+    with pytest.raises(PollSourceContractError, match="denominator_semantics"):
+        load_poll_source_bundle(tmp_path)
+
+    _write_bundle(tmp_path, _valid_tables())
+    bundle = load_poll_source_bundle(tmp_path)
+    assert {r.denominator_semantics for r in bundle.poll_readings} == {
+        "all_respondents"
+    }
 
 
 def test_rejects_unknown_reading_purpose(tmp_path: Path) -> None:
@@ -864,6 +886,17 @@ def test_tracked_current_poll_source_inventory() -> None:
     assert ipsos_likely.unweighted_base == 584
     assert ipsos_likely.weighted_base == Decimal(578)
     assert ipsos_likely.turnout_screen == "custom"
+    # The model's ranking key is data, entered at ingestion, not a text heuristic.
+    assert ipsos_all.denominator_semantics == "all_respondents"
+    assert ipsos_likely.denominator_semantics == "other"
+    assert latest_decided.denominator_semantics == "decided_plus_leaners"
+    assert latest_all.denominator_semantics == "all_respondents"
+    assert (
+        readings[
+            "pallas_20260819_21_mayor_leaning_with_undecided"
+        ].denominator_semantics
+        == "all_respondents"
+    )
 
     canada_pulse = samples["canadapulse-2025-10-06"]
     assert canada_pulse.collection_mode == "online"
