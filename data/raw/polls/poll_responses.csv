@@ -321,3 +321,14 @@ liaison_20260919_20_mayor_decided_leaning,candidate-chow,candidate,chow,Olivia C
 liaison_20260919_20_mayor_decided_leaning,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,40%,0.40,
 liaison_20260919_20_mayor_decided_leaning,candidate-alexander,candidate,alexander,Chris Alexander,individually_published,Chris Alexander,3,10%,0.10,
 liaison_20260919_20_mayor_decided_leaning,someone-else,other,,,,Someone else,4,3%,0.03,
+ipsos_20260904_08_mayor_all,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,36%,0.36,
+ipsos_20260904_08_mayor_all,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,21%,0.21,
+ipsos_20260904_08_mayor_all,candidate-alexander,candidate,alexander,Chris Alexander,individually_published,Chris Alexander,3,4%,0.04,
+ipsos_20260904_08_mayor_all,other,other,,,,Some other candidate,4,5%,0.05,Published poll residual; not an Unmeasured Candidate Tail estimate.
+ipsos_20260904_08_mayor_all,undecided,undecided,,,,I haven't decided yet,5,30%,0.30,
+ipsos_20260904_08_mayor_all,would-not-vote,would_not_vote,,,,I wouldn't vote,6,3%,0.03,Published nonvoter response; not recoded as undecided.
+ipsos_20260904_08_mayor_extremely_likely,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,42%,0.42,
+ipsos_20260904_08_mayor_extremely_likely,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,27%,0.27,
+ipsos_20260904_08_mayor_extremely_likely,candidate-alexander,candidate,alexander,Chris Alexander,individually_published,Chris Alexander,3,4%,0.04,
+ipsos_20260904_08_mayor_extremely_likely,other,other,,,,Some other candidate,4,4%,0.04,Published poll residual; not an Unmeasured Candidate Tail estimate.
+ipsos_20260904_08_mayor_extremely_likely,undecided,undecided,,,,I haven't decided yet,5,23%,0.23,
