@@ -250,7 +250,7 @@ renormalization. Ward samples never belong here.
 | `date_published` | YYYY-MM-DD | yes | Date the poll was publicly released |
 | `sample_size` | integer | no | Blank if not reported |
 | `methodology` | string | no | e.g. `online-panel`, `IVR`, `phone` |
-| `denominator` | string | yes | Public label of the selected reading's denominator: `Decided and leaning voters`, `Decided voters`, `All respondents`, or the source's own wording |
+| `denominator` | string | yes | Public label of the selected reading's denominator: `Decided and leaning voters`, `Decided voters`, `All respondents`, the source's own wording, or `Not stated` when the source reported none |
 | `field_tested` | string | yes | Comma-separated list of candidate keys tested in this poll (must match column names exactly) |
 | `notes` | string | no | Anything noteworthy |
 
