@@ -150,6 +150,7 @@ routed, and context-only readings from being mistaken for general support.
 | `turnout_screen_text` | string | conditional | Required for `custom` |
 | `denominator_type` | enum | yes | `all_respondents`, `decided_respondents`, `valid_responses`, `custom`, or `not_reported` |
 | `denominator_text` | string | conditional | Exact wording unless unreported |
+| `denominator_semantics` | enum | yes | `decided_plus_leaners`, `decided_only`, `all_respondents`, or `other`: what the pollster did about undecided respondents, entered at ingestion (never inferred from wording). The model ranks a sample's readings by it, decided-plus-leaners first, then decided-only, then all-respondents; `other` (turnout screens, leaner tables that keep undecideds, unreported denominators) is used only when nothing else is published. Must agree with `denominator_type` where that is `all_respondents` or `decided_respondents` |
 | `unweighted_base_status` | enum | yes | `reported` or `not_reported` |
 | `unweighted_base` | positive integer | conditional | Reading-level respondent count |
 | `weighted_base_status` | enum | yes | `reported` or `not_reported` |
@@ -249,6 +250,7 @@ renormalization. Ward samples never belong here.
 | `date_published` | YYYY-MM-DD | yes | Date the poll was publicly released |
 | `sample_size` | integer | no | Blank if not reported |
 | `methodology` | string | no | e.g. `online-panel`, `IVR`, `phone` |
+| `denominator` | string | yes | Public label of the selected reading's denominator: `Decided and leaning voters`, `Decided voters`, `All respondents`, or the source's own wording |
 | `field_tested` | string | yes | Comma-separated list of candidate keys tested in this poll (must match column names exactly) |
 | `notes` | string | no | Anything noteworthy |
 

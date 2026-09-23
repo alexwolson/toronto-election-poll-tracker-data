@@ -33,6 +33,15 @@ def test_tracked_archive_matches_audited_representative_readings() -> None:
     assert not any("-v-" in poll_id for poll_id in rows)
 
 
+def test_public_rows_state_their_denominator() -> None:
+    rows = _rows_by_id()
+    assert rows["liaison-2026-09-20"]["denominator"] == "Decided and leaning voters"
+    assert rows["mainstreet-2026-09-14"]["denominator"] == "Decided and leaning voters"
+    assert rows["pallas-2026-08-21"]["denominator"] == "Decided and leaning voters"
+    assert rows["ipsos-2026-09-08"]["denominator"] == "All respondents"
+    assert rows["ipsos-2025-08-29"]["denominator"] == "All respondents"
+
+
 def test_generation_reproduces_the_tracked_archive_exactly(tmp_path: Path) -> None:
     generated = write_descriptive_polls(SOURCE, tmp_path / "polls.csv")
 

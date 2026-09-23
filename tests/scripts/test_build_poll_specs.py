@@ -176,6 +176,11 @@ def test_build_spec_keeps_all_and_decided_readings_of_same_race(tmp_path) -> Non
     )
     assert dec["reported_base_status"] == "not_reported"  # base -1 -> unreported
     assert dec["denominator_text"] == "Among Decided Voters"
+    assert dec["denominator_semantics"] == "decided_only"
+    assert {r["denominator_semantics"] for r in spec["poll_readings"]} == {
+        "all_respondents",
+        "decided_only",
+    }
     counts = ingest_poll_source(spec, bundle_dir=_copy_bundle(tmp_path))
     assert counts["poll_readings"] >= 2
 
