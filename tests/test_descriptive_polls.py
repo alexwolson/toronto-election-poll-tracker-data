@@ -27,7 +27,7 @@ def test_tracked_archive_matches_audited_representative_readings() -> None:
     validate_descriptive_polls(SOURCE, SOURCE / "polls.csv")
     rows = _rows_by_id()
 
-    assert len(rows) == 23
+    assert len(rows) == 24
     assert "abacus-2026-01-27" not in rows
     assert "canadapulse-2025-10-06" not in rows
     assert not any("-v-" in poll_id for poll_id in rows)
@@ -40,6 +40,7 @@ def test_public_rows_state_their_denominator() -> None:
     assert rows["pallas-2026-08-21"]["denominator"] == "Decided and leaning voters"
     assert rows["ipsos-2026-09-08"]["denominator"] == "All respondents"
     assert rows["ipsos-2025-08-29"]["denominator"] == "All respondents"
+    assert rows["forum-2026-09-23"]["denominator"] == "Decided and leaning voters"
     # A reading whose denominator was never reported says so, rather than "Other".
     assert rows["liaison-2026-02-02"]["denominator"] == "Not stated"
 
