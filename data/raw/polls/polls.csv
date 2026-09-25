@@ -1,4 +1,5 @@
 poll_id,firm,date_conducted,date_published,sample_size,methodology,denominator,field_tested,alexander,bailao,bradford,chow,furey,mendicino,michael-ford,odessa-paloma-parker,other,sarah-mcvie,tory,undecided,would_not_vote,notes
+forum-2026-09-23,Forum Research,2026-09-23,2026-09-25,1014,ivr,Decided and leaning voters,"alexander,bradford,chow,other",0.06,,0.35,0.46,,,,,0.13,,,,,Published field; Decided/ Leaning.
 ipsos-2026-09-08,Ipsos,2026-09-08,2026-09-23,1006,online,All respondents,"alexander,bradford,chow,other,undecided,would_not_vote",0.04,,0.21,0.36,,,,,0.05,,,0.30,0.03,All respondents.
 liaison-2026-09-20,Liaison Strategies,2026-09-20,2026-09-22,1000,ivr,Decided and leaning voters,"alexander,bradford,chow,other",0.10,,0.40,0.47,,,,,0.03,,,,,Decided and leaning voters only.
 mainstreet-2026-09-14,Mainstreet Research,2026-09-17,2026-09-18,1000,ivr,Decided and leaning voters,"alexander,bradford,chow,odessa-paloma-parker,other,sarah-mcvie",0.096,,0.377,0.458,,,,0.019,0.024,0.025,,,,Decided and leaning voters.
