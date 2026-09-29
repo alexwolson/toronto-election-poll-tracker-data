@@ -27,7 +27,7 @@ def test_tracked_archive_matches_audited_representative_readings() -> None:
     validate_descriptive_polls(SOURCE, SOURCE / "polls.csv")
     rows = _rows_by_id()
 
-    assert len(rows) == 24
+    assert len(rows) == 25
     assert "abacus-2026-01-27" not in rows
     assert "canadapulse-2025-10-06" not in rows
     assert not any("-v-" in poll_id for poll_id in rows)
@@ -111,3 +111,19 @@ def test_validation_rejects_date_share_and_field_drift(
 
     with pytest.raises(DescriptivePollContractError, match=field):
         validate_descriptive_polls(SOURCE, polls)
+
+
+def test_canada_pulse_archive_selects_one_decided_and_leaning_reading() -> None:
+    rows = _rows_by_id()
+    poll = rows["canadapulse-2026-09-24"]
+    assert poll["date_conducted"] == "2026-09-24"
+    assert poll["date_published"] == "2026-09-29"
+    assert poll["sample_size"] == "510"
+    assert poll["denominator"] == "Decided and leaning voters"
+    assert {key: poll[key] for key in poll["field_tested"].split(",")} == {
+        "alexander": "0.09",
+        "bradford": "0.34",
+        "chow": "0.51",
+        "other": "0.06",
+    }
+    assert sum(row["poll_id"] == poll["poll_id"] for row in rows.values()) == 1
