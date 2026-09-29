@@ -15,7 +15,10 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
-from polling_data.descriptive_polls import validate_descriptive_polls
+from polling_data.descriptive_polls import (
+    build_all_respondent_poll_rows,
+    validate_descriptive_polls,
+)
 
 RELEASE_MANIFEST_SCHEMA_VERSION = 1
 REPOSITORY = "alexwolson/toronto-election-poll-tracker-data"
@@ -25,6 +28,7 @@ GIT_COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 _POLL_METADATA = {
     "poll_id",
+    "poll_reading_id",
     "firm",
     "date_conducted",
     "date_published",
@@ -168,7 +172,9 @@ def _canonical_poll_responses(
 
 
 def _build_mayoral_polling_feed(
-    polls_path: Path, responses: list[dict[str, str]]
+    polls_path: Path,
+    responses: list[dict[str, str]],
+    all_respondent_rows: list[dict[str, str]],
 ) -> dict[str, object]:
     """Build a descriptive, canonical-person-keyed frontend feed."""
 
@@ -188,8 +194,7 @@ def _build_mayoral_polling_feed(
         )
     resolved = {key: next(iter(values)) for key, values in candidate_keys.items()}
 
-    polls: list[dict[str, object]] = []
-    for row in _read_csv(polls_path):
+    def canonical_poll(row: dict[str, str]) -> dict[str, object]:
         shares: dict[str, float] = {}
         for key, value in row.items():
             if key in _POLL_METADATA or not value.strip():
@@ -207,26 +212,34 @@ def _build_mayoral_polling_feed(
                 f"missing_from_field_tested={sorted(set(shares) - set(tested))!r}, "
                 f"missing_from_shares={sorted(set(tested) - set(shares))!r}"
             )
-        polls.append(
-            {
-                "poll_id": row["poll_id"],
-                "firm": row["firm"],
-                "date_conducted": row["date_conducted"],
-                "date_published": row["date_published"],
-                "sample_size": int(row["sample_size"])
-                if row["sample_size"].strip()
-                else None,
-                "methodology": row["methodology"],
-                "denominator": row["denominator"],
-                "field_tested": tested,
-                "shares": shares,
-                "notes": row["notes"],
-            }
-        )
+        return {
+            "poll_id": row["poll_id"],
+            "firm": row["firm"],
+            "date_conducted": row["date_conducted"],
+            "date_published": row["date_published"],
+            "sample_size": int(row["sample_size"])
+            if row["sample_size"].strip()
+            else None,
+            "methodology": row["methodology"],
+            "denominator": row["denominator"],
+            "field_tested": tested,
+            "shares": shares,
+            "notes": row["notes"],
+            **(
+                {"poll_reading_id": row["poll_reading_id"]}
+                if "poll_reading_id" in row
+                else {}
+            ),
+        }
+
+    polls = [canonical_poll(row) for row in _read_csv(polls_path)]
+    all_respondents = [canonical_poll(row) for row in all_respondent_rows]
     polls.sort(
         key=lambda row: (str(row["date_published"]), str(row["poll_id"])), reverse=True
     )
-    candidates = sorted({key for poll in polls for key in poll["shares"]})
+    candidates = sorted(
+        {key for poll in [*polls, *all_respondents] for key in poll["shares"]}
+    )
     trend: dict[str, list[dict[str, object]]] = {key: [] for key in candidates}
     for poll in sorted(
         polls, key=lambda row: (str(row["date_conducted"]), str(row["poll_id"]))
@@ -243,6 +256,7 @@ def _build_mayoral_polling_feed(
         "schema_version": 2,
         "candidates": candidates,
         "polls": polls,
+        "all_respondents": all_respondents,
         "latest": polls[0] if polls else None,
         "trend": trend,
     }
@@ -283,7 +297,9 @@ def build_polling_release_bundle(
         validate_descriptive_polls(source, source / "polls.csv")
         _write_csv(staging / "poll_readings.csv", readings, reading_columns)
         _write_csv(staging / "poll_responses.csv", responses, response_columns)
-        polling_feed = _build_mayoral_polling_feed(source / "polls.csv", responses)
+        polling_feed = _build_mayoral_polling_feed(
+            source / "polls.csv", responses, build_all_respondent_poll_rows(source)
+        )
         (staging / "mayoral_polling.json").write_text(
             json.dumps(
                 polling_feed, ensure_ascii=False, separators=(",", ":"), sort_keys=True

@@ -232,6 +232,10 @@ def _release_inputs(tmp_path, *, aliases, responses, field_tested="chow,other"):
         ],
     )
 
+    shutil.copy2(
+        source / "descriptive_poll_readings.csv",
+        source / "all_respondent_poll_readings.csv",
+    )
     return source, results
 
 
@@ -365,6 +369,9 @@ def test_polling_release_uses_results_keys_and_pins_results(tmp_path):
     assert "candidate_id" not in responses[0]
     polling = json.loads((output / "mayoral_polling.json").read_text())
     assert polling["schema_version"] == 2
+    assert len(polling["all_respondents"]) == 1
+    assert polling["all_respondents"][0]["poll_reading_id"] == "reading"
+    assert polling["all_respondents"][0]["shares"] == polling["polls"][0]["shares"]
     assert polling["latest"]["shares"] == {"per_chow": 0.5, "response:other": 0.5}
     assert polling["latest"]["field_tested"] == ["per_chow", "response:other"]
     assert set(polling["latest"]["field_tested"]) == set(polling["latest"]["shares"])
