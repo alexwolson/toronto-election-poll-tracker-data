@@ -761,11 +761,11 @@ def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 42
-    assert len(bundle.poll_sample_documents) == 42
-    assert len(bundle.poll_samples) == 33
-    assert len(bundle.poll_readings) == 74
-    assert len(bundle.poll_responses) == 337
+    assert len(bundle.source_documents) == 44
+    assert len(bundle.poll_sample_documents) == 44
+    assert len(bundle.poll_samples) == 34
+    assert len(bundle.poll_readings) == 77
+    assert len(bundle.poll_responses) == 353
 
     documents = {
         document.source_document_id: document for document in bundle.source_documents
@@ -793,8 +793,8 @@ def test_tracked_current_poll_source_inventory() -> None:
         if sample.geography_type == "citywide"
     }
     recovered_citywide_ids = set(citywide_samples) - {"abacus-2026-01-27"}
-    assert len(citywide_samples) == 26
-    assert len(recovered_citywide_ids) == 25
+    assert len(citywide_samples) == 27
+    assert len(recovered_citywide_ids) == 26
     assert all(
         citywide_samples[sample_id].extraction_status == "extracted"
         for sample_id in recovered_citywide_ids
@@ -811,17 +811,17 @@ def test_tracked_current_poll_source_inventory() -> None:
         if samples[readings[response.poll_reading_id].poll_sample_id].geography_type
         == "citywide"
     ]
-    assert len(citywide_readings) == 58
-    assert len(citywide_responses) == 271
+    assert len(citywide_readings) == 61
+    assert len(citywide_responses) == 287
     assert (
         sum(
             reading.reading_purpose == "general_vote_intention"
             for reading in citywide_readings
         )
-        == 57
+        == 59
     )
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 32
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 33
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -848,6 +848,7 @@ def test_tracked_current_poll_source_inventory() -> None:
         "liaison-2026-09-20",
         "ipsos-2026-09-08",
         "forum-2026-09-23",
+        "canadapulse-2026-09-24",
     ]
     ordered_reading_samples = list(
         dict.fromkeys(reading.poll_sample_id for reading in citywide_readings)
@@ -1059,3 +1060,56 @@ def test_tracked_current_poll_source_inventory() -> None:
         if response.poll_reading_id == wong_tam.poll_reading_id
     ]
     assert {response.option_order for response in wong_tam_responses} == {None}
+
+
+def test_canada_pulse_september_readings_keep_bases_and_subgroup_separate() -> None:
+    root = Path(__file__).resolve().parents[2]
+    bundle = load_poll_source_bundle(root / "data/raw/polls")
+    sample = next(
+        s for s in bundle.poll_samples if s.poll_sample_id == "canadapulse-2026-09-24"
+    )
+    readings = {
+        r.poll_reading_id: r
+        for r in bundle.poll_readings
+        if r.poll_sample_id == sample.poll_sample_id
+    }
+    assert sample.recruited_sample_size == 510
+    assert sample.collection_mode == "online"
+    assert sample.sponsor == "Rogers CityNews"
+    assert sample.fieldwork_start.isoformat() == "2026-09-14"
+    assert sample.fieldwork_end.isoformat() == "2026-09-24"
+    assert sample.publication_date.isoformat() == "2026-09-29"
+    assert "decided-vote target" in sample.notes
+    assert len(readings) == 3
+    decided = readings["canadapulse_20260914_24_mayor_decided_leaning"]
+    assert decided.denominator_semantics == "decided_plus_leaners"
+    assert decided.unweighted_base == 380
+    assert decided.weighted_base == Decimal(380)
+    assert decided.reading_purpose == "general_vote_intention"
+    all_voters = readings["canadapulse_20260914_24_mayor_all"]
+    assert all_voters.denominator_semantics == "all_respondents"
+    assert all_voters.weighted_base == Decimal(510)
+    all_shares = {
+        r.candidate_id or r.response_kind: r.share
+        for r in bundle.poll_responses
+        if r.poll_reading_id == all_voters.poll_reading_id
+    }
+    assert all_shares == {
+        "chow": Decimal("0.38"),
+        "bradford": Decimal("0.25"),
+        "alexander": Decimal("0.07"),
+        "other": Decimal("0.04"),
+        "would_not_vote": Decimal("0.06"),
+        "dont_know": Decimal("0.20"),
+    }
+    subgroup = readings["canadapulse_20260914_24_mayor_time_for_change"]
+    assert subgroup.reading_purpose == "routed_subgroup"
+    assert subgroup.unweighted_base == 275
+    assert subgroup.weighted_base == Decimal(279)
+    documents = [
+        d
+        for d in bundle.source_documents
+        if d.source_document_id.startswith("canadapulse_2026-")
+    ]
+    assert {d.page_count for d in documents} == {4, 14}
+    assert all(d.visual_qa_status == "passed" for d in documents)
