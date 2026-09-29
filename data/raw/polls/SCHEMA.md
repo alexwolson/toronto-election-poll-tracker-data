@@ -393,3 +393,21 @@ times; sample tokens can be misparsed; shares were normalized; residual kinds
 were combined; alternate readings can look independent; and the outcome table
 collapses minor candidates. They remain tracked only for discovery and for the
 complete legacy-ID crosswalk.
+
+### All-respondent chart selection
+
+`all_respondent_poll_readings.csv` explicitly selects one complete citywide 2026
+mayoral general-vote-intention reading per sample that publishes an all-respondent
+basis. The release builder requires exact coverage of these samples (currently
+20), preserves every published response and source rounding, and includes the
+reading ID in `mayoral_polling.json`'s optional `all_respondents` array. This is an
+additive schema-2 field; `polls`, `latest` and the archive trend keep their existing
+representative readings. Alternate readings never add polls or model evidence.
+
+When a sample publishes multiple all-respondent scenarios, select the counterpart
+of the archive's tested field and leaner treatment: July 2025 Liaison includes
+Tory, March 2026 Pallas includes Ford, and August 2026 Pallas uses its published
+leaning-with-undecided table. All respondents describes the denominator, not
+whether leaners were allocated. No all-respondent shares are inferred for a
+sample that does not publish them. Add a selection when ingesting an eligible
+new sample; the release build fails on missing, duplicate or incompatible choices.

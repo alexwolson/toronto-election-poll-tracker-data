@@ -18,6 +18,7 @@ from backend.model.poll_sources import (
 )
 
 SELECTION_FILENAME = "descriptive_poll_readings.csv"
+ALL_RESPONDENT_SELECTION_FILENAME = "all_respondent_poll_readings.csv"
 SELECTION_COLUMNS = ("poll_sample_id", "poll_reading_id")
 METADATA_COLUMNS = (
     "poll_id",
@@ -91,9 +92,25 @@ def _eligible_readings(bundle: PollSourceBundle) -> dict[str, list[PollReading]]
 
 
 def _selection_rows(
-    bundle: PollSourceBundle, selections: dict[str, str]
+    bundle: PollSourceBundle,
+    selections: dict[str, str],
+    *,
+    all_respondents: bool = False,
 ) -> list[tuple[PollSample, PollReading, dict[str, Decimal]]]:
     eligible = _eligible_readings(bundle)
+    if all_respondents:
+        eligible = {
+            sample_id: matches
+            for sample_id, readings in eligible.items()
+            if (
+                matches := [
+                    reading
+                    for reading in readings
+                    if reading.denominator_semantics == "all_respondents"
+                    and reading.response_coverage == "complete"
+                ]
+            )
+        }
     if set(selections) != set(eligible):
         missing = sorted(set(eligible) - set(selections))
         extra = sorted(set(selections) - set(eligible))
@@ -139,6 +156,12 @@ def _selection_rows(
             raise DescriptivePollContractError(
                 f"representative reading {reading_id!r} has no published numeric responses"
             )
+        if all_respondents and abs(sum(shares.values(), Decimal()) - 1) > Decimal(
+            "0.02"
+        ):
+            raise DescriptivePollContractError(
+                f"all-respondent reading {reading_id!r} lacks a complete numeric response total"
+            )
         selected.append((samples[sample_id], reading, shares))
     return selected
 
@@ -173,17 +196,27 @@ def _public_note(reading: PollReading, shares: dict[str, Decimal]) -> str:
     return f"{note[:1].upper()}{note[1:]}." if note else ""
 
 
-def build_descriptive_poll_rows(
+def _build_poll_rows(
     source_dir: str | Path,
+    *,
+    all_respondents: bool = False,
 ) -> tuple[list[str], list[dict[str, str]]]:
     """Create one public row per explicitly selected, audited citywide sample."""
 
     source = Path(source_dir)
     bundle = load_poll_source_bundle(source)
-    selections = _load_selections(source / SELECTION_FILENAME)
-    selected = _selection_rows(bundle, selections)
+    selection_file = (
+        ALL_RESPONDENT_SELECTION_FILENAME if all_respondents else SELECTION_FILENAME
+    )
+    selections = _load_selections(source / selection_file)
+    selected = _selection_rows(bundle, selections, all_respondents=all_respondents)
     share_columns = sorted({key for _, _, shares in selected for key in shares})
-    columns = [*METADATA_COLUMNS, *share_columns, "notes"]
+    columns = [
+        *METADATA_COLUMNS,
+        *(["poll_reading_id"] if all_respondents else []),
+        *share_columns,
+        "notes",
+    ]
     rows = []
     for sample, reading, shares in selected:
         row = {column: "" for column in columns}
@@ -200,11 +233,25 @@ def build_descriptive_poll_rows(
                 "notes": _public_note(reading, shares),
             }
         )
+        if all_respondents:
+            row["poll_reading_id"] = reading.poll_reading_id
         for key, share in shares.items():
             row[key] = format(share, "f")
         rows.append(row)
     rows.sort(key=lambda row: (row["date_published"], row["poll_id"]), reverse=True)
     return columns, rows
+
+
+def build_descriptive_poll_rows(
+    source_dir: str | Path,
+) -> tuple[list[str], list[dict[str, str]]]:
+    """Create the unchanged representative archive, one row per sample."""
+    return _build_poll_rows(source_dir)
+
+
+def build_all_respondent_poll_rows(source_dir: str | Path) -> list[dict[str, str]]:
+    """One explicitly selected published all-respondent reading per eligible sample."""
+    return _build_poll_rows(source_dir, all_respondents=True)[1]
 
 
 def write_descriptive_polls(source_dir: str | Path, destination: str | Path) -> Path:

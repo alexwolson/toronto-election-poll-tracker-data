@@ -127,3 +127,64 @@ def test_canada_pulse_archive_selects_one_decided_and_leaning_reading() -> None:
         "other": "0.06",
     }
     assert sum(row["poll_id"] == poll["poll_id"] for row in rows.values()) == 1
+
+
+def test_all_respondent_view_preserves_source_shares_and_counts_samples_once() -> None:
+    from polling_data.descriptive_polls import build_all_respondent_poll_rows
+
+    rows = build_all_respondent_poll_rows(SOURCE)
+    by_id = {row["poll_id"]: row for row in rows}
+    assert len(rows) == len(by_id) == 20
+    assert all(row["denominator"] == "All respondents" for row in rows)
+    assert (
+        len(
+            [
+                row
+                for row in rows
+                if row["date_conducted"] > "2026-08-21"
+                and all(row.get(key) for key in ("chow", "bradford", "alexander"))
+            ]
+        )
+        == 5
+    )
+    assert by_id["ipsos-2026-09-08"]["bradford"] == "0.21"
+    assert by_id["canadapulse-2026-09-24"]["chow"] == "0.38"
+    assert (
+        by_id["pallas-2026-03-08"]["poll_reading_id"]
+        == "pallas_20260308_mayor_ford_all"
+    )
+    assert by_id["pallas-2026-08-21"]["chow"] == "0.413"
+    assert "forum-2026-09-23" not in by_id
+
+
+@pytest.mark.parametrize(
+    "replacement",
+    [
+        "liaison_20250702_06_mayor_with_tory_decided",
+        "liaison_20260904_05_mayor_all",
+        None,
+    ],
+)
+def test_all_respondent_selection_rejects_wrong_basis_sample_or_missing_sample(
+    tmp_path: Path,
+    replacement: str | None,
+) -> None:
+    from polling_data.descriptive_polls import build_all_respondent_poll_rows
+
+    source = tmp_path / "polls"
+    shutil.copytree(SOURCE, source)
+    path = source / "all_respondent_poll_readings.csv"
+    with path.open() as handle:
+        rows = list(csv.DictReader(handle))
+    if replacement is None:
+        rows.pop(0)
+    else:
+        rows[0]["poll_reading_id"] = replacement
+    with path.open("w", newline="") as handle:
+        writer = csv.DictWriter(
+            handle, fieldnames=["poll_sample_id", "poll_reading_id"]
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+    with pytest.raises(DescriptivePollContractError):
+        build_all_respondent_poll_rows(source)
