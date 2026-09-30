@@ -352,3 +352,12 @@ canadapulse_20260914_24_mayor_time_for_change,candidate-alexander,candidate,alex
 canadapulse_20260914_24_mayor_time_for_change,other,other,,,,Another candidate,4,7,0.07,Published row order only; not asserted questionnaire presentation order. Shares retain whole-point rounding.
 canadapulse_20260914_24_mayor_time_for_change,would-not-vote,would_not_vote,,,,"Nobody, I will not vote",5,8,0.08,Published row order only; not asserted questionnaire presentation order. Shares retain whole-point rounding.
 canadapulse_20260914_24_mayor_time_for_change,dont-know,dont_know,,,,Don't know / can't say,6,27,0.27,Published row order only; not asserted questionnaire presentation order. Shares retain whole-point rounding.
+liaison_20260926_27_mayor_all,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,41%,0.41,
+liaison_20260926_27_mayor_all,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,33%,0.33,
+liaison_20260926_27_mayor_all,candidate-alexander,candidate,alexander,Chris Alexander,individually_published,Chris Alexander,3,8%,0.08,
+liaison_20260926_27_mayor_all,someone-else,other,,,,Someone else,4,3%,0.03,
+liaison_20260926_27_mayor_all,undecided,undecided,,,,Undecided,5,15%,0.15,
+liaison_20260926_27_mayor_decided_leaning,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,48%,0.48,
+liaison_20260926_27_mayor_decided_leaning,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,39%,0.39,
+liaison_20260926_27_mayor_decided_leaning,candidate-alexander,candidate,alexander,Chris Alexander,individually_published,Chris Alexander,3,10%,0.10,
+liaison_20260926_27_mayor_decided_leaning,someone-else,other,,,,Someone else,4,3%,0.03,

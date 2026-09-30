@@ -27,7 +27,7 @@ def test_tracked_archive_matches_audited_representative_readings() -> None:
     validate_descriptive_polls(SOURCE, SOURCE / "polls.csv")
     rows = _rows_by_id()
 
-    assert len(rows) == 25
+    assert len(rows) == 26
     assert "abacus-2026-01-27" not in rows
     assert "canadapulse-2025-10-06" not in rows
     assert not any("-v-" in poll_id for poll_id in rows)
@@ -36,6 +36,7 @@ def test_tracked_archive_matches_audited_representative_readings() -> None:
 def test_public_rows_state_their_denominator() -> None:
     rows = _rows_by_id()
     assert rows["liaison-2026-09-20"]["denominator"] == "Decided and leaning voters"
+    assert rows["liaison-2026-09-27"]["denominator"] == "Decided and leaning voters"
     assert rows["mainstreet-2026-09-14"]["denominator"] == "Decided and leaning voters"
     assert rows["pallas-2026-08-21"]["denominator"] == "Decided and leaning voters"
     assert rows["ipsos-2026-09-08"]["denominator"] == "All respondents"
@@ -134,7 +135,7 @@ def test_all_respondent_view_preserves_source_shares_and_counts_samples_once() -
 
     rows = build_all_respondent_poll_rows(SOURCE)
     by_id = {row["poll_id"]: row for row in rows}
-    assert len(rows) == len(by_id) == 20
+    assert len(rows) == len(by_id) == 21
     assert all(row["denominator"] == "All respondents" for row in rows)
     assert (
         len(
@@ -145,10 +146,12 @@ def test_all_respondent_view_preserves_source_shares_and_counts_samples_once() -
                 and all(row.get(key) for key in ("chow", "bradford", "alexander"))
             ]
         )
-        == 5
+        == 6
     )
     assert by_id["ipsos-2026-09-08"]["bradford"] == "0.21"
     assert by_id["canadapulse-2026-09-24"]["chow"] == "0.38"
+    assert by_id["liaison-2026-09-27"]["chow"] == "0.41"
+    assert by_id["liaison-2026-09-27"]["undecided"] == "0.15"
     assert (
         by_id["pallas-2026-03-08"]["poll_reading_id"]
         == "pallas_20260308_mayor_ford_all"
