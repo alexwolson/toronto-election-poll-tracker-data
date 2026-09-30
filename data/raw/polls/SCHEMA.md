@@ -3,15 +3,15 @@
 These five CSVs normalize newly acquired poll evidence. Polling releases pass
 them to Backend as live forecast inputs. `descriptive_poll_readings.csv` chooses
 one source-audited reading for the descriptive public archive, and `polls.csv`
-is generated from that selection. The tracked current-cycle inventory contains 44
-source documents, 44 document/sample links, 34 respondent samples, 77 total
-readings, and 353 response rows. Twenty-six citywide mayoral samples have
-completed extraction into 61 dependent readings and 287 response rows; the
+is generated from that selection. The tracked current-cycle inventory contains 46
+source documents, 46 document/sample links, 35 respondent samples, 79 total
+readings, and 362 response rows. Twenty-seven citywide mayoral samples have
+completed extraction into 63 dependent readings and 296 response rows; the
 unrecovered Abacus sample is explicitly `blocked` with no invented reading. Seven
 Council samples contribute the other 16 Council/ward-mayoral readings and 66
-response rows. The 61 mayoral readings are alternate questions, fields,
-denominators, or transformations from 26 sample units, not 61 polls.
-Twenty-five complete general vote-intention readings are explicitly selected for the
+response rows. The 63 mayoral readings are alternate questions, fields,
+denominators, or transformations from 27 sample units, not 63 polls.
+Twenty-six complete general vote-intention readings are explicitly selected for the
 public archive. The blocked Abacus sample and Canada Pulse's 2025 `context_only`
 candidate-consideration reading are retained in the source contract but excluded
 from that horse-race view.
@@ -399,7 +399,7 @@ complete legacy-ID crosswalk.
 `all_respondent_poll_readings.csv` explicitly selects one complete citywide 2026
 mayoral general-vote-intention reading per sample that publishes an all-respondent
 basis. The release builder requires exact coverage of these samples (currently
-20), preserves every published response and source rounding, and includes the
+21), preserves every published response and source rounding, and includes the
 reading ID in `mayoral_polling.json`'s optional `all_respondents` array. This is an
 additive schema-2 field; `polls`, `latest` and the archive trend keep their existing
 representative readings. Alternate readings never add polls or model evidence.
