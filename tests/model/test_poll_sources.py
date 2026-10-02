@@ -757,15 +757,69 @@ def test_ooxml_verifier_rejects_bad_crc(tmp_path: Path) -> None:
         verify_poll_source_artifacts(bundle, project_root)
 
 
+def test_mainstreet_september_29_bases_and_five_candidate_field() -> None:
+    repository_root = Path(__file__).resolve().parents[2]
+    bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
+    sample = next(
+        sample
+        for sample in bundle.poll_samples
+        if sample.poll_sample_id == "mainstreet-2026-09-29"
+    )
+    assert sample.fieldwork_start.isoformat() == "2026-09-28"
+    assert sample.fieldwork_end.isoformat() == "2026-09-29"
+    assert sample.publication_date.isoformat() == "2026-10-02"
+    assert sample.publication_at is None
+    assert sample.evidence_available_at.isoformat() == "2026-10-03T00:00:00-04:00"
+    readings = {
+        reading.poll_reading_id: reading
+        for reading in bundle.poll_readings
+        if reading.poll_sample_id == sample.poll_sample_id
+    }
+    assert len(readings) == 3
+    decided = readings["mainstreet_20260928_29_mayor_decided_leaning"]
+    assert decided.denominator_semantics == "decided_plus_leaners"
+    assert decided.unweighted_base == 850
+    assert decided.weighted_base == Decimal("839.8")
+    all_voters = readings["mainstreet_20260928_29_mayor_all"]
+    assert all_voters.denominator_semantics == "all_respondents"
+    assert (all_voters.unweighted_base, all_voters.weighted_base) == (
+        1000,
+        Decimal(1000),
+    )
+    head_to_head = readings["mainstreet_20260928_29_mayor_head_to_head_all"]
+    assert head_to_head.scenario_label == "Brad Bradford and Olivia Chow only"
+    candidates = {
+        response.candidate_name
+        for response in bundle.poll_responses
+        if response.poll_reading_id == decided.poll_reading_id
+        and response.response_kind == "candidate"
+    }
+    assert candidates == {
+        "Brad Bradford",
+        "Olivia Chow",
+        "Chris Alexander",
+        "Sarah McVie",
+        "Odessa Paloma Parker",
+    }
+    # Both additional candidates retain the identities used by the previous wave.
+    for name in ("Sarah McVie", "Odessa Paloma Parker"):
+        samples = {
+            response.poll_reading_id.split("_mayor_")[0]
+            for response in bundle.poll_responses
+            if response.candidate_name == name
+        }
+        assert samples == {"mainstreet_20260914", "mainstreet_20260928_29"}
+
+
 def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 46
-    assert len(bundle.poll_sample_documents) == 46
-    assert len(bundle.poll_samples) == 35
-    assert len(bundle.poll_readings) == 79
-    assert len(bundle.poll_responses) == 362
+    assert len(bundle.source_documents) == 47
+    assert len(bundle.poll_sample_documents) == 47
+    assert len(bundle.poll_samples) == 36
+    assert len(bundle.poll_readings) == 82
+    assert len(bundle.poll_responses) == 378
 
     documents = {
         document.source_document_id: document for document in bundle.source_documents
@@ -793,8 +847,8 @@ def test_tracked_current_poll_source_inventory() -> None:
         if sample.geography_type == "citywide"
     }
     recovered_citywide_ids = set(citywide_samples) - {"abacus-2026-01-27"}
-    assert len(citywide_samples) == 28
-    assert len(recovered_citywide_ids) == 27
+    assert len(citywide_samples) == 29
+    assert len(recovered_citywide_ids) == 28
     assert all(
         citywide_samples[sample_id].extraction_status == "extracted"
         for sample_id in recovered_citywide_ids
@@ -811,17 +865,17 @@ def test_tracked_current_poll_source_inventory() -> None:
         if samples[readings[response.poll_reading_id].poll_sample_id].geography_type
         == "citywide"
     ]
-    assert len(citywide_readings) == 63
-    assert len(citywide_responses) == 296
+    assert len(citywide_readings) == 66
+    assert len(citywide_responses) == 312
     assert (
         sum(
             reading.reading_purpose == "general_vote_intention"
             for reading in citywide_readings
         )
-        == 61
+        == 64
     )
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 34
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 35
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -850,6 +904,7 @@ def test_tracked_current_poll_source_inventory() -> None:
         "forum-2026-09-23",
         "canadapulse-2026-09-24",
         "liaison-2026-09-27",
+        "mainstreet-2026-09-29",
     ]
     ordered_reading_samples = list(
         dict.fromkeys(reading.poll_sample_id for reading in citywide_readings)
