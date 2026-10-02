@@ -3,12 +3,12 @@
 These five CSVs normalize newly acquired poll evidence. Polling releases pass
 them to Backend as live forecast inputs. `descriptive_poll_readings.csv` chooses
 one source-audited reading for the descriptive public archive, and `polls.csv`
-is generated from that selection. The tracked current-cycle inventory contains 47
-source documents, 47 document/sample links, 36 respondent samples, 82 total
-readings, and 378 response rows. Twenty-eight citywide mayoral samples have
+is generated from that selection. The tracked current-cycle inventory contains 52
+source documents, 52 document/sample links, 41 respondent samples, 92 total
+readings, and 424 response rows. Twenty-eight citywide mayoral samples have
 completed extraction into 66 dependent readings and 312 response rows; the
-unrecovered Abacus sample is explicitly `blocked` with no invented reading. Seven
-Council samples contribute the other 16 Council/ward-mayoral readings and 66
+unrecovered Abacus sample is explicitly `blocked` with no invented reading. Twelve
+ward samples contribute the other 26 Council/ward-mayoral readings and 112
 response rows. The 66 mayoral readings are alternate questions, fields,
 denominators, or transformations from 28 sample units, not 66 polls.
 Twenty-seven complete general vote-intention readings are explicitly selected for the
@@ -284,7 +284,7 @@ only when every value is identical. Any differing collision stops before either
 # ward_poll_readings.csv Schema (current)
 
 One row per response option in a published ward-level councillor poll. This is
-the only ward-poll input used by Council snapshot schema v3. It preserves the
+the ward-poll input used by the Council race-card feed. It preserves the
 source's candidate field and denominator; an absent candidate is unobserved,
 not zero, and residual and undecided responses remain explicit.
 
@@ -295,7 +295,17 @@ Required fields are `ward`, `poll_id`, `firm`, `date_conducted`,
 fields preserve provenance and qualifications. Shares must be finite
 proportions in `[0, 1]`; candidate IDs must be unique within a poll;
 candidate/residual shares must sum to the stated denominator within tolerance;
-and `undecided_share` must agree across every row for the poll.
+and `undecided_share` must agree across every row for the poll. A missing
+undecided percentage stays blank; do not infer it from recruited and reading
+bases. Whole-point rounding is preserved.
+
+`ballot_status=final_ballot_candidates` means every named candidate is on the
+pinned Final Ballot. It does not claim that every final candidate was named:
+remaining choices can be aggregated in `Other`. Retain `different_candidate_field`
+for older or hypothetical fields with comparability limits. The normalized
+five-table contract also records ward-level mayoral questions from the same
+sample; their `geography_type=ward` excludes them from the citywide archive and
+compact mayoral fit. Council and mayoral questions never become two samples.
 
 ---
 

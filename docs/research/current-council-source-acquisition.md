@@ -1,14 +1,14 @@
 # Acquisition audit: current 2026 Forum Council poll sources
 
-**Acquisition dates:** 2026-08-17 and 2026-09-09
-**Scope:** Seven publicly accessible first-party Forum Research respondent samples covering Toronto Wards 5, 11, 13, 19, and 20
+**Acquisition dates:** 2026-08-17, 2026-09-09 and 2026-10-02
+**Scope:** Twelve first-party Forum Research ward samples covering Wards 3, 4, 5, 11, 13, 19, 20 and 23. The [October 2 follow-up](forum-ward-polls-2026-10-02.md) adds five samples to the original seven audited below.
 **Purpose:** Preserve source provenance and extract source-faithful Council and ward-level mayoral Poll Readings for descriptive race cards without changing forecast code
 
 ## Result
 
-All seven known PDFs were recovered directly from Forum Research over HTTPS. They are valid, unencrypted, text-based PDFs. The local copies live under the gitignored `data/source_documents/current_council/` directory. Their normalized document, sample, reading, and response records are now tracked in the five source-contract CSVs under `data/raw/polls/`.
+All seven initial PDFs were recovered directly from Forum Research over HTTPS. They are valid, unencrypted, text-based PDFs. The local copies live under the gitignored `data/source_documents/current_council/` directory. Their normalized document, sample, reading, and response records are now tracked in the five source-contract CSVs under `data/raw/polls/`.
 
-The corpus contains **seven parent respondent samples**, **16 dependent readings**, and **66 published option rows**:
+The initial acquisition contains **seven parent respondent samples**, **16 dependent readings**, and **66 published option rows**:
 
 - five June samples or August samples contain both Council and ward-level mayoral readings, alternate Council scenarios, or both;
 - the August Ward 19 release contains one Council reading only;
