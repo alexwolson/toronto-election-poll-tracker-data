@@ -208,9 +208,9 @@ def test_open_seat_card_gates_triggers_and_surfaces_disagreement() -> None:
 
 
 def test_open_seat_with_a_ward_poll_still_lists_it() -> None:
-    w = _snapshot()["wards"]["19"]  # Bradford open seat, but two Forum polls
+    w = _snapshot()["wards"]["19"]  # Bradford open seat, with three Forum polls
     assert w["is_open_seat"] is True
-    assert len(w["ward_polls"]) == 2
+    assert len(w["ward_polls"]) == 3
     assert all(
         p["candidates"][0]["candidate_name"] == "Nate Erskine-Smith"
         for p in w["ward_polls"]
@@ -226,3 +226,16 @@ def test_ward_20_snapshot_lists_all_forum_readings_without_an_estimate() -> None
         "forum-ward20-2026-08-18-crawford",
     }
     assert "polling_estimate" not in w
+
+
+def test_september_forum_polls_reach_all_five_ward_race_cards() -> None:
+    wards = _snapshot()["wards"]
+    for ward in ("3", "4", "13", "19", "23"):
+        poll = wards[ward]["ward_polls"][-1]
+        assert poll["poll_id"] == f"forum-ward{ward}-2026-09-27"
+        assert poll["date_published"] == "2026-10-02"
+        assert poll["undecided_share"] is None
+        assert poll["candidates"][-1]["is_residual"] is True
+    # Retain the earlier readings individually rather than averaging fields.
+    assert len(wards["13"]["ward_polls"]) == 2
+    assert len(wards["19"]["ward_polls"]) == 3

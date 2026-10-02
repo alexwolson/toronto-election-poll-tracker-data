@@ -815,11 +815,11 @@ def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 47
-    assert len(bundle.poll_sample_documents) == 47
-    assert len(bundle.poll_samples) == 36
-    assert len(bundle.poll_readings) == 82
-    assert len(bundle.poll_responses) == 378
+    assert len(bundle.source_documents) == 52
+    assert len(bundle.poll_sample_documents) == 52
+    assert len(bundle.poll_samples) == 41
+    assert len(bundle.poll_readings) == 92
+    assert len(bundle.poll_responses) == 424
 
     documents = {
         document.source_document_id: document for document in bundle.source_documents
@@ -875,7 +875,7 @@ def test_tracked_current_poll_source_inventory() -> None:
         == 64
     )
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 35
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 40
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -1184,3 +1184,179 @@ def test_canada_pulse_september_readings_keep_bases_and_subgroup_separate() -> N
     ]
     assert {d.page_count for d in documents} == {4, 14}
     assert all(d.visual_qa_status == "passed" for d in documents)
+
+
+@pytest.mark.parametrize(
+    "ward,recruited,council_base,mayor_base,council_shares,mayor_shares",
+    [
+        (
+            3,
+            535,
+            (406, 416),
+            (493, 487),
+            {
+                "Amber Morley": "0.40",
+                "Ted Opitz": "0.27",
+                "Mihaela Andrei": "0.07",
+                "Anthony Internicola": "0.14",
+                "Other": "0.12",
+            },
+            {
+                "Olivia Chow": "0.36",
+                "Brad Bradford": "0.43",
+                "Chris Alexander": "0.14",
+                "Other": "0.07",
+            },
+        ),
+        (
+            4,
+            464,
+            (307, 331),
+            (433, 443),
+            {
+                "Nadia Guerrera": "0.23",
+                "Debbie King": "0.37",
+                "Diana Chan McNally": "0.18",
+                "Vanessa Raponi": "0.06",
+                "Other": "0.16",
+            },
+            {
+                "Olivia Chow": "0.55",
+                "Brad Bradford": "0.35",
+                "Chris Alexander": "0.06",
+                "Other": "0.04",
+            },
+        ),
+        (
+            13,
+            519,
+            (362, 370),
+            (476, 446),
+            {
+                "Chris Moise": "0.29",
+                "Curran Stikuts": "0.13",
+                "Daniel Tate": "0.26",
+                "Walied Khogali Ali": "0.08",
+                "Other": "0.25",
+            },
+            {
+                "Olivia Chow": "0.51",
+                "Brad Bradford": "0.36",
+                "Chris Alexander": "0.07",
+                "Other": "0.05",
+            },
+        ),
+        (
+            19,
+            474,
+            (417, 395),
+            (452, 440),
+            {
+                "James Dann": "0.06",
+                "Nate Erskine-Smith": "0.52",
+                "Natalie Johnson": "0.24",
+                "Jennie Worden": "0.06",
+                "Other": "0.12",
+            },
+            {
+                "Olivia Chow": "0.52",
+                "Brad Bradford": "0.30",
+                "Chris Alexander": "0.14",
+                "Other": "0.04",
+            },
+        ),
+        (
+            23,
+            368,
+            (298, 293),
+            (329, 324),
+            {
+                "Han Dong": "0.12",
+                "Kevin Li": "0.08",
+                "Jamaal Myers": "0.31",
+                "Shaun Chen": "0.37",
+                "John-Mark Oleh": "0.06",
+                "Other": "0.07",
+            },
+            {
+                "Olivia Chow": "0.60",
+                "Brad Bradford": "0.32",
+                "Chris Alexander": "0.04",
+                "Other": "0.04",
+            },
+        ),
+    ],
+)
+def test_september_forum_ward_sources_preserve_bases_and_published_shares(
+    ward, recruited, council_base, mayor_base, council_shares, mayor_shares
+) -> None:
+    from backend.model.council_race_card import load_ward_poll_readings
+
+    root = Path(__file__).resolve().parents[2]
+    bundle = load_poll_source_bundle(root / "data/raw/polls")
+    sample_id = f"forum_w{ward:02d}_20260925_27"
+    sample = next(s for s in bundle.poll_samples if s.poll_sample_id == sample_id)
+    assert sample.geography_type == "ward"
+    assert sample.geography_id == f"toronto-ward-{ward}"
+    assert sample.recruited_sample_size == recruited
+    assert sample.collection_mode == "ivr-online-panel"
+    assert sample.fieldwork_start.isoformat() == "2026-09-25"
+    assert sample.fieldwork_end.isoformat() == "2026-09-27"
+    assert sample.publication_date.isoformat() == "2026-10-02"
+    assert sample.evidence_available_at > sample.publication_at
+    readings = [r for r in bundle.poll_readings if r.poll_sample_id == sample_id]
+    assert len(readings) == 2  # council and mayor are dependent, not two polls
+    for office, bases, shares in [
+        ("council", council_base, council_shares),
+        ("mayoral", mayor_base, mayor_shares),
+    ]:
+        reading = next(r for r in readings if r.contest_type == office)
+        assert reading.denominator_semantics == "decided_plus_leaners"
+        assert reading.denominator_text == "[Decided/ Leaning]"
+        assert (reading.unweighted_base, reading.weighted_base) == bases
+        assert reading.reported_base is None
+        assert reading.question_order is None
+        assert reading.tested_choice_set_status == "unknown"
+        responses = [
+            r
+            for r in bundle.poll_responses
+            if r.poll_reading_id == reading.poll_reading_id
+        ]
+        assert {r.candidate_name or r.response_label: r.share for r in responses} == {
+            name: Decimal(value) for name, value in shares.items()
+        }
+        assert {r.response_kind for r in responses} == {"candidate", "other"}
+        assert all(r.reported_value is not None for r in responses)
+    document = next(
+        d
+        for d in bundle.source_documents
+        if d.source_document_id == sample_id + "_release"
+    )
+    assert document.page_count == 3
+    assert document.visual_qa_status == "passed"
+    assert document.redistribution_status == "unknown"
+    display = load_ward_poll_readings(root / "data/raw/polls/ward_poll_readings.csv")
+    council = next(
+        r for r in display[str(ward)] if r.poll_id == f"forum-ward{ward}-2026-09-27"
+    )
+    assert council.date_published == "2026-10-02"
+    assert council.sample_size == recruited
+    assert council.denominator == "decided and leaning voters"
+    assert council.undecided_share is None
+    assert council.ballot_status == "final_ballot_candidates"
+    assert {c.candidate_name: Decimal(str(c.share)) for c in council.candidates} == {
+        ("Other candidates" if name == "Other" else name): Decimal(value)
+        for name, value in council_shares.items()
+    }
+    assert all(
+        c.registration_status == "registered"
+        for c in council.candidates
+        if not c.is_residual
+    )
+    assert {c.candidate_name for c in council.candidates if c.is_incumbent} == {
+        3: {"Amber Morley"},
+        4: set(),
+        13: {"Chris Moise"},
+        19: set(),
+        23: {"Jamaal Myers"},
+    }[ward]

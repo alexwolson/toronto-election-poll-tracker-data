@@ -145,7 +145,7 @@ WARD_POLLS = ROOT / "data/raw/polls/ward_poll_readings.csv"
 
 
 def test_raw_ward_poll_is_surfaced_where_it_exists() -> None:
-    # The lone 2026 ward poll (Ward 13, Forum) is shown as raw observed evidence
+    # The earlier Ward 13 Forum poll remains raw observed evidence
     # with its limitations, never averaged (ADR 0037).
     readings = load_ward_poll_readings(WARD_POLLS)
     reading = readings["13"][0]
@@ -186,7 +186,9 @@ def test_ward_20_carries_the_august_forum_scenarios_as_dependent_readings() -> N
     august = [reading for reading in w20 if reading.date_conducted == "2026-08-18"]
     assert len(august) == 3
     assert all(reading.sample_size == 269 for reading in august)
-    assert all(reading.ballot_status == "different_candidate_field" for reading in august)
+    assert all(
+        reading.ballot_status == "different_candidate_field" for reading in august
+    )
 
     current = next(reading for reading in august if reading.poll_id.endswith("current"))
     assert current.candidates[0].candidate_id == "kandavel"
@@ -201,7 +203,10 @@ def test_ward_20_carries_the_august_forum_scenarios_as_dependent_readings() -> N
         reading for reading in august if reading.poll_id.endswith("crawford")
     )
     assert crawford.candidates[0].candidate_id == "kandavel"
-    assert next(c for c in crawford.candidates if c.candidate_id == "crawford").share == 0.18
+    assert (
+        next(c for c in crawford.candidates if c.candidate_id == "crawford").share
+        == 0.18
+    )
 
 
 def test_ward_poll_names_the_candidates_first_and_residual_last() -> None:
