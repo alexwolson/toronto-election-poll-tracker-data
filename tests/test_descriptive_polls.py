@@ -27,7 +27,7 @@ def test_tracked_archive_matches_audited_representative_readings() -> None:
     validate_descriptive_polls(SOURCE, SOURCE / "polls.csv")
     rows = _rows_by_id()
 
-    assert len(rows) == 28
+    assert len(rows) == 29
     assert "abacus-2026-01-27" not in rows
     assert "canadapulse-2025-10-06" not in rows
     assert not any("-v-" in poll_id for poll_id in rows)
@@ -136,7 +136,7 @@ def test_all_respondent_view_preserves_source_shares_and_counts_samples_once() -
 
     rows = build_all_respondent_poll_rows(SOURCE)
     by_id = {row["poll_id"]: row for row in rows}
-    assert len(rows) == len(by_id) == 23
+    assert len(rows) == len(by_id) == 24
     assert all(row["denominator"] == "All respondents" for row in rows)
     assert (
         len(
@@ -147,7 +147,7 @@ def test_all_respondent_view_preserves_source_shares_and_counts_samples_once() -
                 and all(row.get(key) for key in ("chow", "bradford", "alexander"))
             ]
         )
-        == 8
+        == 9
     )
     assert by_id["ipsos-2026-09-08"]["bradford"] == "0.21"
     assert by_id["canadapulse-2026-09-24"]["chow"] == "0.38"
@@ -212,3 +212,31 @@ def test_all_respondent_selection_rejects_wrong_basis_sample_or_missing_sample(
         writer.writerows(rows)
     with pytest.raises(DescriptivePollContractError):
         build_all_respondent_poll_rows(source)
+
+
+def test_nanos_views_preserve_distinct_published_readings() -> None:
+    from polling_data.descriptive_polls import build_all_respondent_poll_rows
+
+    archive = _rows_by_id()["nanos-2026-10-04"]
+    all_voters = next(
+        row
+        for row in build_all_respondent_poll_rows(SOURCE)
+        if row["poll_id"] == "nanos-2026-10-04"
+    )
+    assert archive["denominator"] == "Decided and leaning voters"
+    assert {key: archive[key] for key in archive["field_tested"].split(",")} == {
+        "alexander": "0.04",
+        "bradford": "0.426",
+        "chow": "0.524",
+        "other": "0.01",
+    }
+    assert all_voters["poll_reading_id"] == "nanos_20260930_1004_mayor_all"
+    assert {key: all_voters[key] for key in all_voters["field_tested"].split(",")} == {
+        "alexander": "0.027",
+        "bradford": "0.327",
+        "chow": "0.419",
+        "other": "0.008",
+        "undecided": "0.218",
+    }
+    assert archive["sarah-mcvie"] == archive["odessa-paloma-parker"] == ""
+    assert all_voters["sarah-mcvie"] == all_voters["odessa-paloma-parker"] == ""
