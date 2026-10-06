@@ -815,11 +815,11 @@ def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 54
-    assert len(bundle.poll_sample_documents) == 54
-    assert len(bundle.poll_samples) == 42
-    assert len(bundle.poll_readings) == 94
-    assert len(bundle.poll_responses) == 433
+    assert len(bundle.source_documents) == 56
+    assert len(bundle.poll_sample_documents) == 56
+    assert len(bundle.poll_samples) == 43
+    assert len(bundle.poll_readings) == 101
+    assert len(bundle.poll_responses) == 465
 
     documents = {
         document.source_document_id: document for document in bundle.source_documents
@@ -847,8 +847,8 @@ def test_tracked_current_poll_source_inventory() -> None:
         if sample.geography_type == "citywide"
     }
     recovered_citywide_ids = set(citywide_samples) - {"abacus-2026-01-27"}
-    assert len(citywide_samples) == 30
-    assert len(recovered_citywide_ids) == 29
+    assert len(citywide_samples) == 31
+    assert len(recovered_citywide_ids) == 30
     assert all(
         citywide_samples[sample_id].extraction_status == "extracted"
         for sample_id in recovered_citywide_ids
@@ -865,17 +865,17 @@ def test_tracked_current_poll_source_inventory() -> None:
         if samples[readings[response.poll_reading_id].poll_sample_id].geography_type
         == "citywide"
     ]
-    assert len(citywide_readings) == 68
-    assert len(citywide_responses) == 321
+    assert len(citywide_readings) == 75
+    assert len(citywide_responses) == 353
     assert (
         sum(
             reading.reading_purpose == "general_vote_intention"
             for reading in citywide_readings
         )
-        == 66
+        == 70
     )
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 41
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 42
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -906,6 +906,7 @@ def test_tracked_current_poll_source_inventory() -> None:
         "liaison-2026-09-27",
         "mainstreet-2026-09-29",
         "liaison-2026-10-04",
+        "nanos-2026-10-04",
     ]
     ordered_reading_samples = list(
         dict.fromkeys(reading.poll_sample_id for reading in citywide_readings)
@@ -1364,8 +1365,12 @@ def test_september_forum_ward_sources_preserve_bases_and_published_shares(
 
 
 def test_liaison_october_6_preserves_both_denominators_and_reading_bases() -> None:
-    bundle = load_poll_source_bundle(Path(__file__).resolve().parents[2] / "data/raw/polls")
-    sample = next(s for s in bundle.poll_samples if s.poll_sample_id == "liaison-2026-10-04")
+    bundle = load_poll_source_bundle(
+        Path(__file__).resolve().parents[2] / "data/raw/polls"
+    )
+    sample = next(
+        s for s in bundle.poll_samples if s.poll_sample_id == "liaison-2026-10-04"
+    )
     assert sample.fieldwork_start.isoformat() == "2026-10-03"
     assert sample.fieldwork_end.isoformat() == "2026-10-04"
     assert sample.publication_date.isoformat() == "2026-10-06"
@@ -1379,7 +1384,10 @@ def test_liaison_october_6_preserves_both_denominators_and_reading_bases() -> No
     assert set(readings) == {"all_respondents", "decided_plus_leaners"}
     all_voters = readings["all_respondents"]
     decided = readings["decided_plus_leaners"]
-    assert (all_voters.unweighted_base, all_voters.weighted_base) == (1000, Decimal(1000))
+    assert (all_voters.unweighted_base, all_voters.weighted_base) == (
+        1000,
+        Decimal(1000),
+    )
     assert (decided.unweighted_base, decided.weighted_base) == (840, Decimal(841))
     assert all_voters.question_text_status == "not_reported"
     assert decided.question_text == (
@@ -1412,3 +1420,81 @@ def test_liaison_october_6_preserves_both_denominators_and_reading_bases() -> No
             if r.poll_reading_id == reading.poll_reading_id
         }
         assert actual == {key: Decimal(value) for key, value in expected.items()}
+
+
+def test_nanos_october_6_keeps_leaners_bases_and_subgroups_dependent() -> None:
+    bundle = load_poll_source_bundle(
+        Path(__file__).resolve().parents[2] / "data/raw/polls"
+    )
+    sample = next(
+        s for s in bundle.poll_samples if s.poll_sample_id == "nanos-2026-10-04"
+    )
+    assert sample.recruited_sample_size == 755
+    assert sample.collection_mode == "mixed"
+    assert sample.fieldwork_start.isoformat() == "2026-09-30"
+    assert sample.fieldwork_end.isoformat() == "2026-10-04"
+    assert sample.publication_date.isoformat() == "2026-10-06"
+    assert (
+        sample.evidence_available_at.isoformat() == "2026-10-06T06:02:56.736000-04:00"
+    )
+    readings = {
+        r.poll_reading_id: r
+        for r in bundle.poll_readings
+        if r.poll_sample_id == sample.poll_sample_id
+    }
+    assert len(readings) == 7
+    decided = readings["nanos_20260930_1004_mayor_decided_leaning"]
+    initial = readings["nanos_20260930_1004_mayor_all"]
+    followup = readings["nanos_20260930_1004_mayor_lean_followup"]
+    assert decided.denominator_semantics == "decided_plus_leaners"
+    assert decided.denominator_text == "Ballot – Decided Voters Only"
+    assert (decided.unweighted_base, decided.weighted_base) == (648, Decimal(632))
+    assert initial.denominator_semantics == "all_respondents"
+    assert (initial.unweighted_base, initial.weighted_base) == (755, Decimal(750))
+    assert followup.reading_purpose == "conditional_lean_followup"
+    assert (followup.unweighted_base, followup.weighted_base) == (151, Decimal(162))
+    assert all(
+        r.denominator_semantics == "other"
+        for key, r in readings.items()
+        if key not in {initial.poll_reading_id, decided.poll_reading_id}
+    )
+    for reading, expected in [
+        (
+            decided,
+            {
+                "candidate-chow": "0.524",
+                "candidate-bradford": "0.426",
+                "candidate-alexander": "0.04",
+                "rest": "0.01",
+            },
+        ),
+        (
+            initial,
+            {
+                "candidate-chow": "0.419",
+                "candidate-bradford": "0.327",
+                "candidate-alexander": "0.027",
+                "undecided": "0.218",
+                "rest": "0.008",
+            },
+        ),
+    ]:
+        actual = {
+            r.response_option_id: r.share
+            for r in bundle.poll_responses
+            if r.poll_reading_id == reading.poll_reading_id
+        }
+        assert actual == {key: Decimal(value) for key, value in expected.items()}
+    assert sum(
+        r.share
+        for r in bundle.poll_responses
+        if r.poll_reading_id == initial.poll_reading_id
+    ) == Decimal("0.999")
+    document = next(
+        d
+        for d in bundle.source_documents
+        if d.source_document_id == "nanos_2026-10-04_tables"
+    )
+    assert document.retrieval_status == "access_pending"
+    assert document.local_path is None
+    assert document.visual_qa_status == "not_applicable"
