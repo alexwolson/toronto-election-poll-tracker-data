@@ -92,7 +92,7 @@ ${m.page_images.join('\n')}
 
 3. Sample-level metadata from the header/methodology: pollster, fieldwork_start and fieldwork_end (YYYY-MM-DD), publication_date (YYYY-MM-DD), collection_mode (e.g. "ivr"), recruited_sample_size.
 
-Preserve exact published integers; do not compute, normalize, or infer. If a value is truly unreadable use -1. Return the structured object only.`
+Preserve exact published integers; do not compute, normalize, or infer. If a value is truly unreadable use -1. Return the structured object only.${m.extraction_note ? `\n\nDocument-specific note (from the maintainer's manifest): ${m.extraction_note}` : ''}`
 }
 
 function candKey(responses) {

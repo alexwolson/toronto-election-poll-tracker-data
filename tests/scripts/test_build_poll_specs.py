@@ -1,3 +1,4 @@
+import csv
 import shutil
 import sys
 from pathlib import Path
@@ -66,6 +67,52 @@ FORD_CHOW = [
     {"label": "Olivia Chow", "kind": "candidate", "value": 48},
     {"label": "Don't know", "kind": "dont_know", "value": 10},
 ]
+IPSOS_2010_TOPLINE = [
+    {"label": "Rob Ford", "kind": "candidate", "value": 28},
+    {"label": "George Smitherman", "kind": "candidate", "value": 23},
+    {"label": "Joe Pantalone", "kind": "candidate", "value": 10},
+    {"label": "Rocco Rossi", "kind": "candidate", "value": 7},
+    {"label": "Sara Thomson", "kind": "candidate", "value": 7},  # release spelling
+    {"label": "Undecided", "kind": "dont_know", "value": 17},
+]
+
+
+def _outcome_id(cycle: str, name: str) -> str:
+    path = ROOT / "data/raw/elections/mayoral_outcomes.csv"
+    with path.open(encoding="utf-8", newline="") as handle:
+        for row in csv.DictReader(handle):
+            if row["election_cycle_id"] == cycle and row["candidate_name"] == name:
+                return row["candidate_id"]
+    raise AssertionError(f"{name} is not in the {cycle} outcome")
+
+
+def _ipsos_2010(readings):
+    meta = _meta("test_ipsos_2010")
+    meta.update(
+        cycle="toronto_2010",
+        firm="Ipsos Reid",
+        sponsor="Global Television",
+        publication_at="2010-09-27T18:00:00-04:00",
+        sample_note="Toronto adults; a separate subgroup split is published but not used.",
+    )
+    merged = _merged(readings, fieldwork="2010-09-26", n=999)
+    merged.update(
+        pollster="Ipsos Reid",
+        fieldwork_start="2010-09-24",
+        publication_date="2010-09-27",
+        collection_mode="telephone",
+    )
+    return meta, merged
+
+
+def _prose_reading(scenario, responses, choice_set="unknown"):
+    # A release that states shares in prose: no reading base (only the headline
+    # sample size), and the printed shares do not account for every respondent.
+    r = _reading(scenario, responses, base=-1, loc="p.1 release prose")
+    r["question_text"] = ""
+    r["response_coverage"] = "partial"
+    r["tested_choice_set_status"] = choice_set
+    return r
 
 
 def _copy_bundle(tmp_path: Path) -> Path:
@@ -132,9 +179,11 @@ def test_build_spec_mainstreet_firm_decimals_and_residuals(tmp_path) -> None:
     assert spec["poll_readings"][0]["reported_share_precision"] == "1"
     by_label = {r.get("response_label"): r for r in spec["poll_responses"]}
     assert by_label["John Tory"]["reported_value"] == "45.5"  # decimal preserved
-    assert (
-        by_label["Jennifer Keesmat"]["candidate_id"] == "keesmaat"
-    )  # typo canonicalized
+    # Typo canonicalized; a final-ballot candidate carries her outcome id (ADR 0045).
+    assert by_label["Jennifer Keesmat"]["candidate_name"] == "Jennifer Keesmaat"
+    assert by_label["Jennifer Keesmat"]["candidate_id"] == _outcome_id(
+        "toronto_2018", "Jennifer Keesmaat"
+    )
     assert by_label["Another Candidate"]["response_kind"] == "other"
     assert by_label["Another Candidate"]["response_option_id"] == "another-candidate"
     assert by_label["Undecided"]["response_kind"] == "undecided"
@@ -362,3 +411,64 @@ def test_group_by_sample_groups_same_fieldwork_and_size() -> None:
     groups = group_by_sample(items)
     sizes = sorted(len(g) for g in groups)
     assert sizes == [1, 2]
+
+
+def test_build_spec_pins_final_ballot_candidates_to_their_outcome_ids() -> None:
+    # ADR 0045: a polled candidate on the cycle's final ballot carries the id the
+    # outcome assigns (here person ids), whatever spelling the release printed.
+    topline = _prose_reading(
+        "Ford / Smitherman / Pantalone / Rossi / Thomson", IPSOS_2010_TOPLINE
+    )
+    spec, problems = build_spec([_ipsos_2010([topline])], "toronto_2010")
+    assert problems == []
+    ids = {
+        r["candidate_name"]: r["candidate_id"]
+        for r in spec["poll_responses"]
+        if r["response_kind"] == "candidate"
+    }
+    for name in (
+        "Rob Ford",
+        "George Smitherman",
+        "Joe Pantalone",
+        "Rocco Rossi",
+        "Sarah Thomson",
+    ):
+        assert ids[name] == _outcome_id("toronto_2010", name)
+
+
+def test_build_spec_ipsos_reid_prose_release_with_exact_publication_time(
+    tmp_path,
+) -> None:
+    topline = _prose_reading(
+        "Ford / Smitherman / Pantalone / Rossi / Thomson", IPSOS_2010_TOPLINE
+    )
+    two_way = _prose_reading(
+        "Smitherman / Ford",
+        [
+            {"label": "George Smitherman", "kind": "candidate", "value": 48},
+            {"label": "Rob Ford", "kind": "candidate", "value": 45},
+        ],
+        choice_set="complete",
+    )
+    meta, merged = _ipsos_2010([topline, two_way])
+    spec, problems = build_spec([(meta, merged)], "toronto_2010")
+    assert problems == []
+    sample = spec["poll_samples"][0]
+    assert sample["poll_sample_id"] == "ipsos_city_2010_09_26_n999"
+    assert sample["pollster"] == "Ipsos Reid"
+    assert sample["sponsor"] == "Global Television"
+    assert sample["collection_mode"] == "telephone"
+    # The release states its time, so it is recorded exactly (SCHEMA: publication_at).
+    assert sample["publication_at"] == "2010-09-27T18:00:00-04:00"
+    assert sample["publication_time_precision"] == "exact"
+    assert sample["evidence_available_at"] == "2010-09-27T18:00:00-04:00"
+    assert sample["notes"] == meta["sample_note"]
+    readings = spec["poll_readings"]
+    assert [r["population"] for r in readings] == ["Toronto adults", "Toronto adults"]
+    # Only the headline sample size is printed, never a reading base.
+    assert {r["reported_base_status"] for r in readings} == {"not_reported"}
+    assert {r["denominator_semantics"] for r in readings} == {"all_respondents"}
+    assert [r["response_coverage"] for r in readings] == ["partial", "partial"]
+    assert [r["tested_choice_set_status"] for r in readings] == ["unknown", "complete"]
+    counts = ingest_poll_source(spec, bundle_dir=_copy_bundle(tmp_path))
+    assert counts["poll_readings"] >= 2
