@@ -26,6 +26,18 @@ RESULTS_REPOSITORY = "alexwolson/toronto-election-results"
 POLLING_TAG_PATTERN = re.compile(r"^polling-\d{4}-\d{2}-\d{2}\.\d+$")
 GIT_COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+# The audited historical mayoral corpus and its per-reading classification ship in
+# every release as flat ``historical_mayoral_<table>.csv`` assets (release assets
+# cannot nest), copied verbatim; the Polling repository is their only owner.
+HISTORICAL_DIR = "historical_mayoral"
+HISTORICAL_TABLES = (
+    "source_documents",
+    "poll_sample_documents",
+    "poll_samples",
+    "poll_readings",
+    "poll_responses",
+    "reading_classification",
+)
 _POLL_METADATA = {
     "poll_id",
     "poll_reading_id",
@@ -262,6 +274,33 @@ def _build_mayoral_polling_feed(
     }
 
 
+def _historical_tables(source: Path) -> dict[str, Path]:
+    """The historical corpus tables, after checking the classification covers it.
+
+    Every corpus reading needs exactly one classification row, and every row a
+    corpus reading; a historical ingest that forgets its row fails the build.
+    """
+    historical = source / HISTORICAL_DIR
+    tables = {table: historical / f"{table}.csv" for table in HISTORICAL_TABLES}
+    for path in tables.values():
+        if not path.is_file():
+            raise FileNotFoundError(f"missing historical corpus table: {path}")
+    readings = [r["poll_reading_id"] for r in _read_csv(tables["poll_readings"])]
+    classified = [
+        r["poll_reading_id"] for r in _read_csv(tables["reading_classification"])
+    ]
+    if sorted(classified) != sorted(readings) or len(set(classified)) != len(
+        classified
+    ):
+        missing = sorted(set(readings) - set(classified))
+        extra = sorted(set(classified) - set(readings))
+        raise ValueError(
+            "historical reading classification must cover each corpus reading exactly "
+            f"once; missing {missing[:5]}, extra {extra[:5]}"
+        )
+    return tables
+
+
 def build_polling_release_bundle(
     source_dir: str | Path,
     results_bundle: str | Path,
@@ -284,6 +323,7 @@ def build_polling_release_bundle(
             raise FileNotFoundError(f"missing polling release input: {path}")
     if not results_release.strip():
         raise ValueError("results_release must be an immutable release tag")
+    historical = _historical_tables(source)
 
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(
@@ -292,6 +332,8 @@ def build_polling_release_bundle(
         staging = Path(tmp)
         for path in sorted(source.glob("*.csv")):
             shutil.copy2(path, staging / path.name)
+        for table, path in historical.items():
+            shutil.copy2(path, staging / f"{HISTORICAL_DIR}_{table}.csv")
         readings, reading_columns = _canonical_poll_readings(required[0], contests)
         responses, response_columns = _canonical_poll_responses(required[1], people)
         validate_descriptive_polls(source, source / "polls.csv")
@@ -335,8 +377,16 @@ def build_polling_release_bundle(
             "tables": {
                 "poll_readings": "poll_readings.csv",
                 "poll_responses": "poll_responses.csv",
+                **{
+                    f"{HISTORICAL_DIR}_{table}": f"{HISTORICAL_DIR}_{table}.csv"
+                    for table in HISTORICAL_TABLES
+                },
             },
-            "table_versions": {"poll_readings": 2, "poll_responses": 2},
+            "table_versions": {
+                "poll_readings": 2,
+                "poll_responses": 2,
+                **{f"{HISTORICAL_DIR}_{table}": 1 for table in HISTORICAL_TABLES},
+            },
             "feeds": {"mayoral_polling": "mayoral_polling.json"},
             "feed_versions": {"mayoral_polling": 2},
         }
