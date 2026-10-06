@@ -393,6 +393,34 @@ questionnaire choice set. Each reading retains its explicit
 `tested_choice_set_status`; missing or unknown fields are not upgraded by the
 historical adapter.
 
+## Historical corpus in Polling releases
+
+This repository is the only owner of the historical corpus. Every Polling
+release ships the five historical tables and `reading_classification.csv` as
+flat assets named `historical_mayoral_<table>.csv`, copied byte for byte and
+listed in the release manifest's `tables`. Backend reads the historical
+campaigns from its pinned Polling release and keeps no copy of its own (Backend
+ADR 0060).
+
+### historical_mayoral/reading_classification.csv
+
+One row per historical reading. It says what role the question plays for the
+mayoral model. This is the one judgement the five-table contract does not
+record:
+
+| Column | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `poll_reading_id` | identifier | yes | A reading in `historical_mayoral/poll_readings.csv` |
+| `scope` | enum | yes | `citywide_mayoral` (every current row) |
+| `measurement_class` | enum | yes | `campaign_vote_intention` (an ordinary campaign question), `alternative_ballot` (a deliberately changed candidate field, such as a two-way), `conditional_lean_followup`, `routed_subgroup`, or `question_scope_unclear` |
+
+The rows come from the 2026-09-12 measurement classification register, a frozen
+research record kept in Backend, plus later additions. Denominator semantics
+are not repeated here: each reading's own `denominator_semantics` is the only
+source. A sample's readings share its `poll_sample_id`, so no separate
+dependence group is kept. A release build fails unless the table covers every
+corpus reading exactly once, so a historical ingest must add its rows here.
+
 ## Legacy historical CSVs — discovery/staging only
 
 `historical_mayoral_polls.csv` and `historical_mayoral_outcomes.csv` are the

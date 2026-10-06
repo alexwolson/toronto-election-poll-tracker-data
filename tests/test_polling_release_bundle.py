@@ -15,9 +15,13 @@ from backend.model.poll_sources import (
     SOURCE_DOCUMENT_COLUMNS,
 )
 from polling_data.release_bundle import (
+    HISTORICAL_TABLES,
     build_polling_release_bundle,
     publish_polling_release,
 )
+
+ROOT = Path(__file__).resolve().parents[1]
+HISTORICAL = ROOT / "data/raw/polls/historical_mayoral"
 
 
 def _write_csv(path, columns, rows):
@@ -236,6 +240,8 @@ def _release_inputs(tmp_path, *, aliases, responses, field_tested="chow,other"):
         source / "descriptive_poll_readings.csv",
         source / "all_respondent_poll_readings.csv",
     )
+    # The audited historical corpus and its classification ride in every release.
+    shutil.copytree(HISTORICAL, source / "historical_mayoral")
     return source, results
 
 
@@ -562,4 +568,76 @@ def test_publish_verifies_the_downloaded_results_pin(tmp_path):
     ):
         publish_polling_release(
             "polling-2026-09-10.1", bundle, root=project, runner=runner
+        )
+
+
+def test_polling_release_carries_the_historical_corpus_verbatim(tmp_path):
+    output = _build(
+        tmp_path,
+        aliases=[
+            {
+                "normalized_name": "olivia chow",
+                "person_id": "per_chow",
+                "is_unambiguous": True,
+            }
+        ],
+        responses=[_candidate_response()],
+    )
+
+    manifest = json.loads((output / "release_manifest.json").read_text())
+    assets = {record["filename"] for record in manifest["assets"]}
+    assert set(HISTORICAL_TABLES) == {
+        "source_documents",
+        "poll_sample_documents",
+        "poll_samples",
+        "poll_readings",
+        "poll_responses",
+        "reading_classification",
+    }
+    for table in HISTORICAL_TABLES:
+        released = f"historical_mayoral_{table}.csv"
+        assert (output / released).read_bytes() == (
+            HISTORICAL / f"{table}.csv"
+        ).read_bytes()
+        assert manifest["tables"][f"historical_mayoral_{table}"] == released
+        assert released in assets
+
+
+def test_historical_classification_covers_exactly_the_corpus_readings() -> None:
+    with (HISTORICAL / "poll_readings.csv").open(newline="") as handle:
+        readings = [row["poll_reading_id"] for row in csv.DictReader(handle)]
+    with (HISTORICAL / "reading_classification.csv").open(newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    assert list(rows[0]) == ["poll_reading_id", "scope", "measurement_class"]
+    assert sorted(row["poll_reading_id"] for row in rows) == sorted(readings)
+    assert {row["measurement_class"] for row in rows} >= {
+        "campaign_vote_intention",
+        "alternative_ballot",
+    }
+
+
+@pytest.mark.parametrize("change", ["missing", "extra"])
+def test_polling_release_rejects_a_classification_that_does_not_match_the_corpus(
+    tmp_path, change
+):
+    source, results = _release_inputs(
+        tmp_path, aliases=[], responses=[_candidate_response()]
+    )
+    path = source / "historical_mayoral" / "reading_classification.csv"
+    lines = path.read_text().splitlines(keepends=True)
+    if change == "missing":
+        path.write_text("".join(lines[:-1]))
+    else:
+        path.write_text(
+            "".join(lines) + "no_such_reading,citywide_mayoral,alternative_ballot\n"
+        )
+    with pytest.raises(ValueError, match="classification"):
+        build_polling_release_bundle(
+            source,
+            results,
+            tmp_path / "dist",
+            results_release="results-v1",
+            source_commit="pollsha",
+            dirty=False,
+            generated_at="2026-08-26T12:00:00Z",
         )
