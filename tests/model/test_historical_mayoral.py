@@ -186,11 +186,11 @@ def test_final_ballot_known_by_dates_are_conservative_replay_boundaries() -> Non
 def test_only_audited_poll_sources_enter_the_canonical_seam() -> None:
     corpus = load_historical_mayoral_corpus(ROOT)
 
-    assert len(corpus.poll_samples) == 117
-    assert len(corpus.poll_readings) == 260
-    assert len(corpus.poll_responses) == 1531
-    assert len(corpus.source_documents) == 139
-    assert len(corpus.poll_sample_documents) == 141
+    assert len(corpus.poll_samples) == 118
+    assert len(corpus.poll_readings) == 262
+    assert len(corpus.poll_responses) == 1539
+    assert len(corpus.source_documents) == 140
+    assert len(corpus.poll_sample_documents) == 142
     assert all(
         sample.extraction_status == "extracted" for sample in corpus.poll_samples
     )
@@ -206,7 +206,7 @@ def test_only_audited_poll_sources_enter_the_canonical_seam() -> None:
         reading.poll_reading_id: reading.reading_purpose
         for reading in corpus.poll_readings
     }
-    assert sum(value == "general_vote_intention" for value in purposes.values()) == 257
+    assert sum(value == "general_vote_intention" for value in purposes.values()) == 259
     assert purposes["nanos_jul_initially_unsure_leaning"] == (
         "conditional_lean_followup"
     )
@@ -431,10 +431,10 @@ def test_audit_counts_inventory_without_calling_it_calibration_ready() -> None:
 
     assert audit.election_count == 7
     assert audit.outcome_candidate_count == 355
-    assert audit.source_verified_sample_count == 117
-    assert audit.source_verified_reading_count == 260
+    assert audit.source_verified_sample_count == 118
+    assert audit.source_verified_reading_count == 262
     assert audit.legacy_poll_id_count == 153
-    assert audit.historical_sample_inventory_count == 121
+    assert audit.historical_sample_inventory_count == 122
     assert audit.unresolved_sample_proxy_count == 0
     assert audit.no_public_source_proxy_count == 4
     assert audit.blocker_codes == ()

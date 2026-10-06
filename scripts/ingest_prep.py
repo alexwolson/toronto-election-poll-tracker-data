@@ -56,7 +56,10 @@ def prepare(doc: dict) -> dict:
         ["pdftoppm", "-png", "-r", "175", str(local), str(stage / "page")], check=True
     )
     images = sorted(str(p) for p in stage.glob("page-*.png"))
+    # Optional manifest fields (sponsor, publication_at, sample_note, doc_note,
+    # document_role, extraction_note) ride through to the bridge and the workflow.
     meta = {
+        **doc,
         "doc_id": did,
         "cycle": doc["cycle"],
         "firm": doc["firm"],

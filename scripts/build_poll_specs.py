@@ -20,9 +20,13 @@ sample identity when extending to other firms.
 Usage:  uv run scripts/build_poll_specs.py <workflow_results.json>
 """
 
+import csv
 import json
+import re
 import sys
+import unicodedata
 from datetime import UTC, date, datetime, timedelta
+from functools import cache
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -36,6 +40,7 @@ from backend.model.poll_sources import (
 )
 
 BUNDLE = ROOT / "data/raw/polls/historical_mayoral"
+OUTCOMES = ROOT / "data/raw/elections/mayoral_outcomes.csv"
 TORONTO = ZoneInfo("America/Toronto")
 
 CANDIDATES = {
@@ -68,6 +73,10 @@ CANDIDATES = {
     "anthony furey": ("furey", "Anthony Furey"),
     "chloe brown": ("brown", "Chloe Brown"),
     "gil penalosa": ("penalosa", "Gil Peñalosa"),
+    # 2010 field
+    "george smitherman": ("smitherman", "George Smitherman"),
+    "joe pantalone": ("pantalone", "Joe Pantalone"),
+    "rocco rossi": ("rossi", "Rocco Rossi"),
 }
 DK = {"don't know", "dont know", "dk", "undecided/don't know"}
 
@@ -153,6 +162,25 @@ FIRMS = {
             "vision reads."
         ),
     },
+    # 2010-era releases state their shares in prose; sponsors vary by release, so
+    # the meta supplies ``sponsor``.
+    "Ipsos Reid": {
+        "pollster": "Ipsos Reid",
+        "sponsor": "",
+        "prefix": "ipsos_city",
+        "population": "Toronto adults",
+        "denominator_text": "All respondents, including undecided",
+        "doc_note": (
+            "First-party Ipsos Reid release (PDF from the publisher's site). All pages were "
+            "rendered and visually inspected by two independent vision reads; the text "
+            "layer is present. Public availability is not an affirmative reuse licence, so "
+            "redistribution status remains unknown."
+        ),
+        "reading_note": (
+            "Stated in the release prose; agreed across two independent vision reads. "
+            "Only the headline sample size is printed, so no reading base is recorded."
+        ),
+    },
 }
 
 
@@ -182,6 +210,28 @@ def _canonical_label(low: str) -> str:
         if low.startswith(prefix):
             return low[len(prefix) :]
     return low
+
+
+def _name_key(name: str) -> str:
+    """Accent-, case- and punctuation-insensitive name key (ADR 0045 matching)."""
+    ascii_name = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", " ", ascii_name.casefold()).strip()
+
+
+@cache
+def _outcome_ids(cycle: str) -> dict[str, str]:
+    """Name key -> the id the cycle's official outcome assigns (ADR 0045).
+
+    A polled candidate who reached the final ballot is pinned to this id; anyone
+    else (a hypothetical who never ran) keeps the CANDIDATES slug. Exact name-key
+    match only: a printed variant must be canonicalized through CANDIDATES first.
+    """
+    with OUTCOMES.open(encoding="utf-8", newline="") as handle:
+        return {
+            _name_key(row["candidate_name"]): row["candidate_id"]
+            for row in csv.DictReader(handle)
+            if row["election_cycle_id"] == cycle
+        }
 
 
 def _evidence_available_at(pub_date: str) -> str:
@@ -232,13 +282,25 @@ def _document_row(meta, retrieved_at, firm_cfg) -> dict:
     }
 
 
-def _sample_row(sample_id, cycle, base, firm_cfg, *, fw_start, fw_end, n):
+def _sample_row(
+    sample_id,
+    cycle,
+    base,
+    firm_cfg,
+    *,
+    fw_start,
+    fw_end,
+    n,
+    publication_at=None,
+    note=None,
+):
     """A poll_samples row for one citywide sample.
 
     ``base`` supplies the publication-level fields (publication_date,
     collection_mode); the wave-level fieldwork window and recruited size come
     from the explicit arguments so one document's waves can each carry their own.
-    ``firm_cfg`` supplies the pollster and sponsor.
+    ``firm_cfg`` supplies the pollster and sponsor. A release that states its time
+    passes ``publication_at`` (offset-aware), which is then also the evidence time.
     """
     return {
         "poll_sample_id": sample_id,
@@ -250,13 +312,14 @@ def _sample_row(sample_id, cycle, base, firm_cfg, *, fw_start, fw_end, n):
         "fieldwork_start": fw_start or fw_end,
         "fieldwork_end": fw_end,
         "publication_date": base["publication_date"],
-        "publication_at": "",
-        "publication_time_precision": "date_only",
-        "evidence_available_at": _evidence_available_at(base["publication_date"]),
+        "publication_at": publication_at or "",
+        "publication_time_precision": "exact" if publication_at else "date_only",
+        "evidence_available_at": publication_at
+        or _evidence_available_at(base["publication_date"]),
         "collection_mode": base.get("collection_mode", "ivr"),
         "recruited_sample_size": str(n),
         "extraction_status": "extracted",
-        "notes": "Toronto voters age 18+.",
+        "notes": note or "Toronto voters age 18+.",
     }
 
 
@@ -316,7 +379,7 @@ def _emit_reading(
             "question_text": r.get("question_text", ""),
             "scenario_label": r["scenario_label"],
             "document_display_order": str(order),
-            "population": "Toronto voters age 18+",
+            "population": firm_cfg.get("population", "Toronto voters age 18+"),
             "turnout_screen": "none",
             "denominator_type": denom_type,
             "denominator_text": denom_text,
@@ -364,10 +427,11 @@ def _emit_reading(
             )
         elif canon in CANDIDATES:
             cid, cname = CANDIDATES[canon]
+            pinned = _outcome_ids(f"toronto_{year}").get(_name_key(cname), cid)
             row.update(
                 response_option_id=cid,
                 response_kind="candidate",
-                candidate_id=cid,
+                candidate_id=pinned,
                 candidate_name=cname,
                 candidate_observation_status="individually_published",
                 response_label=label,
@@ -390,6 +454,8 @@ def build_spec(group, cycle, *, retrieved_at=None):
     problems: list[str] = []
     meta0, base = group[0]
     firm_cfg = _firm_config(meta0)
+    if meta0.get("sponsor"):
+        firm_cfg = {**firm_cfg, "sponsor": meta0["sponsor"]}
     fw_end = base["fieldwork_end"]
     n = base["recruited_sample_size"]
     for _, md in group:
@@ -408,6 +474,8 @@ def build_spec(group, cycle, *, retrieved_at=None):
         fw_start=base.get("fieldwork_start"),
         fw_end=fw_end,
         n=n,
+        publication_at=meta0.get("publication_at"),
+        note=meta0.get("sample_note"),
     )
 
     docs, links, readings, responses = [], [], [], []
