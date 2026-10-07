@@ -17,6 +17,7 @@ from pathlib import Path
 
 from polling_data.descriptive_polls import (
     build_all_respondent_poll_rows,
+    build_reading_poll_rows,
     validate_descriptive_polls,
 )
 
@@ -38,6 +39,19 @@ HISTORICAL_TABLES = (
     "poll_responses",
     "reading_classification",
 )
+# The 2026 citywide mayoral readings carry the historical file's columns and values.
+CURRENT_CYCLE = "toronto-2026"
+CLASSIFICATION = "reading_classification"
+CLASSIFICATION_COLUMNS = ["poll_reading_id", "scope", "measurement_class"]
+CLASSIFICATION_SCOPE = "citywide_mayoral"
+MEASUREMENT_CLASSES = {
+    "campaign_vote_intention",
+    "alternative_ballot",
+    "conditional_lean_followup",
+    "routed_subgroup",
+    "question_scope_unclear",
+}
+ALTERNATIVE_BALLOT = "alternative_ballot"
 _POLL_METADATA = {
     "poll_id",
     "poll_reading_id",
@@ -78,16 +92,22 @@ def _write_csv(path: Path, rows: list[dict[str, str]], columns: list[str]) -> No
 
 def _load_results_dependency(
     results_bundle: Path,
-) -> tuple[dict, dict[str, tuple[str, ...]], dict[str, str]]:
+) -> tuple[dict, dict[str, tuple[str, ...]], dict[str, str], frozenset[str]]:
     manifest_path = results_bundle / "release_manifest.json"
     aliases_path = results_bundle / "person_aliases.json"
     results_path = results_bundle / "election_results.csv"
-    for required in (manifest_path, aliases_path, results_path):
+    candidates_path = results_bundle / "mayoral_candidates.json"
+    for required in (manifest_path, aliases_path, results_path, candidates_path):
         if not required.is_file():
             raise FileNotFoundError(f"missing Results release asset: {required}")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if manifest.get("repository") != RESULTS_REPOSITORY:
         raise ValueError("Results manifest names an unexpected repository")
+    # Only the certified field is read, so the candidate feed's schema can move on.
+    mayoral = json.loads(candidates_path.read_text(encoding="utf-8"))
+    if mayoral.get("ballot_certified") is not True:
+        raise ValueError("Results mayoral candidates are not a certified Final Ballot")
+    final_ballot = frozenset(row["person_id"] for row in mayoral["candidates"])
 
     aliases = json.loads(aliases_path.read_text(encoding="utf-8"))
     alias_ids: dict[str, set[str]] = {}
@@ -130,7 +150,7 @@ def _load_results_dependency(
             raise ValueError(
                 f"Results release has conflicting contest IDs for {legacy}"
             )
-    return manifest, people, contests
+    return manifest, people, contests, final_ballot
 
 
 def _canonical_poll_readings(
@@ -183,10 +203,73 @@ def _canonical_poll_responses(
     return rows, columns
 
 
+def head_to_head_readings(
+    classification: dict[str, str],
+    responses: list[dict[str, str]],
+    final_ballot: frozenset[str],
+) -> set[str]:
+    """The classified readings that are Head-to-Head Readings.
+
+    A reading qualifies when it is an ``alternative_ballot`` whose candidate
+    responses are exactly two people, both on the Final Ballot, with no
+    other-candidate option.
+    """
+    people: dict[str, list[str]] = {reading: [] for reading in classification}
+    residuals: dict[str, set[str]] = {reading: set() for reading in classification}
+    for row in responses:
+        reading = row["poll_reading_id"]
+        if reading not in classification:
+            continue
+        if row["response_kind"] == "candidate":
+            people[reading].append(row["person_id"])
+        else:
+            residuals[reading].add(row["response_kind"])
+    return {
+        reading
+        for reading, measurement_class in classification.items()
+        if measurement_class == ALTERNATIVE_BALLOT
+        and len(people[reading]) == len(set(people[reading])) == 2
+        and set(people[reading]) <= final_ballot
+        and "other" not in residuals[reading]
+    }
+
+
+def head_to_head_selection(
+    readings: set[str],
+    *,
+    reading_samples: dict[str, str],
+    representative: dict[str, str],
+) -> tuple[list[str], set[str]]:
+    """Split Head-to-Head Readings into the feed array and flagged poll records.
+
+    A poll's representative reading flags that poll; any other enters the array,
+    at most one per poll.
+    """
+    flagged = {
+        reading_samples[reading]
+        for reading in readings
+        if representative.get(reading_samples[reading]) == reading
+    }
+    array = sorted(
+        reading
+        for reading in readings
+        if representative.get(reading_samples[reading]) != reading
+    )
+    polls = [reading_samples[reading] for reading in array]
+    repeated = sorted({poll for poll in polls if polls.count(poll) > 1})
+    if repeated:
+        raise ValueError(
+            f"at most one Head-to-Head Reading per poll is allowed; repeated {repeated}"
+        )
+    return array, flagged
+
+
 def _build_mayoral_polling_feed(
     polls_path: Path,
     responses: list[dict[str, str]],
     all_respondent_rows: list[dict[str, str]],
+    head_to_head_rows: list[dict[str, str]],
+    head_to_head_polls: set[str],
 ) -> dict[str, object]:
     """Build a descriptive, canonical-person-keyed frontend feed."""
 
@@ -245,12 +328,36 @@ def _build_mayoral_polling_feed(
         }
 
     polls = [canonical_poll(row) for row in _read_csv(polls_path)]
+    for poll in polls:
+        if poll["poll_id"] in head_to_head_polls:
+            poll["head_to_head"] = True
     all_respondents = [canonical_poll(row) for row in all_respondent_rows]
+    head_to_head = [
+        {**canonical_poll(row), "head_to_head": True} for row in head_to_head_rows
+    ]
+    poll_ids = {poll["poll_id"] for poll in polls}
+    for entry in head_to_head:
+        if entry["poll_id"] not in poll_ids:
+            raise ValueError(
+                f"Head-to-Head Reading {entry['poll_reading_id']!r} has no poll record"
+            )
+        # The frontend accepts only undecided beside the two candidates (issue 46).
+        for key in entry["shares"]:
+            if key.startswith("response:") and key != "response:undecided":
+                raise ValueError(
+                    f"Head-to-Head Reading {entry['poll_reading_id']!r} has share key "
+                    f"{key!r}; only 'response:undecided' may sit beside the two "
+                    "candidates"
+                )
     polls.sort(
         key=lambda row: (str(row["date_published"]), str(row["poll_id"])), reverse=True
     )
     candidates = sorted(
-        {key for poll in [*polls, *all_respondents] for key in poll["shares"]}
+        {
+            key
+            for poll in [*polls, *all_respondents, *head_to_head]
+            for key in poll["shares"]
+        }
     )
     trend: dict[str, list[dict[str, object]]] = {key: [] for key in candidates}
     for poll in sorted(
@@ -269,6 +376,7 @@ def _build_mayoral_polling_feed(
         "candidates": candidates,
         "polls": polls,
         "all_respondents": all_respondents,
+        "head_to_head": head_to_head,
         "latest": polls[0] if polls else None,
         "trend": trend,
     }
@@ -289,16 +397,66 @@ def _historical_tables(source: Path) -> dict[str, Path]:
     classified = [
         r["poll_reading_id"] for r in _read_csv(tables["reading_classification"])
     ]
+    _require_exact_coverage("historical reading classification", readings, classified)
+    return tables
+
+
+def _require_exact_coverage(
+    label: str, readings: list[str], classified: list[str]
+) -> None:
+    """Fail unless ``classified`` names every reading exactly once and nothing else."""
     if sorted(classified) != sorted(readings) or len(set(classified)) != len(
         classified
     ):
         missing = sorted(set(readings) - set(classified))
         extra = sorted(set(classified) - set(readings))
+        duplicate = sorted({r for r in classified if classified.count(r) > 1})
         raise ValueError(
-            "historical reading classification must cover each corpus reading exactly "
-            f"once; missing {missing[:5]}, extra {extra[:5]}"
+            f"{label} must cover each reading exactly once; missing {missing[:5]}, "
+            f"extra {extra[:5]}, duplicate {duplicate[:5]}"
         )
-    return tables
+
+
+def _current_classification(source: Path) -> dict[str, str]:
+    """The 2026 citywide mayoral reading classification, after checking coverage.
+
+    It has the historical file's columns and values; every 2026 citywide mayoral
+    reading needs exactly one row, and every row such a reading.
+    """
+    path = source / f"{CLASSIFICATION}.csv"
+    if not path.is_file():
+        raise FileNotFoundError(f"missing 2026 reading classification: {path}")
+    with path.open(newline="", encoding="utf-8-sig") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames != CLASSIFICATION_COLUMNS:
+            raise ValueError(
+                f"2026 reading classification must have columns {CLASSIFICATION_COLUMNS}"
+            )
+        rows = list(reader)
+    invalid = [
+        row["poll_reading_id"]
+        for row in rows
+        if row["scope"] != CLASSIFICATION_SCOPE
+        or row["measurement_class"] not in MEASUREMENT_CLASSES
+    ]
+    if invalid:
+        raise ValueError(
+            f"2026 reading classification has an invalid scope or class: {invalid[:5]}"
+        )
+    samples = {
+        row["poll_sample_id"]
+        for row in _read_csv(source / "poll_samples.csv")
+        if row["election_cycle_id"] == CURRENT_CYCLE
+        and row["geography_type"] == "citywide"
+    }
+    readings = [
+        row["poll_reading_id"]
+        for row in _read_csv(source / "poll_readings.csv")
+        if row["poll_sample_id"] in samples and row["contest_type"] == "mayoral"
+    ]
+    classified = [row["poll_reading_id"] for row in rows]
+    _require_exact_coverage("2026 reading classification", readings, classified)
+    return {row["poll_reading_id"]: row["measurement_class"] for row in rows}
 
 
 def build_polling_release_bundle(
@@ -316,7 +474,7 @@ def build_polling_release_bundle(
     source = Path(source_dir)
     results = Path(results_bundle)
     target = Path(destination)
-    results_manifest, people, contests = _load_results_dependency(results)
+    results_manifest, people, contests, final_ballot = _load_results_dependency(results)
     required = [source / "poll_readings.csv", source / "poll_responses.csv"]
     for path in required:
         if not path.is_file():
@@ -324,6 +482,7 @@ def build_polling_release_bundle(
     if not results_release.strip():
         raise ValueError("results_release must be an immutable release tag")
     historical = _historical_tables(source)
+    classification = _current_classification(source)
 
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(
@@ -339,8 +498,22 @@ def build_polling_release_bundle(
         validate_descriptive_polls(source, source / "polls.csv")
         _write_csv(staging / "poll_readings.csv", readings, reading_columns)
         _write_csv(staging / "poll_responses.csv", responses, response_columns)
+        head_to_head, head_to_head_polls = head_to_head_selection(
+            head_to_head_readings(classification, responses, final_ballot),
+            reading_samples={
+                r["poll_reading_id"]: r["poll_sample_id"] for r in readings
+            },
+            representative={
+                r["poll_sample_id"]: r["poll_reading_id"]
+                for r in _read_csv(source / "descriptive_poll_readings.csv")
+            },
+        )
         polling_feed = _build_mayoral_polling_feed(
-            source / "polls.csv", responses, build_all_respondent_poll_rows(source)
+            source / "polls.csv",
+            responses,
+            build_all_respondent_poll_rows(source),
+            build_reading_poll_rows(source, head_to_head),
+            head_to_head_polls,
         )
         (staging / "mayoral_polling.json").write_text(
             json.dumps(
@@ -377,6 +550,7 @@ def build_polling_release_bundle(
             "tables": {
                 "poll_readings": "poll_readings.csv",
                 "poll_responses": "poll_responses.csv",
+                CLASSIFICATION: f"{CLASSIFICATION}.csv",
                 **{
                     f"{HISTORICAL_DIR}_{table}": f"{HISTORICAL_DIR}_{table}.csv"
                     for table in HISTORICAL_TABLES
@@ -385,6 +559,7 @@ def build_polling_release_bundle(
             "table_versions": {
                 "poll_readings": 2,
                 "poll_responses": 2,
+                CLASSIFICATION: 1,
                 **{f"{HISTORICAL_DIR}_{table}": 1 for table in HISTORICAL_TABLES},
             },
             "feeds": {"mayoral_polling": "mayoral_polling.json"},

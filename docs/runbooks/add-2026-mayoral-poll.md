@@ -65,8 +65,10 @@ gh release download "$RESULTS_TAG" \
 Required access: the source document (including any legitimate licensed access),
 network access, and authenticated `gh` (`gh auth login` or `GH_TOKEN`) for release
 publication. The Results release must contain `release_manifest.json`,
-`person_aliases.json`, and `election_results.csv`; Polling refuses a different
-repository or an unknown 2026 contest ([`polling_data/release_bundle.py`](../../polling_data/release_bundle.py)).
+`person_aliases.json`, `election_results.csv`, and a `mayoral_candidates.json`
+whose `ballot_certified` is true (its `candidates` are the Final Ballot for
+Head-to-Head Readings); Polling refuses a different repository or an unknown
+2026 contest ([`polling_data/release_bundle.py`](../../polling_data/release_bundle.py)).
 Every candidate response must resolve by canonical name to exactly one Results
 person. The Polling build fails closed on absent or ambiguous aliases and reports
 the reading ID, source candidate ID, and candidate name. If the gate fails,
@@ -125,6 +127,15 @@ of the archive field and leaner treatment where available. The release builder
 requires one selection for every eligible all-respondent sample and exposes the
 source-exact shares and reading ID in the alternate chart feed. Do not derive
 missing all-respondent values or count this reading as a second poll.
+
+Classify every new citywide mayoral reading in
+`data/raw/polls/reading_classification.csv`. Each row is `(poll_reading_id,
+citywide_mayoral, measurement_class)`; the rule is in
+[`data/raw/polls/SCHEMA.md`](../../data/raw/polls/SCHEMA.md). A deliberately
+changed field, such as a Chow-or-Bradford-only question, is `alternative_ballot`.
+The release build fails on a missing, duplicate or unknown reading. The polling
+feed's `head_to_head` array and flag are derived from this class, so they are
+never edited by hand.
 
 This selection controls the archive display only. The compact model selects its
 own reading from `poll_samples.csv`, `poll_readings.csv`, and `poll_responses.csv`
@@ -218,7 +229,8 @@ feeds, and creates a Backend manifest pinning both upstream releases
 The compact fit reads both the current poll tables and the historical corpus (98
 polls across seven campaigns) from the same pinned Polling release (Backend ADR 0060);
 Backend refuses a Polling release without the historical assets. A current-cycle
-ingestion does not touch the historical corpus or its `reading_classification.csv`.
+ingestion does not touch the historical corpus or its
+`historical_mayoral/reading_classification.csv`.
 
 ### Verify the compact forecast before publication
 

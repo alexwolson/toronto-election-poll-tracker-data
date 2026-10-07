@@ -108,6 +108,10 @@ _Avoid_: Polling average, forecast
 The one complete, general vote-intention Poll Reading selected from a Distinct Poll Sample for the descriptive public poll archive. The selection preserves the source's published shares, field, denominator, and timing. Other readings from the same respondents remain available as dependent evidence but do not become additional public polls. A sample without a complete general vote-intention reading has no Representative Poll Reading.
 _Avoid_: Best poll, independent reading, poll average
 
+**Head-to-Head Reading**:
+A Poll Reading whose question offers exactly two named candidates and no other-candidate option while the Final Ballot holds more. A reading naming two candidates plus "someone else" is not one.
+_Avoid_: Two-way poll, matchup, forced choice
+
 **Distinct Poll Sample**:
 A separately recruited qualifying survey sample with no disclosed overlap with another counted sample. This operational definition does not claim respondent-level independence that a public release cannot verify. Multiple ballot scenarios, questions, or denominators from the same respondents remain one sample and may enter together only when their dependence is represented. A Council challenger's Candidate Win Probability requires at least two Distinct Poll Samples from at least two pollsters, with that candidate individually measured in both, before its remaining Publication Gates are evaluated.
 _Avoid_: Independent sample, poll count, repeated release

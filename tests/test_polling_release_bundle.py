@@ -14,13 +14,17 @@ from backend.model.poll_sources import (
     POLL_SAMPLE_DOCUMENT_COLUMNS,
     SOURCE_DOCUMENT_COLUMNS,
 )
+from polling_data.descriptive_polls import write_descriptive_polls
 from polling_data.release_bundle import (
     HISTORICAL_TABLES,
     build_polling_release_bundle,
+    head_to_head_readings,
+    head_to_head_selection,
     publish_polling_release,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+CURRENT = ROOT / "data/raw/polls"
 HISTORICAL = ROOT / "data/raw/polls/historical_mayoral"
 
 
@@ -43,6 +47,18 @@ def _release_inputs(tmp_path, *, aliases, responses, field_tested="chow,other"):
         )
     )
     (results / "person_aliases.json").write_text(json.dumps({"aliases": aliases}))
+    (results / "mayoral_candidates.json").write_text(
+        json.dumps(
+            {
+                "ballot_certified": True,
+                "candidates": [
+                    {"person_id": "per_chow"},
+                    {"person_id": "per_bradford"},
+                    {"person_id": "per_alexander"},
+                ],
+            }
+        )
+    )
     _write_csv(
         results / "election_results.csv",
         [
@@ -239,6 +255,17 @@ def _release_inputs(tmp_path, *, aliases, responses, field_tested="chow,other"):
     shutil.copy2(
         source / "descriptive_poll_readings.csv",
         source / "all_respondent_poll_readings.csv",
+    )
+    _write_csv(
+        source / "reading_classification.csv",
+        ["poll_reading_id", "scope", "measurement_class"],
+        [
+            {
+                "poll_reading_id": "reading",
+                "scope": "citywide_mayoral",
+                "measurement_class": "campaign_vote_intention",
+            }
+        ],
     )
     # The audited historical corpus and its classification ride in every release.
     shutil.copytree(HISTORICAL, source / "historical_mayoral")
@@ -641,3 +668,449 @@ def test_polling_release_rejects_a_classification_that_does_not_match_the_corpus
             dirty=False,
             generated_at="2026-08-26T12:00:00Z",
         )
+
+
+# --- 2026 reading classification and Head-to-Head Readings ---------------------
+
+
+def _rebuild(source, results, tmp_path):
+    return build_polling_release_bundle(
+        source,
+        results,
+        tmp_path / "dist",
+        results_release="results-v1",
+        source_commit="pollsha",
+        dirty=False,
+        generated_at="2026-08-26T12:00:00Z",
+    )
+
+
+def _current_mayoral_reading_ids():
+    with (CURRENT / "poll_samples.csv").open(newline="") as handle:
+        samples = {
+            row["poll_sample_id"]
+            for row in csv.DictReader(handle)
+            if row["election_cycle_id"] == "toronto-2026"
+            and row["geography_type"] == "citywide"
+        }
+    with (CURRENT / "poll_readings.csv").open(newline="") as handle:
+        return [
+            row["poll_reading_id"]
+            for row in csv.DictReader(handle)
+            if row["poll_sample_id"] in samples and row["contest_type"] == "mayoral"
+        ]
+
+
+def test_current_classification_covers_exactly_the_2026_mayoral_readings() -> None:
+    with (CURRENT / "reading_classification.csv").open(newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    assert list(rows[0]) == ["poll_reading_id", "scope", "measurement_class"]
+    assert sorted(row["poll_reading_id"] for row in rows) == sorted(
+        _current_mayoral_reading_ids()
+    )
+    assert {row["scope"] for row in rows} == {"citywide_mayoral"}
+    classes = {row["poll_reading_id"]: row["measurement_class"] for row in rows}
+    for reading in (
+        "mainstreet_20260928_29_mayor_head_to_head_all",
+        "mainstreet_20260618_mayor_forced_two_way",
+        "forum_20250904_mayor_chow_tory",
+        "forum_20250904_mayor_chow_bradford",
+        "forum_20250904_mayor_chow_bailao",
+    ):
+        assert classes[reading] == "alternative_ballot"
+    assert classes["forum_20261006_mayor"] == "campaign_vote_intention"
+
+
+@pytest.mark.parametrize("change", ["missing", "duplicate", "unknown", "bad_class"])
+def test_polling_release_rejects_a_current_classification_that_does_not_cover_the_readings(
+    tmp_path, change
+):
+    source, results = _release_inputs(
+        tmp_path, aliases=[], responses=[_candidate_response()]
+    )
+    path = source / "reading_classification.csv"
+    header, row = path.read_text().splitlines(keepends=True)
+    if change == "missing":
+        path.write_text(header)
+    elif change == "duplicate":
+        path.write_text(header + row + row)
+    elif change == "unknown":
+        path.write_text(
+            header + row + "no_such_reading,citywide_mayoral,alternative_ballot\n"
+        )
+    else:
+        path.write_text(header + "reading,citywide_mayoral,two_way\n")
+    with pytest.raises(ValueError, match="2026 reading classification"):
+        _rebuild(source, results, tmp_path)
+
+
+def test_polling_release_ships_the_current_classification_beside_the_historical(
+    tmp_path,
+):
+    output = _build(
+        tmp_path,
+        aliases=[
+            {
+                "normalized_name": "olivia chow",
+                "person_id": "per_chow",
+                "is_unambiguous": True,
+            }
+        ],
+        responses=[_candidate_response()],
+    )
+    source = tmp_path / "polls"
+    assert (output / "reading_classification.csv").read_bytes() == (
+        source / "reading_classification.csv"
+    ).read_bytes()
+    manifest = json.loads((output / "release_manifest.json").read_text())
+    assert manifest["tables"]["reading_classification"] == "reading_classification.csv"
+    assert "reading_classification.csv" in {
+        record["filename"] for record in manifest["assets"]
+    }
+
+
+def test_polling_release_requires_a_certified_final_ballot(tmp_path):
+    source, results = _release_inputs(
+        tmp_path, aliases=[], responses=[_candidate_response()]
+    )
+    path = results / "mayoral_candidates.json"
+    path.write_text(
+        json.dumps({**json.loads(path.read_text()), "ballot_certified": False})
+    )
+    with pytest.raises(ValueError, match="certified Final Ballot"):
+        _rebuild(source, results, tmp_path)
+
+
+def _response(reading, kind, person_id=""):
+    return {"poll_reading_id": reading, "response_kind": kind, "person_id": person_id}
+
+
+FINAL_BALLOT = frozenset({"per_chow", "per_bradford", "per_alexander"})
+
+
+@pytest.mark.parametrize(
+    ("measurement_class", "people", "residuals", "qualifies"),
+    [
+        ("alternative_ballot", ["per_chow", "per_bradford"], ["undecided"], True),
+        ("alternative_ballot", ["per_chow", "per_bradford"], [], True),
+        # Not an alternative ballot: an ordinary campaign question.
+        ("campaign_vote_intention", ["per_chow", "per_bradford"], [], False),
+        # Three named candidates, or only one.
+        (
+            "alternative_ballot",
+            ["per_chow", "per_bradford", "per_alexander"],
+            [],
+            False,
+        ),
+        ("alternative_ballot", ["per_chow"], ["undecided"], False),
+        # One of the two is not on the Final Ballot (Chow-Tory).
+        ("alternative_ballot", ["per_chow", "per_tory"], ["undecided"], False),
+        # Two names plus "someone else" is not a Head-to-Head Reading.
+        ("alternative_ballot", ["per_chow", "per_bradford"], ["other"], False),
+    ],
+)
+def test_head_to_head_reading_rule(measurement_class, people, residuals, qualifies):
+    responses = [_response("r", "candidate", person) for person in people] + [
+        _response("r", kind) for kind in residuals
+    ]
+    found = head_to_head_readings({"r": measurement_class}, responses, FINAL_BALLOT)
+    assert found == ({"r"} if qualifies else set())
+
+
+def test_head_to_head_selection_flags_a_representative_reading_on_its_poll():
+    array, flagged = head_to_head_selection(
+        {"rep_h2h", "alt_h2h"},
+        reading_samples={"rep_h2h": "poll-a", "alt_h2h": "poll-b"},
+        representative={"poll-a": "rep_h2h", "poll-b": "full_field"},
+    )
+    assert array == ["alt_h2h"]
+    assert flagged == {"poll-a"}
+
+
+def test_head_to_head_selection_allows_at_most_one_reading_per_poll():
+    with pytest.raises(ValueError, match="at most one Head-to-Head Reading per poll"):
+        head_to_head_selection(
+            {"first", "second"},
+            reading_samples={"first": "poll", "second": "poll"},
+            representative={"poll": "full_field"},
+        )
+
+
+def _real_results_bundle(tmp_path):
+    """A Results bundle resolving every real 2026 poll name and contest.
+
+    Person IDs are synthetic (``per_<source id>``). The Final Ballot holds the poll
+    candidates certified in results-2026-09-30.2: Chow, Bradford, Alexander, McVie
+    and Parker; Tory, Bailão, Furey, Mendicino and Michael Ford are not on it.
+    """
+    results = tmp_path / "results"
+    results.mkdir()
+    (results / "release_manifest.json").write_text(
+        json.dumps(
+            {"repository": "alexwolson/toronto-election-results", "source_commit": "r"}
+        )
+    )
+    with (CURRENT / "poll_responses.csv").open(newline="") as handle:
+        names = {
+            row["candidate_name"]: row["candidate_id"]
+            for row in csv.DictReader(handle)
+            if row["response_kind"] == "candidate"
+        }
+    aliases = [
+        {"normalized_name": name, "person_id": f"per_{slug}", "is_unambiguous": True}
+        for name, slug in names.items()
+    ]
+    (results / "person_aliases.json").write_text(json.dumps({"aliases": aliases}))
+    final_ballot = [
+        "chow",
+        "bradford",
+        "alexander",
+        "sarah-mcvie",
+        "odessa-paloma-parker",
+    ]
+    (results / "mayoral_candidates.json").write_text(
+        json.dumps(
+            {
+                "ballot_certified": True,
+                "candidates": [{"person_id": f"per_{slug}"} for slug in final_ballot],
+            }
+        )
+    )
+    with (CURRENT / "poll_readings.csv").open(newline="") as handle:
+        contests = {row["contest_id"] for row in csv.DictReader(handle)}
+    rows = []
+    for contest in sorted(contests):
+        office, district = (
+            ("mayor", "city")
+            if contest == "toronto-mayor-2026"
+            else ("councillor", f"ward-{contest.split('-')[2]}")
+        )
+        rows.append(
+            {
+                "election_year": "2026",
+                "represented_body": "toronto_city_council",
+                "result_status": "pending",
+                "office_type": office,
+                "official_district_id": district,
+                "contest_id": f"con_{contest}",
+            }
+        )
+    _write_csv(results / "election_results.csv", list(rows[0]), rows)
+    return results
+
+
+def test_real_polling_feed_derives_the_three_head_to_head_readings(tmp_path):
+    output = _rebuild(CURRENT, _real_results_bundle(tmp_path), tmp_path)
+    polling = json.loads((output / "mayoral_polling.json").read_text())
+
+    assert polling["schema_version"] == 2
+    entries = {entry["poll_reading_id"]: entry for entry in polling["head_to_head"]}
+    assert sorted(entries) == [
+        "forum_20250904_mayor_chow_bradford",
+        "mainstreet_20260618_mayor_forced_two_way",
+        "mainstreet_20260928_29_mayor_head_to_head_all",
+    ]
+    assert entries["mainstreet_20260928_29_mayor_head_to_head_all"]["shares"] == {
+        "per_chow": 0.471,
+        "per_bradford": 0.409,
+        "response:undecided": 0.12,
+    }
+    assert entries["forum_20250904_mayor_chow_bradford"]["shares"] == {
+        "per_chow": 0.4,
+        "per_bradford": 0.42,
+        "response:undecided": 0.18,
+    }
+    assert entries["mainstreet_20260618_mayor_forced_two_way"]["shares"] == {
+        "per_chow": 0.481,
+        "per_bradford": 0.519,
+    }
+    assert entries["mainstreet_20260928_29_mayor_head_to_head_all"]["denominator"] == (
+        "All respondents"
+    )
+
+    polls = {poll["poll_id"]: poll for poll in polling["polls"]}
+    for entry in entries.values():
+        assert entry["head_to_head"] is True
+        assert set(entry["field_tested"]) == set(entry["shares"])
+        assert set(entry["shares"]) <= set(polling["candidates"])
+        parent = polls[entry["poll_id"]]
+        for field in (
+            "firm",
+            "date_conducted",
+            "date_published",
+            "sample_size",
+            "methodology",
+        ):
+            assert entry[field] == parent[field]
+    # No representative reading is a Head-to-Head Reading today.
+    assert not any("head_to_head" in poll for poll in polling["polls"])
+    # trend and latest ignore the array: one Chow point per poll record, from it.
+    assert polling["latest"] == polling["polls"][0]
+    assert sorted(
+        (point["poll_id"], point["share"]) for point in polling["trend"]["per_chow"]
+    ) == sorted(
+        (poll["poll_id"], poll["shares"]["per_chow"])
+        for poll in polling["polls"]
+        if "per_chow" in poll["shares"]
+    )
+
+
+def _rewrite_responses(source, rows):
+    _write_csv(
+        source / "poll_responses.csv",
+        POLL_RESPONSE_COLUMNS,
+        [
+            {
+                "poll_reading_id": "reading",
+                "response_option_id": f"option-{index}",
+                "response_kind": kind,
+                "candidate_id": slug,
+                "candidate_name": name,
+                "candidate_observation_status": "individually_published"
+                if slug
+                else "",
+                "response_label": name or kind.title(),
+                "option_order": str(index),
+                "reported_value": share,
+                "share": share,
+                "notes": "",
+            }
+            for index, (kind, slug, name, share) in enumerate(rows, start=1)
+        ],
+    )
+
+
+def test_a_representative_head_to_head_reading_flags_its_poll_record(tmp_path):
+    aliases = [
+        {
+            "normalized_name": "olivia chow",
+            "person_id": "per_chow",
+            "is_unambiguous": True,
+        },
+        {
+            "normalized_name": "brad bradford",
+            "person_id": "per_bradford",
+            "is_unambiguous": True,
+        },
+    ]
+    source, results = _release_inputs(
+        tmp_path, aliases=aliases, responses=[_candidate_response()]
+    )
+    # A post-exit poll that asks only Chow or Bradford.
+    _rewrite_responses(
+        source,
+        [
+            ("candidate", "chow", "Olivia Chow", "0.5"),
+            ("candidate", "bradford", "Brad Bradford", "0.4"),
+            ("undecided", "", "", "0.1"),
+        ],
+    )
+    write_descriptive_polls(source, source / "polls.csv")
+    (source / "reading_classification.csv").write_text(
+        "poll_reading_id,scope,measurement_class\n"
+        "reading,citywide_mayoral,alternative_ballot\n"
+    )
+
+    polling = json.loads(
+        (_rebuild(source, results, tmp_path) / "mayoral_polling.json").read_text()
+    )
+
+    assert polling["schema_version"] == 2
+    assert polling["polls"][0]["head_to_head"] is True
+    assert polling["latest"]["head_to_head"] is True
+    # The representative reading is the poll itself, not an extra entry.
+    assert polling["head_to_head"] == []
+    assert polling["trend"]["per_chow"] == [
+        {"date_conducted": "2026-08-20", "poll_id": "poll", "share": 0.5}
+    ]
+
+
+def test_an_ordinary_poll_record_carries_no_head_to_head_flag(tmp_path):
+    output = _build(
+        tmp_path,
+        aliases=[
+            {
+                "normalized_name": "olivia chow",
+                "person_id": "per_chow",
+                "is_unambiguous": True,
+            }
+        ],
+        responses=[_candidate_response()],
+    )
+    polling = json.loads((output / "mayoral_polling.json").read_text())
+    assert "head_to_head" not in polling["polls"][0]
+    assert polling["head_to_head"] == []
+
+
+def _add_head_to_head_reading(source, residual_kind):
+    """A dependent Chow-or-Bradford reading beside the fixture's full-field one."""
+    with (source / "poll_readings.csv").open(newline="") as handle:
+        base = next(csv.DictReader(handle))
+    with (source / "poll_readings.csv").open("a", newline="") as handle:
+        csv.DictWriter(handle, fieldnames=POLL_READING_COLUMNS).writerow(
+            {
+                **base,
+                "poll_reading_id": "h2h",
+                "scenario_label": "Chow and Bradford only",
+            }
+        )
+    rows = [
+        ("candidate", "chow", "Olivia Chow", "0.5"),
+        ("candidate", "bradford", "Brad Bradford", "0.4"),
+        (residual_kind, "", "", "0.1"),
+    ]
+    with (source / "poll_responses.csv").open("a", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=POLL_RESPONSE_COLUMNS)
+        for index, (kind, slug, name, share) in enumerate(rows, start=1):
+            writer.writerow(
+                {
+                    "poll_reading_id": "h2h",
+                    "response_option_id": f"h2h-{index}",
+                    "response_kind": kind,
+                    "candidate_id": slug,
+                    "candidate_name": name,
+                    "candidate_observation_status": "individually_published"
+                    if slug
+                    else "",
+                    "response_label": name or kind.title(),
+                    "option_order": str(index),
+                    "reported_value": share,
+                    "share": share,
+                    "notes": "",
+                }
+            )
+    with (source / "reading_classification.csv").open("a") as handle:
+        handle.write("h2h,citywide_mayoral,alternative_ballot\n")
+
+
+@pytest.mark.parametrize("residual_kind", ["undecided", "refusal"])
+def test_a_head_to_head_entry_allows_only_undecided_beside_the_two_candidates(
+    tmp_path, residual_kind
+):
+    aliases = [
+        {
+            "normalized_name": "olivia chow",
+            "person_id": "per_chow",
+            "is_unambiguous": True,
+        },
+        {
+            "normalized_name": "brad bradford",
+            "person_id": "per_bradford",
+            "is_unambiguous": True,
+        },
+    ]
+    source, results = _release_inputs(
+        tmp_path, aliases=aliases, responses=[_candidate_response()]
+    )
+    _add_head_to_head_reading(source, residual_kind)
+
+    if residual_kind == "undecided":
+        polling = json.loads(
+            (_rebuild(source, results, tmp_path) / "mayoral_polling.json").read_text()
+        )
+        assert [entry["poll_reading_id"] for entry in polling["head_to_head"]] == [
+            "h2h"
+        ]
+        return
+    with pytest.raises(ValueError, match="'h2h'.*'response:refusal'"):
+        _rebuild(source, results, tmp_path)
