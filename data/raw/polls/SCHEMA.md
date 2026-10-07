@@ -421,6 +421,31 @@ source. A sample's readings share its `poll_sample_id`, so no separate
 dependence group is kept. A release build fails unless the table covers every
 corpus reading exactly once, so a historical ingest must add its rows here.
 
+### reading_classification.csv (2026)
+
+The same judgement for the current cycle, with the same columns and values. It
+has one row per Toronto 2026 citywide mayoral reading in `poll_readings.csv`
+(`election_cycle_id=toronto-2026`, `geography_type=citywide`,
+`contest_type=mayoral`), and `scope` is always `citywide_mayoral`. Ward samples
+and Council readings have no row.
+
+A reading is `campaign_vote_intention` when it asks the sample's main question
+on the field as the race stood at fieldwork, whatever its denominator or turnout
+screen. It is `alternative_ballot` when the pollster deliberately changed that
+field: for example, a two-way, an added undeclared name (Michael Ford, March
+2026), a dropped name (Tory, July 2025), or a field without a registered
+candidate (Forum's July 29 field without Alexander, who filed that day).
+Conditional, routed and context-only readings take
+`conditional_lean_followup`, `routed_subgroup` and `question_scope_unclear`.
+
+The release build fails unless the table names every such reading exactly once,
+names nothing else, and uses only the listed scope and classes. A current-cycle
+ingest must therefore add its rows here. The table ships as the
+`reading_classification.csv` release asset (manifest table
+`reading_classification`), beside `historical_mayoral_reading_classification.csv`.
+Backend reads it to apply "the full field beats a head-to-head in the same poll"
+to Post-Suspension Readings.
+
 ## Legacy historical CSVs — discovery/staging only
 
 `historical_mayoral_polls.csv` and `historical_mayoral_outcomes.csv` are the
@@ -449,3 +474,42 @@ leaning-with-undecided table. All respondents describes the denominator, not
 whether leaners were allocated. No all-respondent shares are inferred for a
 sample that does not publish them. Add a selection when ingesting an eligible
 new sample; the release build fails on missing, duplicate or incompatible choices.
+
+### Head-to-Head Readings in the polling feed
+
+`mayoral_polling.json` (still schema 2) has an optional top-level `head_to_head`
+array. It is derived, not hand-picked. A reading is a Head-to-Head Reading when
+all three of these hold:
+
+- it is classified `alternative_ballot` in `reading_classification.csv`;
+- its candidate responses are exactly two people, both on the Final Ballot;
+- it has no other-candidate option (`response_kind=other`).
+
+The Final Ballot is the `candidates` list of the pinned Results release's
+`mayoral_candidates.json`. The build fails unless `ballot_certified` is true. It
+reads no other field, so the Results candidate feed's schema version does not
+matter here.
+
+A poll's representative reading never enters the array. When it is a
+Head-to-Head Reading, that `polls` record carries `head_to_head: true` instead,
+and so does `latest` when it is that poll. Other poll records omit the flag. Any
+other Head-to-Head Reading becomes one array entry, and a second one in the same
+poll fails the build.
+
+Each entry is shaped like an `all_respondents` record. Its `poll_id`,
+`poll_reading_id`, firm, dates, sample size and method come from its poll record.
+It also has its own public `denominator` label, `field_tested`, `shares` (the two
+person IDs and any `response:undecided`; any other non-candidate key fails the
+build, naming the reading and key), `notes`, and `head_to_head: true`. An
+entry shares its respondents with its poll's full-field question, so it is never
+another poll. `candidates` includes its share keys, while `trend` and `latest`
+ignore the array.
+
+Three readings qualify today:
+
+- Forum, Sept 4, 2025 (Chow–Bradford);
+- Mainstreet, June 18, 2026 (forced two-way);
+- Mainstreet, Sept 28–29, 2026.
+
+Forum's Chow–Tory and Chow–Bailão readings are alternative ballots but not
+Head-to-Head Readings, because Tory and Bailão are not on the Final Ballot.

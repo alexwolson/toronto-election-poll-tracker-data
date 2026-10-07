@@ -138,24 +138,7 @@ def _selection_rows(
             raise DescriptivePollContractError(
                 f"representative reading {reading_id!r} must be a complete general vote-intention reading"
             )
-        shares: dict[str, Decimal] = {}
-        for response in responses[reading_id]:
-            if response.share is None:
-                continue
-            key = (
-                response.candidate_id
-                if response.response_kind == "candidate"
-                else response.response_kind
-            )
-            if not key or key in shares:
-                raise DescriptivePollContractError(
-                    f"representative reading {reading_id!r} has duplicate public response key {key!r}"
-                )
-            shares[key] = response.share
-        if not shares:
-            raise DescriptivePollContractError(
-                f"representative reading {reading_id!r} has no published numeric responses"
-            )
+        shares = _public_shares(reading_id, responses[reading_id])
         if all_respondents and abs(sum(shares.values(), Decimal()) - 1) > Decimal(
             "0.02"
         ):
@@ -164,6 +147,31 @@ def _selection_rows(
             )
         selected.append((samples[sample_id], reading, shares))
     return selected
+
+
+def _public_shares(
+    reading_id: str, responses: list[PollResponse]
+) -> dict[str, Decimal]:
+    """A reading's published numeric shares, keyed by candidate ID or response kind."""
+    shares: dict[str, Decimal] = {}
+    for response in responses:
+        if response.share is None:
+            continue
+        key = (
+            response.candidate_id
+            if response.response_kind == "candidate"
+            else response.response_kind
+        )
+        if not key or key in shares:
+            raise DescriptivePollContractError(
+                f"reading {reading_id!r} has duplicate public response key {key!r}"
+            )
+        shares[key] = response.share
+    if not shares:
+        raise DescriptivePollContractError(
+            f"reading {reading_id!r} has no published numeric responses"
+        )
+    return shares
 
 
 def _denominator_label(reading: PollReading) -> str:
@@ -210,10 +218,18 @@ def _build_poll_rows(
     )
     selections = _load_selections(source / selection_file)
     selected = _selection_rows(bundle, selections, all_respondents=all_respondents)
+    return _public_rows(selected, with_reading_id=all_respondents)
+
+
+def _public_rows(
+    selected: list[tuple[PollSample, PollReading, dict[str, Decimal]]],
+    *,
+    with_reading_id: bool,
+) -> tuple[list[str], list[dict[str, str]]]:
     share_columns = sorted({key for _, _, shares in selected for key in shares})
     columns = [
         *METADATA_COLUMNS,
-        *(["poll_reading_id"] if all_respondents else []),
+        *(["poll_reading_id"] if with_reading_id else []),
         *share_columns,
         "notes",
     ]
@@ -233,7 +249,7 @@ def _build_poll_rows(
                 "notes": _public_note(reading, shares),
             }
         )
-        if all_respondents:
+        if with_reading_id:
             row["poll_reading_id"] = reading.poll_reading_id
         for key, share in shares.items():
             row[key] = format(share, "f")
@@ -252,6 +268,30 @@ def build_descriptive_poll_rows(
 def build_all_respondent_poll_rows(source_dir: str | Path) -> list[dict[str, str]]:
     """One explicitly selected published all-respondent reading per eligible sample."""
     return _build_poll_rows(source_dir, all_respondents=True)[1]
+
+
+def build_reading_poll_rows(
+    source_dir: str | Path, reading_ids: list[str]
+) -> list[dict[str, str]]:
+    """Public rows, shaped like the all-respondent rows, for the named readings.
+
+    Each row carries its sample's metadata, so it matches that sample's poll record.
+    """
+    bundle = load_poll_source_bundle(Path(source_dir))
+    samples = {sample.poll_sample_id: sample for sample in bundle.poll_samples}
+    readings = {reading.poll_reading_id: reading for reading in bundle.poll_readings}
+    responses: dict[str, list[PollResponse]] = defaultdict(list)
+    for response in bundle.poll_responses:
+        responses[response.poll_reading_id].append(response)
+    selected = [
+        (
+            samples[readings[reading_id].poll_sample_id],
+            readings[reading_id],
+            _public_shares(reading_id, responses[reading_id]),
+        )
+        for reading_id in reading_ids
+    ]
+    return _public_rows(selected, with_reading_id=True)[1]
 
 
 def write_descriptive_polls(source_dir: str | Path, destination: str | Path) -> Path:
