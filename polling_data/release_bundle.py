@@ -52,6 +52,21 @@ MEASUREMENT_CLASSES = {
     "question_scope_unclear",
 }
 ALTERNATIVE_BALLOT = "alternative_ballot"
+# A maintainer's decision to keep a sample out of the forecast fit: it stays in the
+# record and the archive, and Backend skips it (Backend ADR 0062).
+MODEL_EXCLUSIONS = "model_exclusions"
+MODEL_EXCLUSION_COLUMNS = [
+    "poll_sample_id",
+    "decided_on",
+    "reasons",
+    "explanation",
+    "notes",
+]
+MODEL_EXCLUSION_REASONS = {
+    "methodology_confidence",
+    "insufficient_track_record",
+    "not_cric_member",
+}
 _POLL_METADATA = {
     "poll_id",
     "poll_reading_id",
@@ -270,8 +285,15 @@ def _build_mayoral_polling_feed(
     all_respondent_rows: list[dict[str, str]],
     head_to_head_rows: list[dict[str, str]],
     head_to_head_polls: set[str],
+    model_exclusions: dict[str, dict[str, object]] | None = None,
 ) -> dict[str, object]:
-    """Build a descriptive, canonical-person-keyed frontend feed."""
+    """Build a descriptive, canonical-person-keyed frontend feed.
+
+    A poll listed in ``model_exclusions`` (keyed by poll ID, which is its sample ID)
+    carries a ``model_exclusion`` record in ``polls`` and ``all_respondents``; it is
+    otherwise an ordinary entry, so ``latest`` and ``trend`` still describe it.
+    """
+    model_exclusions = model_exclusions or {}
 
     candidate_keys: dict[str, set[str]] = {}
     for row in responses:
@@ -332,6 +354,9 @@ def _build_mayoral_polling_feed(
         if poll["poll_id"] in head_to_head_polls:
             poll["head_to_head"] = True
     all_respondents = [canonical_poll(row) for row in all_respondent_rows]
+    for entry in [*polls, *all_respondents]:
+        if entry["poll_id"] in model_exclusions:
+            entry["model_exclusion"] = dict(model_exclusions[str(entry["poll_id"])])
     head_to_head = [
         {**canonical_poll(row), "head_to_head": True} for row in head_to_head_rows
     ]
@@ -459,6 +484,53 @@ def _current_classification(source: Path) -> dict[str, str]:
     return {row["poll_reading_id"]: row["measurement_class"] for row in rows}
 
 
+def _model_exclusions(source: Path) -> dict[str, dict[str, object]]:
+    """The samples the maintainer kept out of the forecast fit, after checking them.
+
+    Each row names one 2026 citywide sample once, an ISO decision date, one or more
+    known reasons (semicolon-separated) and a non-empty public explanation.
+    """
+    path = source / f"{MODEL_EXCLUSIONS}.csv"
+    if not path.is_file():
+        raise FileNotFoundError(f"missing model exclusions table: {path}")
+    with path.open(newline="", encoding="utf-8-sig") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames != MODEL_EXCLUSION_COLUMNS:
+            raise ValueError(
+                f"model exclusions must have columns {MODEL_EXCLUSION_COLUMNS}"
+            )
+        rows = list(reader)
+    samples = {
+        row["poll_sample_id"]
+        for row in _read_csv(source / "poll_samples.csv")
+        if row["election_cycle_id"] == CURRENT_CYCLE
+        and row["geography_type"] == "citywide"
+    }
+    exclusions: dict[str, dict[str, object]] = {}
+    for row in rows:
+        sample = row["poll_sample_id"]
+        reasons = [r for r in row["reasons"].split(";") if r]
+        problem = None
+        if sample not in samples:
+            problem = "names no 2026 citywide sample"
+        elif sample in exclusions:
+            problem = "is listed twice"
+        elif not re.fullmatch(r"\d{4}-\d{2}-\d{2}", row["decided_on"]):
+            problem = "has no ISO decision date"
+        elif not reasons or set(reasons) - MODEL_EXCLUSION_REASONS:
+            problem = f"needs reasons from {sorted(MODEL_EXCLUSION_REASONS)}"
+        elif not row["explanation"].strip():
+            problem = "has no explanation"
+        if problem:
+            raise ValueError(f"model exclusion {sample!r} {problem}")
+        exclusions[sample] = {
+            "decided_on": row["decided_on"],
+            "reasons": reasons,
+            "explanation": row["explanation"].strip(),
+        }
+    return exclusions
+
+
 def build_polling_release_bundle(
     source_dir: str | Path,
     results_bundle: str | Path,
@@ -483,6 +555,7 @@ def build_polling_release_bundle(
         raise ValueError("results_release must be an immutable release tag")
     historical = _historical_tables(source)
     classification = _current_classification(source)
+    exclusions = _model_exclusions(source)
 
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(
@@ -514,6 +587,7 @@ def build_polling_release_bundle(
             build_all_respondent_poll_rows(source),
             build_reading_poll_rows(source, head_to_head),
             head_to_head_polls,
+            exclusions,
         )
         (staging / "mayoral_polling.json").write_text(
             json.dumps(
@@ -551,6 +625,7 @@ def build_polling_release_bundle(
                 "poll_readings": "poll_readings.csv",
                 "poll_responses": "poll_responses.csv",
                 CLASSIFICATION: f"{CLASSIFICATION}.csv",
+                MODEL_EXCLUSIONS: f"{MODEL_EXCLUSIONS}.csv",
                 **{
                     f"{HISTORICAL_DIR}_{table}": f"{HISTORICAL_DIR}_{table}.csv"
                     for table in HISTORICAL_TABLES
@@ -560,6 +635,7 @@ def build_polling_release_bundle(
                 "poll_readings": 2,
                 "poll_responses": 2,
                 CLASSIFICATION: 1,
+                MODEL_EXCLUSIONS: 1,
                 **{f"{HISTORICAL_DIR}_{table}": 1 for table in HISTORICAL_TABLES},
             },
             "feeds": {"mayoral_polling": "mayoral_polling.json"},

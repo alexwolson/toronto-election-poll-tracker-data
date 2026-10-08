@@ -8,14 +8,16 @@ A poll-only update normally reuses the Results release pinned by production;
 publish a new Results release only when upstream facts or identities need correcting.
 
 The active mayoral forecast is the **v3 compact model**, publishing forecast feed
-**schema 4** with policy `margin-first-joint-draws-v1`. Its current specification
+**schema 5** with policy `margin-first-joint-draws-v1`. Its current specification
 is [ADR 0054](../../../toronto-election-poll-tracker-backend/docs/adr/0054-publish-the-compact-joint-model-election-day-distributions.md)
 as amended by [ADR 0055](../../../toronto-election-poll-tracker-backend/docs/adr/0055-model-election-day-as-a-dirichlet-reading-of-the-latent-support.md)
 (Dirichlet election-day discrepancy),
 [ADR 0056](../../../toronto-election-poll-tracker-backend/docs/adr/0056-publish-the-uncertainty-ladder.md)
 (uncertainty breakdown), and
 [ADR 0057](../../../toronto-election-poll-tracker-backend/docs/adr/0057-select-and-weight-current-cycle-readings-like-the-historical-corpus.md)
-(current-cycle reading selection).
+(current-cycle reading selection),
+[ADR 0061](../../../toronto-election-poll-tracker-backend/docs/adr/0061-learn-where-a-suspended-campaigns-support-goes.md)
+(Suspended Campaigns and Post-Suspension Readings), and ADR 0062 (Excluded Polls).
 The model version, forecast feed schema, and deployment source-manifest schema
 (v2) are separate version numbers.
 
@@ -137,6 +139,14 @@ The release build fails on a missing, duplicate or unknown reading. The polling
 feed's `head_to_head` array and flag are derived from this class, so they are
 never edited by hand.
 
+If the maintainer decides a sample must not be used in the forecast, add one row
+to `data/raw/polls/model_exclusions.csv` with the decision date, its reasons and
+the public explanation (rule in
+[`data/raw/polls/SCHEMA.md`](../../data/raw/polls/SCHEMA.md); Backend ADR 0062).
+Ingest the sample in full regardless: exclusion keeps it in the record and the
+archive, and only Backend's reading selection skips it. Never exclude a poll on
+your own judgement.
+
 This selection controls the archive display only. The compact model selects its
 own reading from `poll_samples.csv`, `poll_readings.csv`, and `poll_responses.csv`
 in the released Polling bundle. Ingest all published readings and their actual
@@ -243,7 +253,11 @@ ingestion does not touch the historical corpus or its
 
 - **Reading eligibility and selection.** The sample must be extracted, citywide,
   and in `toronto-2026`. An eligible mayoral `general_vote_intention` reading must
-  publish numeric shares for Chow, Bradford, and Alexander. Among eligible readings,
+  publish numeric shares for Chow, Bradford, and Alexander; a Post-Suspension
+  Reading (fieldwork ending on or after Oct 6) needs only Chow and Bradford, any
+  Alexander share is set aside, and the full field beats a head-to-head in the
+  same sample (ADR 0061). A sample in `model_exclusions.csv` never enters the fit
+  (ADR 0062). Among eligible readings,
   prefer `decided_plus_leaners`, then `decided_only`, then `all_respondents`, then
   `other`; ties go to more modelled named candidates, then reading ID. An earlier
   fieldwork date does not itself exclude a reading covering these three. An
@@ -262,7 +276,7 @@ ingestion does not touch the historical corpus or its
   divergences, worst R-hat below 1.01, and minimum ESS at least 400 on non-constant
   coordinates. A divergent fit gets one retry at target acceptance 0.99 and
   seed + 1. Failure stops the build; keep the previous release live.
-- **Output and sensitivities.** Require schema 4, policy
+- **Output and sensitivities.** Require schema 5, policy
   `margin-first-joint-draws-v1`, `model.name=compact_mayoral`,
   `model.specification.discrepancy=dirichlet`, and `model.qualification_passed=true`.
   Review the full-ballot vote medians and central 80% intervals, pairwise margin

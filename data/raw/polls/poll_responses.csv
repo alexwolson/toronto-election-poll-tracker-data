@@ -467,3 +467,8 @@ nanos_20260930_1004_mayor_all_other_turnout,rest,other,,,,Rest,5,1.6%,0.016,
 forum_20261006_mayor,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,46,0.46,
 forum_20261006_mayor,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,42,0.42,
 forum_20261006_mayor,other,other,,,,Someone else,3,12,0.12,Published poll residual; not an Unmeasured Candidate Tail estimate.
+scope_20261006_mayor_all,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,1,41%,0.41,
+scope_20261006_mayor_all,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,2,44%,0.44,
+scope_20261006_mayor_all,other,other,,,,Someone else,3,3%,0.03,Published poll residual; not an Unmeasured Candidate Tail estimate.
+scope_20261006_mayor_all,undecided,undecided,,,,Still undecided,4,11%,0.11,
+scope_20261006_mayor_all,would-not-vote,would_not_vote,,,,I will not be voting,5,2%,0.02,Published nonvoter response; not recoded as undecided.
