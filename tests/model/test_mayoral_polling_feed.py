@@ -51,4 +51,5 @@ def test_feed_exposes_latest_and_a_raw_per_candidate_trend() -> None:
     assert [pt["date_conducted"] for pt in chow] == sorted(
         pt["date_conducted"] for pt in chow
     )  # chronological
-    assert chow[-1]["share"] == 0.46  # Forum fieldwork ended 2026-10-06
+    # Forum and Scope both ended 2026-10-06; ties order by poll_id, so Scope is last.
+    assert chow[-1]["share"] == 0.44
