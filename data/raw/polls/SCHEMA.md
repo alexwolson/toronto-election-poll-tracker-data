@@ -446,6 +446,28 @@ ingest must therefore add its rows here. The table ships as the
 Backend reads it to apply "the full field beats a head-to-head in the same poll"
 to Post-Suspension Readings.
 
+### model_exclusions.csv
+
+The samples the maintainer has decided to keep out of the forecast fit. An
+excluded sample stays in the five tables, the public archive and the polling
+feed; Backend skips it when it selects the 2026 readings it models (Backend
+ADR 0062). One row per excluded sample:
+
+| Column | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `poll_sample_id` | identifier | yes | A Toronto 2026 citywide sample in `poll_samples.csv`, listed once |
+| `decided_on` | ISO date | yes | When the maintainer decided |
+| `reasons` | `;`-separated enums | yes | One or more of `methodology_confidence` (the published method does not support confidence in the sample), `insufficient_track_record` (the firm has no published polls that can be checked against a result), `not_cric_member` (the firm is not a Canadian Research Insights Council member) |
+| `explanation` | string | yes | The public, plain-language reason the site shows |
+| `notes` | string | no | Internal provenance for the decision |
+
+The release build fails on an unknown sample or reason, a duplicate, a missing
+date or an empty explanation. The table ships as the `model_exclusions.csv` asset
+(manifest table `model_exclusions`), and each matching `polls` and
+`all_respondents` entry in the polling feed gains `model_exclusion: {decided_on,
+reasons, explanation}`. Exclusion is a maintainer decision, recorded here; it is
+never inferred from a poll's numbers.
+
 ## Legacy historical CSVs — discovery/staging only
 
 `historical_mayoral_polls.csv` and `historical_mayoral_outcomes.csv` are the
