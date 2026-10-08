@@ -211,15 +211,22 @@ From its clean, up-to-date `main` checkout:
 
 ```bash
 cd ../toronto-election-poll-tracker-backend
+BACKEND_TAG=backend-YYYY-MM-DD.N  # unused: check `gh release list` first
 uv run python scripts/refresh_all.py \
   --results-bundle "$RUN_ROOT/results" \
   --polling-bundle "$RUN_ROOT/polling" \
-  --results-release "$RESULTS_TAG" --polling-release "$POLLING_TAG"
+  --results-release "$RESULTS_TAG" --polling-release "$POLLING_TAG" \
+  --release-tag "$BACKEND_TAG"
 jq '{schema_version,publication_policy,analysis_cutoff,evidence_tier,final_field_samples,model,election_day,uncertainty,sensitivity,history}' \
   dist/mayoral_forecast.json
-jq '.dependencies,.feeds,.assets' dist/release_manifest.json
-BACKEND_TAG=backend-YYYY-MM-DD.N
+jq '.dependencies,.feeds,.forecast_draws,.assets' dist/release_manifest.json
+jq '{release_tag,draws,candidates}' dist/mayoral_forecast_draws.json
 ```
+
+Choose the tag before the build: the bundle records it beside the final
+forecast's Election Outcome Draws (`mayoral_forecast_draws.npz` and its record
+`mayoral_forecast_draws.json`), and the publisher refuses a bundle built for
+another tag. A taken tag means a rebuild, and a rebuild's draws differ by CPU.
 
 The refresh validates the Polling→Results pin, hydrates the released inputs, runs
 Ruff lint, formatting checks and all Backend tests, rebuilds mayoral/council/trustee
@@ -291,8 +298,8 @@ gh release download "$BACKEND_TAG" \
 ```
 
 The publisher validates the tag, clean source commit, remote `main` target and
-both upstream pins, then downloads and checks the released manifest and every
-asset before reporting success. A failure or partial upload consumes the tag;
+both upstream pins and the draws record's tag, then downloads and checks the
+released manifest, every asset and the draws before reporting success. A failure or partial upload consumes the tag;
 publish corrections under a new tag.
 
 ## 4. Resolve, verify, and deploy the Frontend
