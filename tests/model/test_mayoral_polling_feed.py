@@ -11,7 +11,7 @@ POLLS = ROOT / "data/raw/polls/polls.csv"
 
 def test_polls_load_newest_published_first() -> None:
     polls = load_mayoral_polls(POLLS)
-    assert polls[0].poll_id == "nanos-2026-10-04"
+    assert polls[0].poll_id == "scope-2026-10-06"
     published = [p.date_published for p in polls]
     assert published == sorted(published, reverse=True)
 
@@ -19,30 +19,32 @@ def test_polls_load_newest_published_first() -> None:
 def test_shares_carry_only_populated_candidates() -> None:
     polls = load_mayoral_polls(POLLS)
     latest = polls[0]
-    # Nanos (published 2026-10-06): three named candidates and someone else.
-    # McVie and Parker were not published separately; neither is recorded at zero.
+    # Scope (published 2026-10-08): all respondents, Alexander not offered.
+    # Undecided and non-voters stay separate options, never recoded as candidates.
     assert set(latest.shares) == {
-        "alexander",
         "bradford",
         "chow",
         "other",
+        "undecided",
+        "would_not_vote",
     }
     assert latest.shares == {
-        "alexander": 0.04,
-        "bradford": 0.426,
-        "chow": 0.524,
-        "other": 0.01,
+        "bradford": 0.41,
+        "chow": 0.44,
+        "other": 0.03,
+        "undecided": 0.11,
+        "would_not_vote": 0.02,
     }
     assert set(latest.field_tested) == set(latest.shares)
-    assert latest.denominator == "Decided and leaning voters"
+    assert latest.denominator == "All respondents"
     assert "denominator" not in latest.shares
 
 
 def test_feed_exposes_latest_and_a_raw_per_candidate_trend() -> None:
     feed = build_mayoral_polling_feed(POLLS)
     assert feed["schema_version"] == 1
-    assert feed["latest"]["poll_id"] == "nanos-2026-10-04"
-    assert feed["latest"]["denominator"] == "Decided and leaning voters"
+    assert feed["latest"]["poll_id"] == "scope-2026-10-06"
+    assert feed["latest"]["denominator"] == "All respondents"
     assert "denominator" not in feed["candidates"]
     assert {"chow", "bradford", "alexander"} <= set(feed["candidates"])
     chow = feed["trend"]["chow"]
