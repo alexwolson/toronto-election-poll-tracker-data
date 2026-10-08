@@ -26,6 +26,7 @@ from polling_data.release_bundle import (
 ROOT = Path(__file__).resolve().parents[1]
 CURRENT = ROOT / "data/raw/polls"
 HISTORICAL = ROOT / "data/raw/polls/historical_mayoral"
+EXCLUSION_HEADER = "poll_sample_id,decided_on,reasons,explanation,notes\n"
 
 
 def _write_csv(path, columns, rows):
@@ -267,6 +268,7 @@ def _release_inputs(tmp_path, *, aliases, responses, field_tested="chow,other"):
             }
         ],
     )
+    (source / "model_exclusions.csv").write_text(EXCLUSION_HEADER)
     # The audited historical corpus and its classification ride in every release.
     shutil.copytree(HISTORICAL, source / "historical_mayoral")
     return source, results
@@ -1114,3 +1116,115 @@ def test_a_head_to_head_entry_allows_only_undecided_beside_the_two_candidates(
         return
     with pytest.raises(ValueError, match="'h2h'.*'response:refusal'"):
         _rebuild(source, results, tmp_path)
+
+
+def _alias_chow():
+    return [
+        {
+            "normalized_name": "olivia chow",
+            "person_id": "per_chow",
+            "is_unambiguous": True,
+        }
+    ]
+
+
+def _exclude(source, row):
+    (source / "model_exclusions.csv").write_text(EXCLUSION_HEADER + row + "\n")
+
+
+EXCLUDE_POLL = (
+    "poll,2026-10-08,methodology_confidence;insufficient_track_record,"
+    "Listed for the record only.,"
+)
+
+
+def test_an_excluded_poll_carries_its_exclusion_in_the_feed(tmp_path):
+    source, results = _release_inputs(
+        tmp_path, aliases=_alias_chow(), responses=[_candidate_response()]
+    )
+    _exclude(source, EXCLUDE_POLL)
+    output = _rebuild(source, results, tmp_path)
+    polling = json.loads((output / "mayoral_polling.json").read_text())
+
+    expected = {
+        "decided_on": "2026-10-08",
+        "reasons": ["methodology_confidence", "insufficient_track_record"],
+        "explanation": "Listed for the record only.",
+    }
+    assert polling["polls"][0]["model_exclusion"] == expected
+    assert polling["all_respondents"][0]["model_exclusion"] == expected
+    manifest = json.loads((output / "release_manifest.json").read_text())
+    assert manifest["tables"]["model_exclusions"] == "model_exclusions.csv"
+    assert manifest["table_versions"]["model_exclusions"] == 1
+    assert (output / "model_exclusions.csv").read_bytes() == (
+        source / "model_exclusions.csv"
+    ).read_bytes()
+
+
+def test_a_poll_without_an_exclusion_carries_no_exclusion_field(tmp_path):
+    output = _build(tmp_path, aliases=_alias_chow(), responses=[_candidate_response()])
+    polling = json.loads((output / "mayoral_polling.json").read_text())
+    assert "model_exclusion" not in polling["polls"][0]
+    assert "model_exclusion" not in polling["all_respondents"][0]
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        "no_such_sample,2026-10-08,methodology_confidence,Why.,",
+        "poll,2026-10-08,house_dislike,Why.,",
+        "poll,2026-10-08,,Why.,",
+        "poll,2026-10-08,methodology_confidence,,",
+        "poll,08/10/2026,methodology_confidence,Why.,",
+        (
+            "poll,2026-10-08,methodology_confidence,Why.,\n"
+            "poll,2026-10-08,not_cric_member,Again.,"
+        ),
+    ],
+    ids=[
+        "unknown_sample",
+        "unknown_reason",
+        "no_reason",
+        "no_explanation",
+        "bad_date",
+        "duplicate",
+    ],
+)
+def test_polling_release_rejects_an_invalid_model_exclusion(tmp_path, row):
+    source, results = _release_inputs(
+        tmp_path, aliases=_alias_chow(), responses=[_candidate_response()]
+    )
+    _exclude(source, row)
+    with pytest.raises(ValueError, match="model exclusion"):
+        _rebuild(source, results, tmp_path)
+
+
+def test_polling_release_requires_the_model_exclusions_table(tmp_path):
+    source, results = _release_inputs(
+        tmp_path, aliases=_alias_chow(), responses=[_candidate_response()]
+    )
+    (source / "model_exclusions.csv").unlink()
+    with pytest.raises(FileNotFoundError, match="model exclusions"):
+        _rebuild(source, results, tmp_path)
+
+
+def test_scope_is_the_only_excluded_poll_and_says_why() -> None:
+    with (CURRENT / "model_exclusions.csv").open(newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    assert [row["poll_sample_id"] for row in rows] == ["scope-2026-10-06"]
+    (scope,) = rows
+    assert scope["decided_on"] == "2026-10-08"
+    assert scope["reasons"].split(";") == [
+        "methodology_confidence",
+        "insufficient_track_record",
+        "not_cric_member",
+    ]
+    assert "Canadian Research Insights Council" in scope["explanation"]
+
+
+def test_real_polling_feed_marks_only_scope_as_excluded(tmp_path):
+    output = _rebuild(CURRENT, _real_results_bundle(tmp_path), tmp_path)
+    polling = json.loads((output / "mayoral_polling.json").read_text())
+    for view in ("polls", "all_respondents"):
+        excluded = [p["poll_id"] for p in polling[view] if "model_exclusion" in p]
+        assert excluded == ["scope-2026-10-06"]
