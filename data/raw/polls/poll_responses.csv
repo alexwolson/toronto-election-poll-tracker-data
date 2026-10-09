@@ -472,3 +472,19 @@ scope_20261006_mayor_all,candidate-chow,candidate,chow,Olivia Chow,individually_
 scope_20261006_mayor_all,other,other,,,,Someone else,3,3%,0.03,Published poll residual; not an Unmeasured Candidate Tail estimate.
 scope_20261006_mayor_all,undecided,undecided,,,,Still undecided,4,11%,0.11,
 scope_20261006_mayor_all,would-not-vote,would_not_vote,,,,I will not be voting,5,2%,0.02,Published nonvoter response; not recoded as undecided.
+mainstreet_20261006_07_mayor_all,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,40.8%,0.408,
+mainstreet_20261006_07_mayor_all,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,38.3%,0.383,
+mainstreet_20261006_07_mayor_all,candidate-odessa-paloma-parker,candidate,odessa-paloma-parker,Odessa Paloma Parker,individually_published,Odessa Paloma Parker,3,2.4%,0.024,
+mainstreet_20261006_07_mayor_all,candidate-sarah-mcvie,candidate,sarah-mcvie,Sarah McVie,individually_published,Sarah McVie,4,2.1%,0.021,
+mainstreet_20261006_07_mayor_all,other,other,,,,Another candidate,5,2.8%,0.028,
+mainstreet_20261006_07_mayor_all,undecided,undecided,,,,Undecided,6,10.0%,0.1,
+mainstreet_20261006_07_mayor_all,would-not-vote,would_not_vote,,,,Would not vote,7,3.6%,0.036,Published nonvoter response; not recoded as undecided.
+mainstreet_20261006_07_mayor_decided_leaning,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,47.2%,0.472,
+mainstreet_20261006_07_mayor_decided_leaning,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,44.3%,0.443,
+mainstreet_20261006_07_mayor_decided_leaning,candidate-odessa-paloma-parker,candidate,odessa-paloma-parker,Odessa Paloma Parker,individually_published,Odessa Paloma Parker,3,2.8%,0.028,
+mainstreet_20261006_07_mayor_decided_leaning,candidate-sarah-mcvie,candidate,sarah-mcvie,Sarah McVie,individually_published,Sarah McVie,4,2.5%,0.025,
+mainstreet_20261006_07_mayor_decided_leaning,other,other,,,,Another candidate,5,3.2%,0.032,
+mainstreet_20261006_07_mayor_head_to_head_all,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,44.7%,0.447,
+mainstreet_20261006_07_mayor_head_to_head_all,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,41.5%,0.415,
+mainstreet_20261006_07_mayor_head_to_head_all,neither,none_of_the_above,,,,Neither,3,5.5%,0.055,
+mainstreet_20261006_07_mayor_head_to_head_all,undecided,undecided,,,,Undecided,4,8.3%,0.083,

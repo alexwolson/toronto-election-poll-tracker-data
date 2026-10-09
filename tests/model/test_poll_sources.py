@@ -801,25 +801,29 @@ def test_mainstreet_september_29_bases_and_five_candidate_field() -> None:
         "Sarah McVie",
         "Odessa Paloma Parker",
     }
-    # Both additional candidates retain the identities used by the previous wave.
+    # Both additional candidates keep the same identities in every Mainstreet wave.
     for name in ("Sarah McVie", "Odessa Paloma Parker"):
         samples = {
             response.poll_reading_id.split("_mayor_")[0]
             for response in bundle.poll_responses
             if response.candidate_name == name
         }
-        assert samples == {"mainstreet_20260914", "mainstreet_20260928_29"}
+        assert samples == {
+            "mainstreet_20260914",
+            "mainstreet_20260928_29",
+            "mainstreet_20261006_07",
+        }
 
 
 def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 59
-    assert len(bundle.poll_sample_documents) == 59
-    assert len(bundle.poll_samples) == 45
-    assert len(bundle.poll_readings) == 103
-    assert len(bundle.poll_responses) == 473
+    assert len(bundle.source_documents) == 60
+    assert len(bundle.poll_sample_documents) == 60
+    assert len(bundle.poll_samples) == 46
+    assert len(bundle.poll_readings) == 106
+    assert len(bundle.poll_responses) == 489
 
     documents = {
         document.source_document_id: document for document in bundle.source_documents
@@ -847,8 +851,8 @@ def test_tracked_current_poll_source_inventory() -> None:
         if sample.geography_type == "citywide"
     }
     recovered_citywide_ids = set(citywide_samples) - {"abacus-2026-01-27"}
-    assert len(citywide_samples) == 33
-    assert len(recovered_citywide_ids) == 32
+    assert len(citywide_samples) == 34
+    assert len(recovered_citywide_ids) == 33
     assert all(
         citywide_samples[sample_id].extraction_status == "extracted"
         for sample_id in recovered_citywide_ids
@@ -865,17 +869,17 @@ def test_tracked_current_poll_source_inventory() -> None:
         if samples[readings[response.poll_reading_id].poll_sample_id].geography_type
         == "citywide"
     ]
-    assert len(citywide_readings) == 77
-    assert len(citywide_responses) == 361
+    assert len(citywide_readings) == 80
+    assert len(citywide_responses) == 377
     assert (
         sum(
             reading.reading_purpose == "general_vote_intention"
             for reading in citywide_readings
         )
-        == 72
+        == 75
     )
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 44
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 45
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -909,6 +913,7 @@ def test_tracked_current_poll_source_inventory() -> None:
         "nanos-2026-10-04",
         "forum-2026-10-06",
         "scope-2026-10-06",
+        "mainstreet-2026-10-07",
     ]
     ordered_reading_samples = list(
         dict.fromkeys(reading.poll_sample_id for reading in citywide_readings)
@@ -948,6 +953,23 @@ def test_tracked_current_poll_source_inventory() -> None:
     )
     assert new_all.denominator_semantics == "all_respondents"
     assert new_decided.denominator_semantics == "decided_plus_leaners"
+
+    # Mainstreet Oct 6-7: entirely post-suspension; Alexander is not offered.
+    mainstreet = samples["mainstreet-2026-10-07"]
+    assert mainstreet.fieldwork_start.isoformat() == "2026-10-06"
+    assert mainstreet.fieldwork_end.isoformat() == "2026-10-07"
+    assert mainstreet.evidence_available_at.isoformat() == "2026-10-09T05:02:32-04:00"
+    mainstreet_decided = readings["mainstreet_20261006_07_mayor_decided_leaning"]
+    assert (mainstreet_decided.unweighted_base, mainstreet_decided.weighted_base) == (
+        864,
+        Decimal("865.0"),
+    )
+    assert mainstreet_decided.denominator_semantics == "decided_plus_leaners"
+    assert not any(
+        response.candidate_id == "alexander"
+        for response in bundle.poll_responses
+        if readings[response.poll_reading_id].poll_sample_id == "mainstreet-2026-10-07"
+    )
 
     # Ipsos for the Star was released later than its older fieldwork.
     ipsos = samples["ipsos-2026-09-08"]
