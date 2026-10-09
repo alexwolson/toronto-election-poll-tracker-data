@@ -43,6 +43,8 @@ HISTORICAL_TABLES = (
 CURRENT_CYCLE = "toronto-2026"
 CLASSIFICATION = "reading_classification"
 CLASSIFICATION_COLUMNS = ["poll_reading_id", "scope", "measurement_class"]
+# Residual share keys a Head-to-Head Reading may carry beside its two candidates.
+HEAD_TO_HEAD_RESIDUALS = frozenset({"response:undecided", "response:none_of_the_above"})
 CLASSIFICATION_SCOPE = "citywide_mayoral"
 MEASUREMENT_CLASSES = {
     "campaign_vote_intention",
@@ -366,13 +368,13 @@ def _build_mayoral_polling_feed(
             raise ValueError(
                 f"Head-to-Head Reading {entry['poll_reading_id']!r} has no poll record"
             )
-        # The frontend accepts only undecided beside the two candidates (issue 46).
+        # The frontend accepts only these residuals beside the two candidates.
         for key in entry["shares"]:
-            if key.startswith("response:") and key != "response:undecided":
+            if key.startswith("response:") and key not in HEAD_TO_HEAD_RESIDUALS:
                 raise ValueError(
                     f"Head-to-Head Reading {entry['poll_reading_id']!r} has share key "
-                    f"{key!r}; only 'response:undecided' may sit beside the two "
-                    "candidates"
+                    f"{key!r}; only 'response:undecided' and "
+                    "'response:none_of_the_above' may sit beside the two candidates"
                 )
     polls.sort(
         key=lambda row: (str(row["date_published"]), str(row["poll_id"])), reverse=True

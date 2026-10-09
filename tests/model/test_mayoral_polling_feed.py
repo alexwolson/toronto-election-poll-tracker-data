@@ -11,7 +11,7 @@ POLLS = ROOT / "data/raw/polls/polls.csv"
 
 def test_polls_load_newest_published_first() -> None:
     polls = load_mayoral_polls(POLLS)
-    assert polls[0].poll_id == "scope-2026-10-06"
+    assert polls[0].poll_id == "mainstreet-2026-10-07"
     published = [p.date_published for p in polls]
     assert published == sorted(published, reverse=True)
 
@@ -19,37 +19,28 @@ def test_polls_load_newest_published_first() -> None:
 def test_shares_carry_only_populated_candidates() -> None:
     polls = load_mayoral_polls(POLLS)
     latest = polls[0]
-    # Scope (published 2026-10-08): all respondents, Alexander not offered.
-    # Undecided and non-voters stay separate options, never recoded as candidates.
-    assert set(latest.shares) == {
-        "bradford",
-        "chow",
-        "other",
-        "undecided",
-        "would_not_vote",
-    }
+    # Mainstreet (published 2026-10-09): decided and leaning, Alexander not offered.
     assert latest.shares == {
-        "bradford": 0.41,
-        "chow": 0.44,
-        "other": 0.03,
-        "undecided": 0.11,
-        "would_not_vote": 0.02,
+        "bradford": 0.443,
+        "chow": 0.472,
+        "odessa-paloma-parker": 0.028,
+        "other": 0.032,
+        "sarah-mcvie": 0.025,
     }
     assert set(latest.field_tested) == set(latest.shares)
-    assert latest.denominator == "All respondents"
+    assert latest.denominator == "Decided and leaning voters"
     assert "denominator" not in latest.shares
 
 
 def test_feed_exposes_latest_and_a_raw_per_candidate_trend() -> None:
     feed = build_mayoral_polling_feed(POLLS)
     assert feed["schema_version"] == 1
-    assert feed["latest"]["poll_id"] == "scope-2026-10-06"
-    assert feed["latest"]["denominator"] == "All respondents"
+    assert feed["latest"]["poll_id"] == "mainstreet-2026-10-07"
+    assert feed["latest"]["denominator"] == "Decided and leaning voters"
     assert "denominator" not in feed["candidates"]
     assert {"chow", "bradford", "alexander"} <= set(feed["candidates"])
     chow = feed["trend"]["chow"]
     assert [pt["date_conducted"] for pt in chow] == sorted(
         pt["date_conducted"] for pt in chow
     )  # chronological
-    # Forum and Scope both ended 2026-10-06; ties order by poll_id, so Scope is last.
-    assert chow[-1]["share"] == 0.44
+    assert chow[-1]["share"] == 0.472  # Mainstreet fieldwork ended 2026-10-07
