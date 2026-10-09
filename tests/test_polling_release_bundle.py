@@ -901,7 +901,7 @@ def _real_results_bundle(tmp_path):
     return results
 
 
-def test_real_polling_feed_derives_the_three_head_to_head_readings(tmp_path):
+def test_real_polling_feed_derives_the_four_head_to_head_readings(tmp_path):
     output = _rebuild(CURRENT, _real_results_bundle(tmp_path), tmp_path)
     polling = json.loads((output / "mayoral_polling.json").read_text())
 
@@ -911,7 +911,15 @@ def test_real_polling_feed_derives_the_three_head_to_head_readings(tmp_path):
         "forum_20250904_mayor_chow_bradford",
         "mainstreet_20260618_mayor_forced_two_way",
         "mainstreet_20260928_29_mayor_head_to_head_all",
+        "mainstreet_20261006_07_mayor_head_to_head_all",
     ]
+    # Mainstreet Oct 6-7 publishes Neither beside Undecided; both stay distinct.
+    assert entries["mainstreet_20261006_07_mayor_head_to_head_all"]["shares"] == {
+        "per_chow": 0.447,
+        "per_bradford": 0.415,
+        "response:none_of_the_above": 0.055,
+        "response:undecided": 0.083,
+    }
     assert entries["mainstreet_20260928_29_mayor_head_to_head_all"]["shares"] == {
         "per_chow": 0.471,
         "per_bradford": 0.409,
@@ -1085,8 +1093,8 @@ def _add_head_to_head_reading(source, residual_kind):
         handle.write("h2h,citywide_mayoral,alternative_ballot\n")
 
 
-@pytest.mark.parametrize("residual_kind", ["undecided", "refusal"])
-def test_a_head_to_head_entry_allows_only_undecided_beside_the_two_candidates(
+@pytest.mark.parametrize("residual_kind", ["undecided", "none_of_the_above", "refusal"])
+def test_a_head_to_head_entry_allows_only_undecided_or_neither_beside_the_two(
     tmp_path, residual_kind
 ):
     aliases = [
@@ -1106,7 +1114,7 @@ def test_a_head_to_head_entry_allows_only_undecided_beside_the_two_candidates(
     )
     _add_head_to_head_reading(source, residual_kind)
 
-    if residual_kind == "undecided":
+    if residual_kind in {"undecided", "none_of_the_above"}:
         polling = json.loads(
             (_rebuild(source, results, tmp_path) / "mayoral_polling.json").read_text()
         )
