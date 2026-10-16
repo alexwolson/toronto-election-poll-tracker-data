@@ -3,15 +3,15 @@
 These five CSVs normalize newly acquired poll evidence. Polling releases pass
 them to Backend as live forecast inputs. `descriptive_poll_readings.csv` chooses
 one source-audited reading for the descriptive public archive, and `polls.csv`
-is generated from that selection. The tracked current-cycle inventory contains 64
-source documents, 64 document/sample links, 48 respondent samples, 114 total
-readings, and 517 response rows. Thirty-five citywide mayoral samples have
-completed extraction into 88 dependent readings and 405 response rows; the
+is generated from that selection. The tracked current-cycle inventory contains 65
+source documents, 65 document/sample links, 49 respondent samples, 117 total
+readings, and 528 response rows. Thirty-six citywide mayoral samples have
+completed extraction into 91 dependent readings and 416 response rows; the
 unrecovered Abacus sample is explicitly `blocked` with no invented reading. Twelve
 ward samples contribute the other 26 Council/ward-mayoral readings and 112
-response rows. The 88 mayoral readings are alternate questions, fields,
-denominators, or transformations from 35 sample units, not 88 polls.
-Thirty-four complete general vote-intention readings are explicitly selected for the
+response rows. The 91 mayoral readings are alternate questions, fields,
+denominators, or transformations from 36 sample units, not 91 polls.
+Thirty-five complete general vote-intention readings are explicitly selected for the
 public archive. The blocked Abacus sample and Canada Pulse's 2025 `context_only`
 candidate-consideration reading are retained in the source contract but excluded
 from that horse-race view.

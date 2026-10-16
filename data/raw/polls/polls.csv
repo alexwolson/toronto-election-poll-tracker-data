@@ -1,4 +1,5 @@
 poll_id,firm,date_conducted,date_published,sample_size,methodology,denominator,field_tested,alexander,bailao,bradford,chow,furey,mendicino,michael-ford,odessa-paloma-parker,other,sarah-mcvie,tory,undecided,would_not_vote,notes
+pallas-2026-10-14,Pallas Data,2026-10-14,2026-10-16,732,ivr,Decided and leaning voters,"bradford,chow,other",,,0.457,0.516,,,,,0.028,,,,,Decided and Leaning Voters; published shares total 100.1% due to source rounding.
 nanos-2026-10-10,Nanos Research,2026-10-10,2026-10-13,757,mixed,Decided and leaning voters,"bradford,chow,other",,,0.473,0.508,,,,,0.019,,,,,Ballot – Decided Voters Only.
 liaison-2026-10-09,Liaison Strategies,2026-10-09,2026-10-13,1000,ivr,Decided and leaning voters,"bradford,chow,other",,,0.46,0.51,,,,,0.03,,,,,Decided and Leaning voters.
 mainstreet-2026-10-07,Mainstreet Research,2026-10-07,2026-10-09,1000,ivr,Decided and leaning voters,"bradford,chow,odessa-paloma-parker,other,sarah-mcvie",,,0.443,0.472,,,,0.028,0.032,0.025,,,,Decided and leaning voters.
