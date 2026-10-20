@@ -819,11 +819,11 @@ def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 65
-    assert len(bundle.poll_sample_documents) == 65
-    assert len(bundle.poll_samples) == 49
-    assert len(bundle.poll_readings) == 117
-    assert len(bundle.poll_responses) == 528
+    assert len(bundle.source_documents) == 67
+    assert len(bundle.poll_sample_documents) == 67
+    assert len(bundle.poll_samples) == 50
+    assert len(bundle.poll_readings) == 123
+    assert len(bundle.poll_responses) == 549
 
     documents = {
         document.source_document_id: document for document in bundle.source_documents
@@ -851,8 +851,8 @@ def test_tracked_current_poll_source_inventory() -> None:
         if sample.geography_type == "citywide"
     }
     recovered_citywide_ids = set(citywide_samples) - {"abacus-2026-01-27"}
-    assert len(citywide_samples) == 37
-    assert len(recovered_citywide_ids) == 36
+    assert len(citywide_samples) == 38
+    assert len(recovered_citywide_ids) == 37
     assert all(
         citywide_samples[sample_id].extraction_status == "extracted"
         for sample_id in recovered_citywide_ids
@@ -869,17 +869,17 @@ def test_tracked_current_poll_source_inventory() -> None:
         if samples[readings[response.poll_reading_id].poll_sample_id].geography_type
         == "citywide"
     ]
-    assert len(citywide_readings) == 91
-    assert len(citywide_responses) == 416
+    assert len(citywide_readings) == 97
+    assert len(citywide_responses) == 437
     assert (
         sum(
             reading.reading_purpose == "general_vote_intention"
             for reading in citywide_readings
         )
-        == 84
+        == 88
     )
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 48
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 49
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -917,6 +917,7 @@ def test_tracked_current_poll_source_inventory() -> None:
         "liaison-2026-10-09",
         "nanos-2026-10-10",
         "pallas-2026-10-14",
+        "nanos-2026-10-18",
     ]
     ordered_reading_samples = list(
         dict.fromkeys(reading.poll_sample_id for reading in citywide_readings)
@@ -1035,6 +1036,24 @@ def test_tracked_current_poll_source_inventory() -> None:
         response.candidate_id == "alexander"
         for response in bundle.poll_responses
         if readings[response.poll_reading_id].poll_sample_id == "pallas-2026-10-14"
+    )
+
+    # Nanos wave 3, Oct 15-18: CTV published before the Nanos post; Alexander not offered.
+    nanos3 = samples["nanos-2026-10-18"]
+    assert nanos3.fieldwork_start.isoformat() == "2026-10-15"
+    assert nanos3.fieldwork_end.isoformat() == "2026-10-18"
+    assert nanos3.recruited_sample_size == 762
+    assert nanos3.evidence_available_at.isoformat() == "2026-10-20T06:01:16-04:00"
+    nanos3_decided = readings["nanos_20261015_18_mayor_decided_leaning"]
+    assert (nanos3_decided.unweighted_base, nanos3_decided.weighted_base) == (
+        682,
+        Decimal(669),
+    )
+    assert nanos3_decided.denominator_semantics == "decided_plus_leaners"
+    assert not any(
+        response.candidate_id == "alexander"
+        for response in bundle.poll_responses
+        if readings[response.poll_reading_id].poll_sample_id == "nanos-2026-10-18"
     )
 
     # Ipsos for the Star was released later than its older fieldwork.
