@@ -812,6 +812,7 @@ def test_mainstreet_september_29_bases_and_five_candidate_field() -> None:
             "mainstreet_20260914",
             "mainstreet_20260928_29",
             "mainstreet_20261006_07",
+            "mainstreet_20261016_18",
         }
 
 
@@ -819,11 +820,11 @@ def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 67
-    assert len(bundle.poll_sample_documents) == 67
-    assert len(bundle.poll_samples) == 50
-    assert len(bundle.poll_readings) == 123
-    assert len(bundle.poll_responses) == 549
+    assert len(bundle.source_documents) == 70
+    assert len(bundle.poll_sample_documents) == 70
+    assert len(bundle.poll_samples) == 53
+    assert len(bundle.poll_readings) == 129
+    assert len(bundle.poll_responses) == 577
 
     documents = {
         document.source_document_id: document for document in bundle.source_documents
@@ -851,8 +852,8 @@ def test_tracked_current_poll_source_inventory() -> None:
         if sample.geography_type == "citywide"
     }
     recovered_citywide_ids = set(citywide_samples) - {"abacus-2026-01-27"}
-    assert len(citywide_samples) == 38
-    assert len(recovered_citywide_ids) == 37
+    assert len(citywide_samples) == 41
+    assert len(recovered_citywide_ids) == 40
     assert all(
         citywide_samples[sample_id].extraction_status == "extracted"
         for sample_id in recovered_citywide_ids
@@ -869,17 +870,17 @@ def test_tracked_current_poll_source_inventory() -> None:
         if samples[readings[response.poll_reading_id].poll_sample_id].geography_type
         == "citywide"
     ]
-    assert len(citywide_readings) == 97
-    assert len(citywide_responses) == 437
+    assert len(citywide_readings) == 103
+    assert len(citywide_responses) == 465
     assert (
         sum(
             reading.reading_purpose == "general_vote_intention"
             for reading in citywide_readings
         )
-        == 88
+        == 94
     )
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 49
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 52
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -918,6 +919,9 @@ def test_tracked_current_poll_source_inventory() -> None:
         "nanos-2026-10-10",
         "pallas-2026-10-14",
         "nanos-2026-10-18",
+        "mainstreet-2026-10-18",
+        "buildcanada-2026-10-16",
+        "pollara-2026-10-19",
     ]
     ordered_reading_samples = list(
         dict.fromkeys(reading.poll_sample_id for reading in citywide_readings)
@@ -1054,6 +1058,47 @@ def test_tracked_current_poll_source_inventory() -> None:
         response.candidate_id == "alexander"
         for response in bundle.poll_responses
         if readings[response.poll_reading_id].poll_sample_id == "nanos-2026-10-18"
+    )
+
+    # Mainstreet Oct 16-18: one combined reported-vote/intention question; decided only.
+    ms18_decided = readings["mainstreet_20261016_18_mayor_decided"]
+    assert (ms18_decided.unweighted_base, ms18_decided.weighted_base) == (
+        903,
+        Decimal(866),
+    )
+    assert ms18_decided.denominator_semantics == "decided_only"
+    assert samples["mainstreet-2026-10-18"].evidence_available_at.isoformat() == (
+        "2026-10-20T03:38:53-04:00"
+    )
+
+    # Two firms new this cycle: Build Canada (SMS-to-online) and Pollara (CUPE 416).
+    build_canada = samples["buildcanada-2026-10-16"]
+    assert build_canada.pollster == "Build Canada"
+    assert build_canada.collection_mode == "online-sms-invitation"
+    assert build_canada.recruited_sample_size == 991
+    bc_decided = readings["buildcanada_20261011_16_mayor_decided_leaning"]
+    assert (bc_decided.unweighted_base, bc_decided.weighted_base) == (
+        820,
+        Decimal("766.1"),
+    )
+    assert bc_decided.denominator_semantics == "decided_plus_leaners"
+    pollara = samples["pollara-2026-10-19"]
+    assert (pollara.pollster, pollara.sponsor) == (
+        "Pollara Strategic Insights",
+        "CUPE Local 416",
+    )
+    assert pollara.collection_mode == "mixed"
+    pollara_decided = readings["pollara_20261013_19_mayor_decided_leaning"]
+    assert (pollara_decided.unweighted_base, pollara_decided.weighted_base) == (
+        919,
+        Decimal(911),
+    )
+    assert pollara_decided.reported_share_precision == 0
+    assert not any(
+        response.candidate_id == "alexander"
+        for response in bundle.poll_responses
+        if readings[response.poll_reading_id].poll_sample_id
+        in {"mainstreet-2026-10-18", "buildcanada-2026-10-16", "pollara-2026-10-19"}
     )
 
     # Ipsos for the Star was released later than its older fieldwork.
