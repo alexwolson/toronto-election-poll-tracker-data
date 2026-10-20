@@ -820,11 +820,11 @@ def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 70
-    assert len(bundle.poll_sample_documents) == 70
-    assert len(bundle.poll_samples) == 53
-    assert len(bundle.poll_readings) == 129
-    assert len(bundle.poll_responses) == 577
+    assert len(bundle.source_documents) == 71
+    assert len(bundle.poll_sample_documents) == 71
+    assert len(bundle.poll_samples) == 54
+    assert len(bundle.poll_readings) == 131
+    assert len(bundle.poll_responses) == 584
 
     documents = {
         document.source_document_id: document for document in bundle.source_documents
@@ -851,8 +851,17 @@ def test_tracked_current_poll_source_inventory() -> None:
         for sample_id, sample in samples.items()
         if sample.geography_type == "citywide"
     }
-    recovered_citywide_ids = set(citywide_samples) - {"abacus-2026-01-27"}
-    assert len(citywide_samples) == 41
+    # Liaison Oct 18-19 is an embargoed pre-release copy: in progress, with its
+    # document access pending, until the publisher's copy is retrieved.
+    embargoed_ids = {"liaison-2026-10-19"}
+    assert all(
+        citywide_samples[sample_id].extraction_status == "in_progress"
+        for sample_id in embargoed_ids
+    )
+    recovered_citywide_ids = (
+        set(citywide_samples) - {"abacus-2026-01-27"} - embargoed_ids
+    )
+    assert len(citywide_samples) == 42
     assert len(recovered_citywide_ids) == 40
     assert all(
         citywide_samples[sample_id].extraction_status == "extracted"
@@ -870,17 +879,17 @@ def test_tracked_current_poll_source_inventory() -> None:
         if samples[readings[response.poll_reading_id].poll_sample_id].geography_type
         == "citywide"
     ]
-    assert len(citywide_readings) == 103
-    assert len(citywide_responses) == 465
+    assert len(citywide_readings) == 105
+    assert len(citywide_responses) == 472
     assert (
         sum(
             reading.reading_purpose == "general_vote_intention"
             for reading in citywide_readings
         )
-        == 94
+        == 96
     )
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 52
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 53
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -922,6 +931,7 @@ def test_tracked_current_poll_source_inventory() -> None:
         "mainstreet-2026-10-18",
         "buildcanada-2026-10-16",
         "pollara-2026-10-19",
+        "liaison-2026-10-19",
     ]
     ordered_reading_samples = list(
         dict.fromkeys(reading.poll_sample_id for reading in citywide_readings)
@@ -1100,6 +1110,28 @@ def test_tracked_current_poll_source_inventory() -> None:
         if readings[response.poll_reading_id].poll_sample_id
         in {"mainstreet-2026-10-18", "buildcanada-2026-10-16", "pollara-2026-10-19"}
     )
+
+    # Liaison Oct 18-19 (embargoed until Oct 21): date-only publication, no
+    # retrieved artifact yet, Alexander not offered.
+    liaison_embargo = samples["liaison-2026-10-19"]
+    assert liaison_embargo.sponsor == "Toronto Star"
+    assert liaison_embargo.publication_date.isoformat() == "2026-10-21"
+    assert liaison_embargo.publication_at is None
+    assert liaison_embargo.evidence_available_at.isoformat() == (
+        "2026-10-22T00:00:00-04:00"
+    )
+    assert documents["liaison_2026-10-19_tables"].retrieval_status == "access_pending"
+    liaison_embargo_decided = readings["liaison_20261018_19_mayor_decided_leaning"]
+    assert (
+        liaison_embargo_decided.unweighted_base,
+        liaison_embargo_decided.weighted_base,
+    ) == (857, Decimal(859))
+    assert {
+        response.candidate_id: response.share
+        for response in bundle.poll_responses
+        if response.poll_reading_id == "liaison_20261018_19_mayor_decided_leaning"
+        and response.candidate_id
+    } == {"chow": Decimal("0.47"), "bradford": Decimal("0.49")}
 
     # Ipsos for the Star was released later than its older fieldwork.
     ipsos = samples["ipsos-2026-09-08"]
