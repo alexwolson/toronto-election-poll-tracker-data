@@ -820,8 +820,8 @@ def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 71
-    assert len(bundle.poll_sample_documents) == 71
+    assert len(bundle.source_documents) == 72
+    assert len(bundle.poll_sample_documents) == 72
     assert len(bundle.poll_samples) == 54
     assert len(bundle.poll_readings) == 131
     assert len(bundle.poll_responses) == 584
@@ -851,18 +851,9 @@ def test_tracked_current_poll_source_inventory() -> None:
         for sample_id, sample in samples.items()
         if sample.geography_type == "citywide"
     }
-    # Liaison Oct 18-19 is an embargoed pre-release copy: in progress, with its
-    # document access pending, until the publisher's copy is retrieved.
-    embargoed_ids = {"liaison-2026-10-19"}
-    assert all(
-        citywide_samples[sample_id].extraction_status == "in_progress"
-        for sample_id in embargoed_ids
-    )
-    recovered_citywide_ids = (
-        set(citywide_samples) - {"abacus-2026-01-27"} - embargoed_ids
-    )
+    recovered_citywide_ids = set(citywide_samples) - {"abacus-2026-01-27"}
     assert len(citywide_samples) == 42
-    assert len(recovered_citywide_ids) == 40
+    assert len(recovered_citywide_ids) == 41
     assert all(
         citywide_samples[sample_id].extraction_status == "extracted"
         for sample_id in recovered_citywide_ids
@@ -1111,20 +1102,18 @@ def test_tracked_current_poll_source_inventory() -> None:
         in {"mainstreet-2026-10-18", "buildcanada-2026-10-16", "pollara-2026-10-19"}
     )
 
-    # Liaison Oct 18-19 (embargoed until Oct 21): date-only publication, no
-    # retrieved artifact yet, Alexander not offered.
-    liaison_embargo = samples["liaison-2026-10-19"]
-    assert liaison_embargo.sponsor == "Toronto Star"
-    assert liaison_embargo.publication_date.isoformat() == "2026-10-21"
-    assert liaison_embargo.publication_at is None
-    assert liaison_embargo.evidence_available_at.isoformat() == (
-        "2026-10-22T00:00:00-04:00"
+    # Liaison Oct 18-19: post-suspension; Alexander is not offered.
+    liaison_oct19 = samples["liaison-2026-10-19"]
+    assert liaison_oct19.sponsor == "Toronto Star"
+    assert liaison_oct19.publication_date.isoformat() == "2026-10-21"
+    assert liaison_oct19.evidence_available_at.isoformat() == (
+        "2026-10-21T05:00:00-04:00"
     )
-    assert documents["liaison_2026-10-19_tables"].retrieval_status == "access_pending"
-    liaison_embargo_decided = readings["liaison_20261018_19_mayor_decided_leaning"]
+    assert liaison_oct19.collection_mode == "ivr"
+    liaison_oct19_decided = readings["liaison_20261018_19_mayor_decided_leaning"]
     assert (
-        liaison_embargo_decided.unweighted_base,
-        liaison_embargo_decided.weighted_base,
+        liaison_oct19_decided.unweighted_base,
+        liaison_oct19_decided.weighted_base,
     ) == (857, Decimal(859))
     assert {
         response.candidate_id: response.share
