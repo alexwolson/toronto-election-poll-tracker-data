@@ -204,13 +204,13 @@ def test_open_seat_card_gates_triggers_and_surfaces_disagreement() -> None:
     assert w["is_open_seat"] is True
     assert w["incumbent"]["exposure_triggers"] == []  # gated off for open seats
     assert w["incumbency_flag_disagrees"] is True
-    assert w["ward_polls"] == []  # no ward poll here
+    assert [p["poll_id"] for p in w["ward_polls"]] == ["forum-ward14-2026-10-18"]
 
 
 def test_open_seat_with_a_ward_poll_still_lists_it() -> None:
-    w = _snapshot()["wards"]["19"]  # Bradford open seat, with three Forum polls
+    w = _snapshot()["wards"]["19"]  # Bradford open seat, with four Forum polls
     assert w["is_open_seat"] is True
-    assert len(w["ward_polls"]) == 3
+    assert len(w["ward_polls"]) == 4
     assert all(
         p["candidates"][0]["candidate_name"] == "Nate Erskine-Smith"
         for p in w["ward_polls"]
@@ -219,7 +219,7 @@ def test_open_seat_with_a_ward_poll_still_lists_it() -> None:
 
 def test_ward_20_snapshot_lists_all_forum_readings_without_an_estimate() -> None:
     w = _snapshot()["wards"]["20"]
-    assert len(w["ward_polls"]) == 4
+    assert len(w["ward_polls"]) == 5
     assert {poll["poll_id"] for poll in w["ward_polls"]} >= {
         "forum-ward20-2026-08-18-current",
         "forum-ward20-2026-08-18-tory-jr",
@@ -231,11 +231,35 @@ def test_ward_20_snapshot_lists_all_forum_readings_without_an_estimate() -> None
 def test_september_forum_polls_reach_all_five_ward_race_cards() -> None:
     wards = _snapshot()["wards"]
     for ward in ("3", "4", "13", "19", "23"):
-        poll = wards[ward]["ward_polls"][-1]
-        assert poll["poll_id"] == f"forum-ward{ward}-2026-09-27"
+        poll = next(
+            p
+            for p in wards[ward]["ward_polls"]
+            if p["poll_id"] == f"forum-ward{ward}-2026-09-27"
+        )
         assert poll["date_published"] == "2026-10-02"
         assert poll["undecided_share"] is None
         assert poll["candidates"][-1]["is_residual"] is True
     # Retain the earlier readings individually rather than averaging fields.
-    assert len(wards["13"]["ward_polls"]) == 2
-    assert len(wards["19"]["ward_polls"]) == 3
+    assert len(wards["13"]["ward_polls"]) == 3
+    assert len(wards["19"]["ward_polls"]) == 4
+
+
+def test_october_forum_polls_reach_all_seven_ward_race_cards() -> None:
+    wards = _snapshot()["wards"]
+    for ward, end in (
+        ("4", "18"),
+        ("5", "18"),
+        ("13", "18"),
+        ("14", "18"),
+        ("19", "20"),
+        ("20", "18"),
+        ("23", "18"),
+    ):
+        poll = next(
+            p
+            for p in wards[ward]["ward_polls"]
+            if p["poll_id"] == f"forum-ward{ward}-2026-10-{end}"
+        )
+        assert poll["date_published"] == "2026-10-22"
+        assert poll["undecided_share"] is None
+        assert poll["candidates"][-1]["is_residual"] is True

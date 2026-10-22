@@ -1,7 +1,7 @@
 # Acquisition audit: current 2026 Forum Council poll sources
 
-**Acquisition dates:** 2026-08-17, 2026-09-09 and 2026-10-02
-**Scope:** Twelve first-party Forum Research ward samples covering Wards 3, 4, 5, 11, 13, 19, 20 and 23. The [October 2 follow-up](forum-ward-polls-2026-10-02.md) adds five samples to the original seven audited below.
+**Acquisition dates:** 2026-08-17, 2026-09-09, 2026-10-02 and 2026-10-22
+**Scope:** Nineteen first-party Forum Research ward samples covering Wards 3, 4, 5, 11, 13, 14, 19, 20 and 23. The [October 2 follow-up](forum-ward-polls-2026-10-02.md) adds five samples and the [October 22 follow-up](forum-ward-polls-2026-10-22.md) seven more to the original seven audited below.
 **Purpose:** Preserve source provenance and extract source-faithful Council and ward-level mayoral Poll Readings for descriptive race cards without changing forecast code
 
 ## Result
