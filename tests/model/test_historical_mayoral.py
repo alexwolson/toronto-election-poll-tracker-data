@@ -8,6 +8,7 @@ from dataclasses import replace
 from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pytest
 
@@ -399,7 +400,10 @@ def test_legacy_discovery_data_stays_explicitly_unresolved() -> None:
     assert false_poll.poll_sample_id is None
     legacy_outcomes = _rows("data/raw/polls/historical_mayoral_outcomes.csv")
     assert len(legacy_outcomes) == 21
-    assert all("wikipedia.org" in row["source_url"] for row in legacy_outcomes)
+    assert all(
+        urlparse(row["source_url"]).hostname.endswith(".wikipedia.org")
+        for row in legacy_outcomes
+    )
     assert {row["election_id"] for row in legacy_outcomes if row["is_residual"]} == {
         "toronto_2014",
         "toronto_2018",
