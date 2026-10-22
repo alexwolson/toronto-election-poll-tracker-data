@@ -162,7 +162,7 @@ def test_raw_ward_poll_is_surfaced_where_it_exists() -> None:
 def test_wards_without_a_poll_have_no_readings() -> None:
     readings = load_ward_poll_readings(WARD_POLLS)
     assert readings.get("12", ()) == ()  # Matlow — no ward poll
-    assert readings.get("14", ()) == ()  # Fletcher open seat — no ward poll
+    assert readings.get("2", ()) == ()  # no ward poll
 
 
 def test_ward_11_carries_both_forum_scenarios() -> None:
@@ -181,7 +181,7 @@ def test_ward_11_carries_both_forum_scenarios() -> None:
 def test_ward_20_carries_the_august_forum_scenarios_as_dependent_readings() -> None:
     readings = load_ward_poll_readings(WARD_POLLS)
     w20 = readings["20"]
-    assert len(w20) == 4
+    assert len(w20) == 5
 
     august = [reading for reading in w20 if reading.date_conducted == "2026-08-18"]
     assert len(august) == 3
