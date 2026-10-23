@@ -820,11 +820,11 @@ def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 79
-    assert len(bundle.poll_sample_documents) == 79
-    assert len(bundle.poll_samples) == 61
-    assert len(bundle.poll_readings) == 145
-    assert len(bundle.poll_responses) == 634
+    assert len(bundle.source_documents) == 81
+    assert len(bundle.poll_sample_documents) == 81
+    assert len(bundle.poll_samples) == 62
+    assert len(bundle.poll_readings) == 150
+    assert len(bundle.poll_responses) == 655
 
     documents = {
         document.source_document_id: document for document in bundle.source_documents
@@ -852,8 +852,8 @@ def test_tracked_current_poll_source_inventory() -> None:
         if sample.geography_type == "citywide"
     }
     recovered_citywide_ids = set(citywide_samples) - {"abacus-2026-01-27"}
-    assert len(citywide_samples) == 42
-    assert len(recovered_citywide_ids) == 41
+    assert len(citywide_samples) == 43
+    assert len(recovered_citywide_ids) == 42
     assert all(
         citywide_samples[sample_id].extraction_status == "extracted"
         for sample_id in recovered_citywide_ids
@@ -870,17 +870,17 @@ def test_tracked_current_poll_source_inventory() -> None:
         if samples[readings[response.poll_reading_id].poll_sample_id].geography_type
         == "citywide"
     ]
-    assert len(citywide_readings) == 105
-    assert len(citywide_responses) == 472
+    assert len(citywide_readings) == 110
+    assert len(citywide_responses) == 493
     assert (
         sum(
             reading.reading_purpose == "general_vote_intention"
             for reading in citywide_readings
         )
-        == 96
+        == 101
     )
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 60
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 61
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -923,6 +923,7 @@ def test_tracked_current_poll_source_inventory() -> None:
         "buildcanada-2026-10-16",
         "pollara-2026-10-19",
         "liaison-2026-10-19",
+        "canadapulse-2026-10-21",
     ]
     ordered_reading_samples = list(
         dict.fromkeys(reading.poll_sample_id for reading in citywide_readings)
@@ -1121,6 +1122,34 @@ def test_tracked_current_poll_source_inventory() -> None:
         if response.poll_reading_id == "liaison_20261018_19_mayor_decided_leaning"
         and response.candidate_id
     } == {"chow": Decimal("0.47"), "bradford": Decimal("0.49")}
+
+    # Canada Pulse Oct 16-21 (Rogers CityNews): post-suspension; Alexander is not
+    # offered. Its definite-voter tables are turnout-screened, so they rank below the
+    # all-decided reading.
+    canadapulse_oct21 = samples["canadapulse-2026-10-21"]
+    assert canadapulse_oct21.sponsor == "Rogers CityNews"
+    assert canadapulse_oct21.publication_date.isoformat() == "2026-10-23"
+    assert canadapulse_oct21.evidence_available_at.isoformat() == (
+        "2026-10-23T06:48:11-04:00"
+    )
+    assert canadapulse_oct21.collection_mode == "online"
+    canadapulse_oct21_decided = readings[
+        "canadapulse_20261016_21_mayor_decided_leaning"
+    ]
+    assert (
+        canadapulse_oct21_decided.unweighted_base,
+        canadapulse_oct21_decided.weighted_base,
+    ) == (663, Decimal(700))
+    assert {
+        response.candidate_id: response.share
+        for response in bundle.poll_responses
+        if response.poll_reading_id == "canadapulse_20261016_21_mayor_decided_leaning"
+        and response.candidate_id
+    } == {"chow": Decimal("0.51"), "bradford": Decimal("0.46")}
+    assert {
+        readings[f"canadapulse_20261016_21_mayor_{suffix}"].denominator_semantics
+        for suffix in ("definite_all", "definite_decided_leaning")
+    } == {"other"}
 
     # Ipsos for the Star was released later than its older fieldwork.
     ipsos = samples["ipsos-2026-09-08"]
@@ -1357,7 +1386,7 @@ def test_canada_pulse_september_readings_keep_bases_and_subgroup_separate() -> N
     documents = [
         d
         for d in bundle.source_documents
-        if d.source_document_id.startswith("canadapulse_2026-")
+        if d.source_document_id.startswith("canadapulse_2026-09-")
     ]
     assert {d.page_count for d in documents} == {4, 14}
     assert all(d.visual_qa_status == "passed" for d in documents)
