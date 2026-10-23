@@ -807,6 +807,7 @@ def test_mainstreet_september_29_bases_and_five_candidate_field() -> None:
             response.poll_reading_id.split("_mayor_")[0]
             for response in bundle.poll_responses
             if response.candidate_name == name
+            and not response.poll_reading_id.startswith("mainstreet_w")  # ward polls
         }
         assert samples == {
             "mainstreet_20260914",
@@ -820,11 +821,11 @@ def test_tracked_current_poll_source_inventory() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     bundle = load_poll_source_bundle(repository_root / "data/raw/polls")
 
-    assert len(bundle.source_documents) == 81
-    assert len(bundle.poll_sample_documents) == 81
-    assert len(bundle.poll_samples) == 62
-    assert len(bundle.poll_readings) == 150
-    assert len(bundle.poll_responses) == 655
+    assert len(bundle.source_documents) == 82
+    assert len(bundle.poll_sample_documents) == 84
+    assert len(bundle.poll_samples) == 65
+    assert len(bundle.poll_readings) == 156
+    assert len(bundle.poll_responses) == 692
 
     documents = {
         document.source_document_id: document for document in bundle.source_documents
@@ -880,7 +881,7 @@ def test_tracked_current_poll_source_inventory() -> None:
         == 101
     )
     assert readings["canadapulse_20251006_mayor_all"].reading_purpose == "context_only"
-    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 61
+    assert len({reading.poll_sample_id for reading in bundle.poll_readings}) == 64
     expected_citywide_order = [
         "pallas-2025-06-07",
         "liaison-2025-07-06",
@@ -1930,3 +1931,139 @@ def test_di_giorgio_keeps_one_ballot_identity_across_forum_misprints() -> None:
     assert {(r.candidate_id, r.candidate_name) for r in rows} == {
         ("daniel-di-giorgio", "Daniel Di Giorgio")
     }
+
+
+_MAINSTREET_WARD_COUNCIL = {
+    4: {
+        "Nadia Guerrera": "0.352",
+        "Debbie King": "0.033",
+        "Diana Chan McNally": "0.292",
+        "Bridget Ogundipe": "0.004",
+        "Adam Pham": "0.155",
+        "Vanessa Raponi": "0.034",
+        "Holly Weber": "0.034",
+        "No preferred candidate": "0.095",
+    },
+    10: {
+        "Ian Cunningham": "0.376",
+        "Xue Ding": "0.016",
+        "Andi Hoàng-Lefranc": "0.007",
+        "Bashar Kassir": "0.016",
+        "Ausma Malik": "0.391",
+        "Paul Nash": "0.029",
+        "Husain Neemuchwala": "0.032",
+        "No preferred candidate": "0.134",
+    },
+    25: {
+        "Shawn Allen": "0.371",
+        "Dharshan Casinathen": "0.057",
+        "Jannette Lumley": "0.013",
+        "Zakir Patel": "0.116",
+        "Neethan Shan": "0.294",
+        "Another candidate": "0.150",
+    },
+}
+
+
+@pytest.mark.parametrize(
+    "ward,base,mayor_shares,undecided,incumbents",
+    [
+        (4, 262, ("0.625", "0.337", "0.023", "0.000", "0.015"), "0.095", set()),
+        (
+            10,
+            292,
+            ("0.542", "0.451", "0.000", "0.000", "0.007"),
+            "0.134",
+            {"Ausma Malik"},
+        ),
+        (
+            25,
+            340,
+            ("0.424", "0.532", "0.006", "0.006", "0.031"),
+            None,
+            {"Neethan Shan"},
+        ),
+    ],
+)
+def test_mainstreet_october_ward_sources_keep_vote_intention_as_printed(
+    ward, base, mayor_shares, undecided, incumbents
+) -> None:
+    from backend.model.council_race_card import load_ward_poll_readings
+
+    root = Path(__file__).resolve().parents[2]
+    bundle = load_poll_source_bundle(root / "data/raw/polls")
+    sample_id = f"mainstreet_w{ward:02d}_20261014_16"
+    sample = next(s for s in bundle.poll_samples if s.poll_sample_id == sample_id)
+    assert sample.geography_type == "ward"
+    assert sample.geography_id == f"toronto-ward-{ward}"
+    assert sample.recruited_sample_size == base
+    assert sample.collection_mode == "ivr"
+    assert sample.fieldwork_start.isoformat() == "2026-10-14"
+    assert sample.fieldwork_end.isoformat() == "2026-10-16"
+    assert sample.publication_date.isoformat() == "2026-10-22"
+    links = [
+        link
+        for link in bundle.poll_sample_documents
+        if link.poll_sample_id == sample_id
+    ]
+    assert [link.source_document_id for link in links] == [
+        "mainstreet_2026-10-22_wards_tables"
+    ]
+    readings = [r for r in bundle.poll_readings if r.poll_sample_id == sample_id]
+    assert len(readings) == 2  # council and mayor are dependent, not two polls
+    expected = {
+        "council": _MAINSTREET_WARD_COUNCIL[ward],
+        "mayoral": dict(
+            zip(
+                [
+                    "Olivia Chow",
+                    "Brad Bradford",
+                    "Odessa Paloma Parker",
+                    "Sarah McVie",
+                    "Someone else",
+                ],
+                mayor_shares,
+                strict=True,
+            )
+        ),
+    }
+    for office, shares in expected.items():
+        reading = next(r for r in readings if r.contest_type == office)
+        assert reading.denominator_semantics == "all_respondents"
+        assert reading.reading_purpose == "general_vote_intention"
+        assert (reading.unweighted_base, reading.weighted_base) == (base, base)
+        responses = [
+            r
+            for r in bundle.poll_responses
+            if r.poll_reading_id == reading.poll_reading_id
+        ]
+        assert {r.candidate_name or r.response_label: r.share for r in responses} == {
+            name: Decimal(value) for name, value in shares.items()
+        }
+    document = next(
+        d
+        for d in bundle.source_documents
+        if d.source_document_id == "mainstreet_2026-10-22_wards_tables"
+    )
+    assert document.page_count == 35
+    display = load_ward_poll_readings(root / "data/raw/polls/ward_poll_readings.csv")
+    council = next(
+        r
+        for r in display[str(ward)]
+        if r.poll_id == f"mainstreet-ward{ward}-2026-10-16"
+    )
+    assert council.firm == "Mainstreet Research"
+    assert council.date_conducted == "2026-10-16"
+    assert council.date_published == "2026-10-22"
+    assert council.sample_size == base
+    assert council.denominator == "all respondents"
+    assert council.ballot_status == "final_ballot_candidates"
+    assert council.undecided_share == (float(undecided) if undecided else None)
+    assert {c.candidate_name: Decimal(str(c.share)) for c in council.candidates} == {
+        ("Other candidates" if name == "Another candidate" else name): Decimal(value)
+        for name, value in _MAINSTREET_WARD_COUNCIL[ward].items()
+        if name != "No preferred candidate"
+    }
+    assert {c.candidate_name for c in council.candidates if c.is_incumbent} == (
+        incumbents
+    )

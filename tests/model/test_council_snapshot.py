@@ -263,3 +263,20 @@ def test_october_forum_polls_reach_all_seven_ward_race_cards() -> None:
         assert poll["date_published"] == "2026-10-22"
         assert poll["undecided_share"] is None
         assert poll["candidates"][-1]["is_residual"] is True
+
+
+def test_mainstreet_october_polls_reach_wards_4_10_and_25() -> None:
+    wards = _snapshot()["wards"]
+    for ward, undecided in (("4", 0.095), ("10", 0.134), ("25", None)):
+        poll = next(
+            p
+            for p in wards[ward]["ward_polls"]
+            if p["poll_id"] == f"mainstreet-ward{ward}-2026-10-16"
+        )
+        assert poll["date_published"] == "2026-10-22"
+        assert poll["denominator"] == "all respondents"
+        assert poll["undecided_share"] == undecided
+    # Wards 10 and 25 had no ward poll before; Ward 4 keeps its Forum readings.
+    assert len(wards["10"]["ward_polls"]) == 1
+    assert len(wards["25"]["ward_polls"]) == 1
+    assert len(wards["4"]["ward_polls"]) == 3
