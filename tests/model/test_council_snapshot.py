@@ -240,7 +240,9 @@ def test_september_forum_polls_reach_all_five_ward_race_cards() -> None:
         assert poll["undecided_share"] is None
         assert poll["candidates"][-1]["is_residual"] is True
     # Retain the earlier readings individually rather than averaging fields.
-    assert len(wards["13"]["ward_polls"]) == 3
+    assert (
+        len(wards["13"]["ward_polls"]) == 4
+    )  # + Mainstreet Oct 14-16 (published Oct 23)
     assert len(wards["19"]["ward_polls"]) == 4
 
 
