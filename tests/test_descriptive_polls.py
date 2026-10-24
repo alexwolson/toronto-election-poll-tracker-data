@@ -27,7 +27,7 @@ def test_tracked_archive_matches_audited_representative_readings() -> None:
     validate_descriptive_polls(SOURCE, SOURCE / "polls.csv")
     rows = _rows_by_id()
 
-    assert len(rows) == 41
+    assert len(rows) == 42
     assert "abacus-2026-01-27" not in rows
     assert "canadapulse-2025-10-06" not in rows
     assert not any("-v-" in poll_id for poll_id in rows)
@@ -55,6 +55,7 @@ def test_public_rows_state_their_denominator() -> None:
     assert rows["pollara-2026-10-19"]["denominator"] == "Decided and leaning voters"
     assert rows["liaison-2026-10-19"]["denominator"] == "Decided and leaning voters"
     assert rows["canadapulse-2026-10-21"]["denominator"] == "Decided and leaning voters"
+    assert rows["pollara-2026-10-21"]["denominator"] == "Decided and leaning voters"
     # A reading whose denominator was never reported says so, rather than "Other".
     assert rows["liaison-2026-02-02"]["denominator"] == "Not stated"
 
@@ -148,7 +149,7 @@ def test_all_respondent_view_preserves_source_shares_and_counts_samples_once() -
 
     rows = build_all_respondent_poll_rows(SOURCE)
     by_id = {row["poll_id"]: row for row in rows}
-    assert len(rows) == len(by_id) == 35
+    assert len(rows) == len(by_id) == 36
     assert all(row["denominator"] == "All respondents" for row in rows)
     assert (
         len(
@@ -215,6 +216,13 @@ def test_all_respondent_view_preserves_source_shares_and_counts_samples_once() -
         "bradford": "0.38",
         "chow": "0.44",
         "undecided": "0.16",
+    }
+    pollara2 = by_id["pollara-2026-10-21"]
+    assert pollara2["poll_reading_id"] == "pollara_20261016_21_mayor_all"
+    assert {key: pollara2[key] for key in ("bradford", "chow", "undecided")} == {
+        "bradford": "0.38",
+        "chow": "0.47",
+        "undecided": "0.13",
     }
     nanos3 = by_id["nanos-2026-10-18"]
     assert nanos3["poll_reading_id"] == "nanos_20261015_18_mayor_all"
