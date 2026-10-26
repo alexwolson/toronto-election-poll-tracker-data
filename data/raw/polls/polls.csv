@@ -1,4 +1,6 @@
 poll_id,firm,date_conducted,date_published,sample_size,methodology,denominator,field_tested,alexander,bailao,bradford,chow,furey,mendicino,michael-ford,odessa-paloma-parker,other,sarah-mcvie,tory,undecided,would_not_vote,notes
+pallas-2026-10-24,Pallas Data,2026-10-24,2026-10-25,608,ivr,Decided and leaning voters,"bradford,chow,other",,,0.433,0.526,,,,,0.041,,,,,Decided and Leaning Voters.
+mainstreet-2026-10-24,Mainstreet Research,2026-10-24,2026-10-25,993,ivr,Decided voters,"bradford,chow,odessa-paloma-parker,other,sarah-mcvie",,,0.454,0.508,,,,0.01,0.024,0.004,,,,"Decided voters, already voted or certain to vote; Undecideds removed; already voted or certain to vote only."
 liaison-2026-10-25,Liaison Strategies,2026-10-25,2026-10-25,750,ivr,Decided and leaning voters,"bradford,chow,other",,,0.44,0.52,,,,,0.04,,,,,Decided and Leaning voters.
 pollara-2026-10-21,Pollara Strategic Insights,2026-10-21,2026-10-23,1094,mixed,Decided and leaning voters,"bradford,chow,other",,,0.44,0.55,,,,,0.01,,,,,"Decided voters, including those who had already voted at the advance polls."
 canadapulse-2026-10-21,Canada Pulse Insights,2026-10-21,2026-10-23,737,online,Decided and leaning voters,"bradford,chow,other",,,0.46,0.51,,,,,0.03,,,,,"All respondents, decided (leaners in): Chow / Bradford / another; undecided and nobody out of the base."

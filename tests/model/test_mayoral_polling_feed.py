@@ -11,7 +11,7 @@ POLLS = ROOT / "data/raw/polls/polls.csv"
 
 def test_polls_load_newest_published_first() -> None:
     polls = load_mayoral_polls(POLLS)
-    assert polls[0].poll_id == "liaison-2026-10-25"
+    assert polls[0].poll_id == "pallas-2026-10-24"
     published = [p.date_published for p in polls]
     assert published == sorted(published, reverse=True)
 
@@ -19,8 +19,8 @@ def test_polls_load_newest_published_first() -> None:
 def test_shares_carry_only_populated_candidates() -> None:
     polls = load_mayoral_polls(POLLS)
     latest = polls[0]
-    # Liaison (published 2026-10-25): decided and leaning, Alexander not offered.
-    assert latest.shares == {"bradford": 0.44, "chow": 0.52, "other": 0.04}
+    # Pallas (published 2026-10-25): decided and leaning, Alexander not offered.
+    assert latest.shares == {"bradford": 0.433, "chow": 0.526, "other": 0.041}
     assert set(latest.field_tested) == set(latest.shares)
     assert latest.denominator == "Decided and leaning voters"
     assert "denominator" not in latest.shares
@@ -29,7 +29,7 @@ def test_shares_carry_only_populated_candidates() -> None:
 def test_feed_exposes_latest_and_a_raw_per_candidate_trend() -> None:
     feed = build_mayoral_polling_feed(POLLS)
     assert feed["schema_version"] == 1
-    assert feed["latest"]["poll_id"] == "liaison-2026-10-25"
+    assert feed["latest"]["poll_id"] == "pallas-2026-10-24"
     assert feed["latest"]["denominator"] == "Decided and leaning voters"
     assert "denominator" not in feed["candidates"]
     assert {"chow", "bradford", "alexander"} <= set(feed["candidates"])
