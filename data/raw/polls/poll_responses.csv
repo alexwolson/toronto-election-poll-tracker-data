@@ -771,3 +771,6 @@ pallas_20261024_mayor_leaning_with_undecided,undecided,undecided,,,,Undecided,4,
 pallas_20261024_mayor_decided_leaning,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,52.6,0.526,
 pallas_20261024_mayor_decided_leaning,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,43.3,0.433,
 pallas_20261024_mayor_decided_leaning,another-candidate,other,,,,Another Candidate,3,4.1,0.041,
+forum_20261025_mayor,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,53,0.53,
+forum_20261025_mayor,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,43,0.43,
+forum_20261025_mayor,other,other,,,,Someone else,3,4,0.04,Published poll residual; not an Unmeasured Candidate Tail estimate.
