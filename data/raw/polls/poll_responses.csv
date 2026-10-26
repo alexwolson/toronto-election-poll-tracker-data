@@ -774,3 +774,11 @@ pallas_20261024_mayor_decided_leaning,another-candidate,other,,,,Another Candida
 forum_20261025_mayor,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,53,0.53,
 forum_20261025_mayor,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,43,0.43,
 forum_20261025_mayor,other,other,,,,Someone else,3,4,0.04,Published poll residual; not an Unmeasured Candidate Tail estimate.
+pollara_20261016_24_mayor_likely_all,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,48%,0.48,
+pollara_20261016_24_mayor_likely_all,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,40%,0.40,
+pollara_20261016_24_mayor_likely_all,other,other,,,,Someone else,3,1%,0.01,
+pollara_20261016_24_mayor_likely_all,undecided,undecided,,,,Undecided,4,10%,0.10,
+pollara_20261016_24_mayor_likely_all,would-not-vote,would_not_vote,,,,Wouldn't vote,5,0%,0.00,
+pollara_20261016_24_mayor_likely_decided_leaning,candidate-chow,candidate,chow,Olivia Chow,individually_published,Olivia Chow,1,54%,0.54,
+pollara_20261016_24_mayor_likely_decided_leaning,candidate-bradford,candidate,bradford,Brad Bradford,individually_published,Brad Bradford,2,45%,0.45,
+pollara_20261016_24_mayor_likely_decided_leaning,other,other,,,,Someone else,3,2%,0.02,
